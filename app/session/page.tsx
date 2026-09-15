@@ -14,7 +14,7 @@ import { SetSquares } from '@/components/set-squares'
 import { Stepper } from '@/components/stepper'
 import { getDb, type LocalSetLog } from '@/lib/db/dexie'
 import { lastPerformance, type LastPerformance } from '@/lib/queries'
-import { clearSet, finishSession, logSet } from '@/lib/sessions'
+import { activeSet as pickActiveSet, clearSet, finishSession, logSet } from '@/lib/sessions'
 import { useWakeLock } from '@/lib/use-wake-lock'
 
 const WEIGHT_STEP = 2.5 // the smallest pair of plates
@@ -34,6 +34,7 @@ function Session() {
   const id = useSearchParams().get('id') ?? ''
 
   const [position, setPosition] = useState(0)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [restEndsAt, setRestEndsAt] = useState<number | null>(null)
   const [draft, setDraft] = useState<{ id: string; weightKg: number | null; reps: number | null } | null>(null)
   const [viewingExercise, setViewingExercise] = useState(false)
@@ -80,8 +81,13 @@ function Session() {
     }
   }, [userId, exerciseId, id])
 
-  // The first set with nothing logged is the one you're about to do.
-  const activeSet = groupLogs.find((log) => log.completedAt === null) ?? groupLogs.at(-1)
+  // The set you tapped, otherwise the first set with nothing logged.
+  const activeSet = pickActiveSet(groupLogs, selectedId)
+
+  function goTo(index: number) {
+    setPosition(index)
+    setSelectedId(null)
+  }
 
   // What to put in the steppers for a set, most specific first:
   //   1. what you already logged for this set (editing it),
@@ -120,13 +126,18 @@ function Session() {
   async function completeSet() {
     if (!activeSet || !userId) return
     await logSet(userId, activeSet, values)
+    // Back to the next set still to do.
+    setSelectedId(null)
+
+    // A correction is not a set: no rest, and it leaves you where you are.
+    if (activeSet.completedAt) return
     if (activeSet.restSec) setRestEndsAt(Date.now() + activeSet.restSec * 1000)
 
     const remaining = groupLogs.filter(
       (log) => log.completedAt === null && log.id !== activeSet.id,
     )
     if (remaining.length === 0 && position < positions.length - 1) {
-      setPosition(position + 1)
+      goTo(position + 1)
     }
   }
 
@@ -164,7 +175,7 @@ function Session() {
                 <button
                   type="button"
                   tabIndex={-1}
-                  onClick={() => setPosition(index)}
+                  onClick={() => goTo(index)}
                   className="block w-full py-1.5"
                 >
                   <span
@@ -236,7 +247,14 @@ function Session() {
           )}
         </p>
 
-        <SetSquares logs={groupLogs} activeId={activeSet?.id} />
+        <SetSquares
+          logs={groupLogs}
+          activeId={activeSet?.id}
+          onSelect={(logId) => {
+            setSelectedId(logId)
+            setDraft(null)
+          }}
+        />
 
         {activeSet ? (
           <section className="mt-8">
@@ -269,7 +287,7 @@ function Session() {
               onClick={() => void completeSet()}
               className="mt-6 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift"
             >
-              {activeSet.completedAt ? 'Update set' : `Log set ${activeSet.setIndex}`}
+              {activeSet.completedAt ? `Update set ${activeSet.setIndex}` : `Log set ${activeSet.setIndex}`}
             </button>
 
             {activeSet.completedAt && (
@@ -290,7 +308,7 @@ function Session() {
           {previousName ? (
             <button
               type="button"
-              onClick={() => setPosition(position - 1)}
+              onClick={() => goTo(position - 1)}
               className="flex min-w-0 items-center gap-1.5 py-2 text-left"
             >
               <ChevronLeft size={18} className="shrink-0 text-ink-dim" aria-hidden />
@@ -305,7 +323,7 @@ function Session() {
           {nextName && (
             <button
               type="button"
-              onClick={() => setPosition(position + 1)}
+              onClick={() => goTo(position + 1)}
               className="col-start-2 flex min-w-0 items-center justify-end gap-1.5 py-2 text-right"
             >
               <span className="min-w-0">

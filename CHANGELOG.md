@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-15 14:25
+
+- Fix a mistyped set: the set squares on the session screen are now tappable. Tap any set, logged
+  or not, to load its weight and reps into the steppers, then Update set (or Undo this set).
+  Before, only the last set of an exercise could be corrected. A correction keeps the set's
+  original completion time, starts no rest timer and leaves you on the same exercise; logging
+  returns you to the next set still to do.
+
 ## 2026-09-15 14:15
 
 - Profile page (`/profile`, new tab in the bottom nav) with your name and email, a theme picker —

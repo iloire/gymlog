@@ -5,6 +5,7 @@ import { writeRow } from '@/lib/db/write'
 import { bodyWeightId, sessionId, setLogId } from '@/lib/id'
 import { dateToEpoch } from '@/lib/queries'
 import {
+  activeSet,
   clearSet,
   finishSession,
   logSet,
@@ -158,6 +159,20 @@ describe('logging sets', () => {
     expect(await getDb(USER).setLogs.get(set!.id)).toMatchObject({ completedAt: null, weightKg: 60 })
   })
 
+  it('keeps when a set was done when it is corrected later', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [set] = await logsFor(id)
+    await logSet(USER, set!, { weightKg: 60, reps: 8 })
+    const logged = (await getDb(USER).setLogs.get(set!.id))!
+
+    await logSet(USER, logged, { weightKg: 60, reps: 6 })
+
+    expect(await getDb(USER).setLogs.get(set!.id)).toMatchObject({
+      reps: 6,
+      completedAt: logged.completedAt,
+    })
+  })
+
   it('finishes a session', async () => {
     const id = await startSession(USER, 'tpl', null, DATE)
     await finishSession(USER, (await getDb(USER).sessions.get(id))!)
@@ -192,5 +207,39 @@ describe('recordBodyWeight', () => {
     await recordBodyWeight(USER, 80, '2026-09-14')
     await recordBodyWeight(USER, 79.8, '2026-09-15')
     expect(await getDb(USER).bodyWeights.count()).toBe(2)
+  })
+})
+
+describe('activeSet', () => {
+  it('edits the next set to do, then the last set once all are done', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [first, second, third] = await logsFor(id)
+    await logSet(USER, first!, { weightKg: 60, reps: 5 })
+
+    const squat = (await logsFor(id)).filter((log) => log.exerciseId === 'Squat')
+    expect(activeSet(squat, null)?.id).toBe(second!.id)
+
+    await logSet(USER, squat[1]!, { weightKg: 60, reps: 5 })
+    await logSet(USER, squat[2]!, { weightKg: 60, reps: 5 })
+    const done = (await logsFor(id)).filter((log) => log.exerciseId === 'Squat')
+    expect(activeSet(done, null)?.id).toBe(third!.id)
+  })
+
+  it('edits a tapped set that is already logged', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [first] = await logsFor(id)
+    await logSet(USER, first!, { weightKg: 60, reps: 5 })
+    const squat = (await logsFor(id)).filter((log) => log.exerciseId === 'Squat')
+
+    expect(activeSet(squat, first!.id)?.id).toBe(first!.id)
+  })
+
+  it('ignores a selection left over from another exercise', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const logs = await logsFor(id)
+    const squat = logs.filter((log) => log.exerciseId === 'Squat')
+    const bench = logs.filter((log) => log.exerciseId === 'Bench')
+
+    expect(activeSet(bench, squat[0]!.id)?.id).toBe(bench[0]!.id)
   })
 })

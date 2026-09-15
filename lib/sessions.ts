@@ -74,6 +74,19 @@ export async function startSession(
   return id
 }
 
+/**
+ * The set the steppers are editing: the one you tapped, else the first set
+ * with nothing logged, else the last set. A selection left over from another
+ * exercise is ignored rather than trusted.
+ */
+export function activeSet(logs: LocalSetLog[], selectedId: string | null): LocalSetLog | undefined {
+  return (
+    logs.find((log) => log.id === selectedId) ??
+    logs.find((log) => log.completedAt === null) ??
+    logs.at(-1)
+  )
+}
+
 export async function logSet(
   userId: string,
   log: LocalSetLog,
@@ -82,7 +95,8 @@ export async function logSet(
   await writeRow(userId, 'setLogs', {
     ...log,
     ...values,
-    completedAt: Date.now(),
+    // Correcting a set later keeps when it was done, not when it was fixed.
+    completedAt: log.completedAt ?? Date.now(),
   })
 }
 
