@@ -30,8 +30,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — .env.local and .env.prod are committed, git-crypt encrypted (see
+# .gitattributes). There is no .env; anything else is local-only.
+.env
+.env.*
+!.env.local
+!.env.prod
+!.env.example
 
 # vercel
 .vercel

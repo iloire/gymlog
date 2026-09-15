@@ -1,0 +1,5 @@
+# Env files are committed encrypted with the shared git-crypt key (f43bdfc3).
+# `-text` is required: eol normalisation runs after the clean filter and would
+# strip CR bytes out of the ciphertext, silently corrupting the file.
+.env.local filter=git-crypt diff=git-crypt -text
+.env.prod filter=git-crypt diff=git-crypt -text

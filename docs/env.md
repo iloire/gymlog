@@ -19,8 +19,14 @@ Only `.env.local` (development) and `.env.prod` (production) exist. There is no 
 
 ## git-crypt
 
-This repo does **not** yet have git-crypt configured, so `.env.local` is gitignored rather than
-committed encrypted. To join the existing key (`f43bdfc3`, shared by the other 12 repos), export
-it from 1Password to `~/Downloads/git-crypt-key`, then `git-crypt unlock ~/Downloads/git-crypt-key`
-— never `git-crypt init`, which forks the estate onto a new key. Add the env paths to
-`.gitattributes` with `-text` (never `text`/`eol`, which corrupts ciphertext).
+`.env.local` and `.env.prod` are committed **encrypted** with the shared git-crypt key
+(`f43bdfc3`, stored only in 1Password — the same key as the other repos). `.gitattributes` lists
+them with `-text`, which is required: eol normalisation would otherwise strip CR bytes out of the
+ciphertext.
+
+On a fresh clone the env files read as binary until the repo is unlocked. Export the key from
+1Password to `~/Downloads/git-crypt-key`, run `git-crypt unlock ~/Downloads/git-crypt-key`, then
+delete the download. Never `git-crypt init` — it would silently generate a new key and fork this
+repo off the shared one.
+
+`.env.example` is committed in plain text and documents every variable.
