@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-15 17:28
+
+- History (`/history`, a new tab): every workout you trained, newest first, with its date,
+  duration, volume and sets done. Tap one to see each exercise's sets, and **Open to fix a set** to
+  correct it on the session screen. Above the list, your workouts are ordered by the one you have
+  gone longest without, so in a programme of several workouts the one that is due is on top, with
+  Start. Today's "train something anyway" list uses the same order and says when you last did each.
+  Works offline.
+
 ## 2026-09-15 14:58
 
 - Premade programmes (`/programmes`): Full body 3 days, Upper / lower 4 days and Dumbbells 3 days.

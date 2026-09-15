@@ -10,6 +10,7 @@ import { useUserId } from '@/components/session-boot'
 import { SyncBadge } from '@/components/sync-badge'
 import { WeightPrompt } from '@/components/weight-prompt'
 import { getDb } from '@/lib/db/dexie'
+import { daysAgo, rotation, sessionHistory } from '@/lib/history'
 import { dayOfWeek, templateForDay, templateItems, today } from '@/lib/queries'
 import { startSession } from '@/lib/sessions'
 
@@ -26,9 +27,8 @@ export default function TodayPage() {
     const scheduled = await templateForDay(userId)
     const date = today()
 
-    const templates = (await db.workoutTemplates.toArray()).filter(
-      (t) => t.deletedAt === null && t.archivedAt === null,
-    )
+    // Off-schedule, the workout you have gone longest without comes first.
+    const templates = rotation(await db.workoutTemplates.toArray(), await sessionHistory(userId))
 
     if (!scheduled) {
       return { scheduled: null, templates, session: null, exercises: [] as string[] }
@@ -124,15 +124,20 @@ export default function TodayPage() {
 
             {plan?.templates.length ? (
               <ul className="mt-5 divide-y divide-line border-y border-line">
-                {plan.templates.map((template) => (
+                {plan.templates.map(({ template, lastDone }) => (
                   <li key={template.id}>
                     <button
                       type="button"
                       onClick={() => void start(template.id, null)}
-                      className="flex w-full items-center justify-between py-4 text-left"
+                      className="flex w-full items-center justify-between gap-3 py-4 text-left"
                     >
-                      <span className="text-[15px]">{template.name}</span>
-                      <span className="text-sm text-ink-dim">Start</span>
+                      <span className="min-w-0">
+                        <span className="block text-[15px]">{template.name}</span>
+                        <span className="block text-sm text-ink-dim">
+                          {lastDone ? `Last done ${daysAgo(lastDone)}` : 'Not done yet'}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-sm text-ink-dim">Start</span>
                     </button>
                   </li>
                 ))}

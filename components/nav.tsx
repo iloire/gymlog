@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDays, Dumbbell, Library, ListChecks, Scale, UserRound } from 'lucide-react'
+import { CalendarDays, Dumbbell, History, Library, ListChecks, Scale, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -8,6 +8,7 @@ const items = [
   { href: '/', label: 'Today', icon: Dumbbell },
   { href: '/workouts', label: 'Workouts', icon: ListChecks },
   { href: '/program', label: 'Week', icon: CalendarDays },
+  { href: '/history', label: 'History', icon: History },
   { href: '/exercises', label: 'Exercises', icon: Library },
   { href: '/weight', label: 'Weight', icon: Scale },
   { href: '/profile', label: 'Profile', icon: UserRound },

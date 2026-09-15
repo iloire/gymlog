@@ -19,7 +19,7 @@ Every item ships with unit tests; CI requires them.
    the original brief the app does not do yet.
 4. **Exercise instructions offline** (§2.2) and **a rest timer that survives leaving the screen**
    (§2.3).
-5. **History and strength charts** (§3.1, §3.2).
+5. ~~**History**~~ ✅ and **strength charts** (§3.1, §3.2).
 6. **Before anyone else signs up** (§5) — password reset, rate limiting, data export.
 
 ---
@@ -38,7 +38,9 @@ exercise lists alternatives, and the first one you can do is copied in. Start on
 (on the days you choose) or just add its workouts. Schema: `data/README.md`. Still open:
 
 - **A/B alternation across weeks** — the week is fixed per weekday, so A/B/A every week rather than
-  A-B-A then B-A-B. Needs a "next workout in order" mode for Today.
+  A-B-A then B-A-B. Needs a "next workout in order" mode for Today. *Partly there:* History and
+  Today's rest-day list order workouts by the one you have gone longest without (`rotation()` in
+  `lib/history.ts`), which is that order computed from what you actually did.
 - **More programmes and stages**, and a filter on days per week once the catalogue outgrows one
   screen. A file change still needs a deploy: the files are bundled so they work offline.
 - **"Only what I have"** on the exercise library and picker, reusing `lib/equipment.ts`.
@@ -138,9 +140,14 @@ stepper increment 5 lb in lb mode.
 
 ## 3. Seeing progress
 
-### 3.1 History — M
+### ~~3.1 History — M~~ ✅
 
-A list of past sessions (date, workout, duration, volume), each opening a read-only view with an
+**Shipped 2026-09-15 as `/history`:** past sessions newest first (date, workout, duration, volume,
+sets done), each expanding to its sets with a link back into the session screen to fix one. Above
+it, your workouts ordered by the one you have gone longest without, each with Start. Still open: a
+proper read-only view and rescheduling a session to another date.
+
+The original brief: a list of past sessions (date, workout, duration, volume), each opening a read-only view with an
 **Edit** mode for correcting a mistyped set. Rescheduling a session must go through
 `rescheduleSession()` so `performedAt` stays consistent.
 

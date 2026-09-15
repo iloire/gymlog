@@ -4,16 +4,11 @@ import type { ReactNode } from 'react'
 
 import { WeekStrip } from '@/components/admin/week-strip'
 import { adminUserDetail, type AdminUserDetail } from '@/lib/admin'
-import { formatDay } from '@/lib/format'
+import { formatDay, kg } from '@/lib/format'
 
 export const metadata: Metadata = { title: 'Admin' }
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
-/** Weights are stored in kg; the admin view shows them as stored. */
-function kg(value: number): string {
-  return `${Number(value.toFixed(1)).toLocaleString('en-GB')} kg`
-}
 
 function Section({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) {
   return (

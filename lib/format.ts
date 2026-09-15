@@ -23,3 +23,16 @@ export function formatAgo(epochMs: number | null, now = Date.now()): string | nu
   if (days < 60) return `${days} days ago`
   return formatDay(epochMs)
 }
+
+/** '4,250 kg'. Weights are stored in kg and shown as stored, to one decimal. */
+export function kg(value: number): string {
+  return `${Number(value.toFixed(1)).toLocaleString('en-GB')} kg`
+}
+
+/** '52 min' or '1 h 5 min'. */
+export function formatDuration(ms: number): string {
+  const minutes = Math.round(ms / 60_000)
+  if (minutes < 60) return `${minutes} min`
+  const rest = minutes % 60
+  return rest === 0 ? `${Math.floor(minutes / 60)} h` : `${Math.floor(minutes / 60)} h ${rest} min`
+}
