@@ -1,0 +1,11 @@
+{
+  "$comment": "Which exercises from yuhonas/free-exercise-db get imported. Edit this, then run `npm run exercises:import`. Empty array = no filter on that field.",
+  "source": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json",
+  "imageBaseUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/",
+  "levels": ["beginner", "intermediate"],
+  "categories": ["strength", "stretching"],
+  "equipment": ["barbell", "dumbbell", "machine", "cable", "body only"],
+  "requireImages": true,
+  "imageWidth": 600,
+  "imageQuality": 78
+}
