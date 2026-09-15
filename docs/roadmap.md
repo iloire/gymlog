@@ -15,8 +15,8 @@ Every item ships with unit tests; CI requires them.
    whatever annoys you with chalk on your hands and no signal jump this queue. An hour at the gym
    is worth more than any line below.
 2. **Don't lose unsynced sets on sign-out** (§2.1) — small, and it prevents data loss.
-3. **Starter beginner programme** (§1.1) and **automatic progression** (§1.2) — the part of the
-   original brief the app does not do yet.
+3. ~~**Starter beginner programme** (§1.1)~~ ✅ and **automatic progression** (§1.2) — the part of
+   the original brief the app does not do yet.
 4. **Exercise instructions offline** (§2.2) and **a rest timer that survives leaving the screen**
    (§2.3).
 5. **History and strength charts** (§3.1, §3.2).
@@ -30,7 +30,20 @@ The original ask was to train "according to my development stage". Today the app
 gives no guidance: a new account opens onto an empty screen and has to design its own programme —
 the hardest part for a beginner.
 
-### 1.1 One-tap starter programme — M
+### ~~1.1 One-tap starter programme — M~~ ✅
+
+**Shipped 2026-09-15 as `/programmes`:** three premade programmes (full body 3-day, upper/lower
+4-day, dumbbells 3-day) as `data/programmes/*.json`, fitted to the equipment you tick — each
+exercise lists alternatives, and the first one you can do is copied in. Start one onto your week
+(on the days you choose) or just add its workouts. Schema: `data/README.md`. Still open:
+
+- **A/B alternation across weeks** — the week is fixed per weekday, so A/B/A every week rather than
+  A-B-A then B-A-B. Needs a "next workout in order" mode for Today.
+- **More programmes and stages**, and a filter on days per week once the catalogue outgrows one
+  screen. A file change still needs a deploy: the files are bundled so they work offline.
+- **"Only what I have"** on the exercise library and picker, reusing `lib/equipment.ts`.
+
+The original brief:
 
 A "Beginner full body, 3 days" programme to adopt in one tap: Workout A and Workout B alternating
 Monday / Wednesday / Friday, with sensible sets, reps, rest and starting weights (empty bar for
@@ -287,7 +300,8 @@ Worth remembering, not worth building yet:
 - **Apple Health / Google Fit** — write workouts and bodyweight out. Native-only APIs; would need a
   wrapper app.
 - **Gym equipment profile** — tell the app what your gym has (no leg press, plates to 1.25 kg) so
-  substitutions (§4.5) and the plate calculator (§2.5) respect it.
+  substitutions (§4.5) and the plate calculator (§2.5) respect it. *Half done:* the equipment you
+  tick (`lib/equipment.ts`) already fits premade programmes; plates are not modelled.
 - **Voice logging** — "sixty kilos, five reps" with sweaty hands. Browser speech recognition does
   not work offline.
 - **Watch complication** for the rest timer.

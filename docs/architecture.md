@@ -27,7 +27,7 @@ Components never fetch. The sync engine is the only network caller, and it runs 
 | `lib/sync/` | Outbox, flush loop, merge rules. |
 | `lib/` | `env`, `env.public`, `auth`, `id`, `users`, `utils`. |
 | `scripts/` | One-off tooling (exercise import). Excluded from the Vercel build. |
-| `data/` | Config data files, e.g. `exercise-filter.json`, `login-images.json`. |
+| `data/` | Config data files: exercise import filter, sign in pictures, equipment and premade programmes. Schemas in `data/README.md`. |
 | `public/exercise-media/` | Exercise photos, `<id>/{0,1}.webp`. |
 | `public/auth-media/` | Sign in pictures, public to signed-out visitors. See `docs/login-images.md`. |
 

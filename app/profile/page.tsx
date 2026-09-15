@@ -2,6 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 
+import { EquipmentPicker } from '@/components/equipment-picker'
 import { Nav } from '@/components/nav'
 import { SignOutButton } from '@/components/sign-out-button'
 import { ThemePicker } from '@/components/theme-picker'
@@ -28,6 +29,14 @@ export default function ProfilePage() {
         <section className="mt-8">
           <h2 className="mb-4 text-xl font-semibold">Appearance</h2>
           <ThemePicker />
+        </section>
+
+        <section className="mt-8">
+          <h2 className="mb-1 text-xl font-semibold">Equipment</h2>
+          <p className="mb-4 text-sm text-ink-dim">
+            What your gym has, so premade programmes swap in exercises you can do.
+          </p>
+          <EquipmentPicker />
         </section>
 
         <footer className="mt-10 border-t border-line pt-5">

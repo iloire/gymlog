@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-15 14:58
+
+- Premade programmes (`/programmes`): Full body 3 days, Upper / lower 4 days and Dumbbells 3 days.
+  Tick the equipment you have (presets: Full gym, Home rack, Dumbbells and a bench, No equipment)
+  and each programme shows whether it fits, swapping exercises you cannot do for listed
+  alternatives — a barbell squat becomes a split squat with dumbbells. The preview shows every
+  exercise with its photo; pick which days to train, then **Start this programme** (copies the
+  workouts onto your week, ending the current programme) or **Just add the workouts**. Everything
+  is copied, so you can edit it freely. A new account's Today screen now offers this first;
+  Workouts, Week and Profile link to it. Programmes and equipment are JSON files in `data/`
+  (schema in `data/README.md`); your equipment is saved on the device, like the theme.
+
 ## 2026-09-15 14:39
 
 - Profile has an Admin link to `/admin`, above Sign out. Everyone sees it; anyone who is not an

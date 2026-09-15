@@ -14,6 +14,8 @@ deployed to production** — the workflow waits for Vercel's verdict and smoke-t
 ## What it does
 
 - **Workouts** — an ordered list of exercises with sets, reps and rest.
+- **Premade programmes** — pick a ready-made week (full body, upper/lower, dumbbells only), fitted
+  to the equipment you have: exercises you can't do are swapped for ones you can.
 - **Your week** — put a workout on each training day. Moving up a stage starts a new programme;
   everything you logged before stays exactly as it was.
 - **The gym screen** — one exercise at a time, big thumb-sized steppers, prefilled with what you

@@ -138,12 +138,20 @@ export default function TodayPage() {
                 ))}
               </ul>
             ) : (
-              <Link
-                href="/workouts/new"
-                className="mt-6 flex h-16 w-full items-center justify-center rounded-md bg-plate-blue text-lg font-semibold text-white"
-              >
-                Build your first workout
-              </Link>
+              <>
+                <Link
+                  href="/programmes"
+                  className="mt-6 flex h-16 w-full items-center justify-center rounded-md bg-plate-blue text-lg font-semibold text-white"
+                >
+                  Pick a premade programme
+                </Link>
+                <Link
+                  href="/workouts/new"
+                  className="mt-3 flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
+                >
+                  Build your own workout
+                </Link>
+              </>
             )}
           </section>
         )}

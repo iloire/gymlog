@@ -1,0 +1,86 @@
+{
+  "id": "dumbbells-3-day",
+  "name": "Dumbbells, 3 days",
+  "level": "beginner",
+  "summary": "A whole-body programme for a pair of dumbbells and a bench, at home or in a hotel gym.",
+  "week": ["a", null, "b", null, "a", null, null],
+  "workouts": {
+    "a": {
+      "name": "Dumbbells A",
+      "exercises": [
+        {
+          "exercise": "Split_Squat_with_Dumbbells",
+          "alternatives": ["Bodyweight_Squat"],
+          "sets": 3,
+          "reps": 10,
+          "restSec": 90
+        },
+        {
+          "exercise": "Dumbbell_Bench_Press",
+          "alternatives": ["Pushups"],
+          "sets": 3,
+          "reps": 10,
+          "restSec": 90
+        },
+        {
+          "exercise": "One-Arm_Dumbbell_Row",
+          "alternatives": ["Bent_Over_Two-Dumbbell_Row"],
+          "sets": 3,
+          "reps": 10,
+          "restSec": 90
+        },
+        {
+          "exercise": "Side_Lateral_Raise",
+          "sets": 3,
+          "reps": 12,
+          "restSec": 60
+        },
+        {
+          "exercise": "Dumbbell_Bicep_Curl",
+          "sets": 3,
+          "reps": 12,
+          "restSec": 60
+        }
+      ]
+    },
+    "b": {
+      "name": "Dumbbells B",
+      "exercises": [
+        {
+          "exercise": "Stiff-Legged_Dumbbell_Deadlift",
+          "alternatives": ["Butt_Lift_Bridge"],
+          "sets": 3,
+          "reps": 10,
+          "restSec": 90
+        },
+        {
+          "exercise": "Dumbbell_Shoulder_Press",
+          "sets": 3,
+          "reps": 10,
+          "restSec": 90
+        },
+        {
+          "exercise": "Dumbbell_Lunges",
+          "alternatives": ["Bodyweight_Squat"],
+          "sets": 3,
+          "reps": 10,
+          "restSec": 90
+        },
+        {
+          "exercise": "Bent_Over_Two-Dumbbell_Row",
+          "alternatives": ["One-Arm_Dumbbell_Row"],
+          "sets": 3,
+          "reps": 10,
+          "restSec": 90
+        },
+        {
+          "exercise": "Standing_Dumbbell_Triceps_Extension",
+          "alternatives": ["Bench_Dips"],
+          "sets": 3,
+          "reps": 12,
+          "restSec": 60
+        }
+      ]
+    }
+  }
+}

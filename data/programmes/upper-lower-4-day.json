@@ -1,0 +1,162 @@
+{
+  "id": "upper-lower-4-day",
+  "name": "Upper / lower, 4 days",
+  "level": "novice",
+  "summary": "Once the 3-day full body stops moving: upper body and legs on alternate days, a heavy lift first and more reps after.",
+  "week": ["upper-a", "lower-a", null, "upper-b", "lower-b", null, null],
+  "workouts": {
+    "upper-a": {
+      "name": "Upper A",
+      "exercises": [
+        {
+          "exercise": "Barbell_Bench_Press_-_Medium_Grip",
+          "alternatives": ["Dumbbell_Bench_Press", "Machine_Bench_Press", "Pushups"],
+          "sets": 4,
+          "reps": 6,
+          "restSec": 180
+        },
+        {
+          "exercise": "Bent_Over_Barbell_Row",
+          "alternatives": ["Seated_Cable_Rows", "One-Arm_Dumbbell_Row", "Bent_Over_Two-Dumbbell_Row"],
+          "sets": 4,
+          "reps": 8,
+          "restSec": 120
+        },
+        {
+          "exercise": "Dumbbell_Shoulder_Press",
+          "alternatives": ["Machine_Shoulder_Military_Press", "Seated_Cable_Shoulder_Press"],
+          "sets": 3,
+          "reps": 10,
+          "restSec": 90
+        },
+        {
+          "exercise": "Wide-Grip_Lat_Pulldown",
+          "alternatives": ["Chin-Up", "Bent_Over_Two-Dumbbell_Row"],
+          "sets": 3,
+          "reps": 10,
+          "restSec": 90
+        },
+        {
+          "exercise": "Triceps_Pushdown",
+          "alternatives": ["Standing_Dumbbell_Triceps_Extension", "Bench_Dips"],
+          "sets": 3,
+          "reps": 12,
+          "restSec": 60
+        }
+      ]
+    },
+    "lower-a": {
+      "name": "Lower A",
+      "exercises": [
+        {
+          "exercise": "Barbell_Squat",
+          "alternatives": ["Leg_Press", "Split_Squat_with_Dumbbells", "Bodyweight_Squat"],
+          "sets": 4,
+          "reps": 6,
+          "restSec": 180
+        },
+        {
+          "exercise": "Romanian_Deadlift",
+          "alternatives": ["Stiff-Legged_Dumbbell_Deadlift", "Butt_Lift_Bridge"],
+          "sets": 3,
+          "reps": 8,
+          "restSec": 120
+        },
+        {
+          "exercise": "Lying_Leg_Curls",
+          "alternatives": ["Seated_Leg_Curl", "Single_Leg_Glute_Bridge"],
+          "sets": 3,
+          "reps": 12,
+          "restSec": 60
+        },
+        {
+          "exercise": "Standing_Calf_Raises",
+          "alternatives": ["Standing_Barbell_Calf_Raise", "Standing_Dumbbell_Calf_Raise"],
+          "sets": 3,
+          "reps": 12,
+          "restSec": 60
+        }
+      ]
+    },
+    "upper-b": {
+      "name": "Upper B",
+      "exercises": [
+        {
+          "exercise": "Standing_Military_Press",
+          "alternatives": ["Dumbbell_Shoulder_Press", "Machine_Shoulder_Military_Press"],
+          "sets": 4,
+          "reps": 6,
+          "restSec": 180
+        },
+        {
+          "exercise": "Chin-Up",
+          "alternatives": ["Wide-Grip_Lat_Pulldown", "One-Arm_Dumbbell_Row"],
+          "sets": 4,
+          "reps": 6,
+          "restSec": 120
+        },
+        {
+          "exercise": "Barbell_Incline_Bench_Press_-_Medium_Grip",
+          "alternatives": ["Hammer_Grip_Incline_DB_Bench_Press", "Leverage_Incline_Chest_Press", "Incline_Push-Up"],
+          "sets": 3,
+          "reps": 8,
+          "restSec": 120
+        },
+        {
+          "exercise": "Seated_Cable_Rows",
+          "alternatives": ["One-Arm_Dumbbell_Row", "Bent_Over_Barbell_Row"],
+          "sets": 3,
+          "reps": 10,
+          "restSec": 90
+        },
+        {
+          "exercise": "Dumbbell_Bicep_Curl",
+          "alternatives": ["Barbell_Curl", "Standing_Biceps_Cable_Curl"],
+          "sets": 3,
+          "reps": 12,
+          "restSec": 60
+        }
+      ]
+    },
+    "lower-b": {
+      "name": "Lower B",
+      "exercises": [
+        {
+          "exercise": "Barbell_Deadlift",
+          "alternatives": ["Stiff-Legged_Dumbbell_Deadlift", "Cable_Deadlifts"],
+          "sets": 3,
+          "reps": 5,
+          "restSec": 180
+        },
+        {
+          "exercise": "Leg_Press",
+          "alternatives": ["Split_Squat_with_Dumbbells", "Barbell_Squat", "Bodyweight_Squat"],
+          "sets": 3,
+          "reps": 10,
+          "restSec": 120
+        },
+        {
+          "exercise": "Dumbbell_Lunges",
+          "alternatives": ["Barbell_Walking_Lunge"],
+          "sets": 3,
+          "reps": 10,
+          "restSec": 90
+        },
+        {
+          "exercise": "Leg_Extensions",
+          "alternatives": ["Split_Squat_with_Dumbbells", "Bodyweight_Squat"],
+          "sets": 3,
+          "reps": 12,
+          "restSec": 60
+        },
+        {
+          "exercise": "Seated_Calf_Raise",
+          "alternatives": ["Standing_Dumbbell_Calf_Raise"],
+          "sets": 3,
+          "reps": 15,
+          "restSec": 60
+        }
+      ]
+    }
+  }
+}

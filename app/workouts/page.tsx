@@ -61,6 +61,12 @@ export default function WorkoutsPage() {
           <Plus size={18} aria-hidden />
           New workout
         </Link>
+        <Link
+          href="/programmes"
+          className="mt-3 flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
+        >
+          Browse premade programmes
+        </Link>
       </main>
       <Nav />
     </>

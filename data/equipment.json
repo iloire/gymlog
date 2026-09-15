@@ -1,0 +1,39 @@
+{
+  "$comment": "What you can train with, and what each exercise needs beyond the library's own `equipment` field. Schema: data/README.md.",
+  "items": [
+    { "id": "barbell", "name": "Barbell" },
+    { "id": "rack", "name": "Squat rack" },
+    { "id": "bench", "name": "Bench" },
+    { "id": "dumbbell", "name": "Dumbbells" },
+    { "id": "pull-up-bar", "name": "Pull-up bar" },
+    { "id": "cable", "name": "Cable station" },
+    { "id": "machine", "name": "Weight machines" }
+  ],
+  "presets": [
+    {
+      "id": "full-gym",
+      "name": "Full gym",
+      "items": ["barbell", "rack", "bench", "dumbbell", "pull-up-bar", "cable", "machine"]
+    },
+    {
+      "id": "home-rack",
+      "name": "Home rack",
+      "items": ["barbell", "rack", "bench", "dumbbell", "pull-up-bar"]
+    },
+    { "id": "dumbbells", "name": "Dumbbells and a bench", "items": ["dumbbell", "bench"] },
+    { "id": "nothing", "name": "No equipment", "items": [] }
+  ],
+  "needs": {
+    "Barbell_Squat": ["rack"],
+    "Standing_Military_Press": ["rack"],
+    "Standing_Barbell_Calf_Raise": ["rack"],
+    "Barbell_Bench_Press_-_Medium_Grip": ["bench", "rack"],
+    "Barbell_Incline_Bench_Press_-_Medium_Grip": ["bench", "rack"],
+    "Dumbbell_Bench_Press": ["bench"],
+    "Hammer_Grip_Incline_DB_Bench_Press": ["bench"],
+    "One-Arm_Dumbbell_Row": ["bench"],
+    "Bench_Dips": ["bench"],
+    "Chin-Up": ["pull-up-bar"],
+    "Pullups": ["pull-up-bar"]
+  }
+}

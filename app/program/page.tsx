@@ -86,6 +86,11 @@ export default function ProgramPage() {
             <Link href="/workouts/new" className="text-ink underline underline-offset-4">
               Build one now
             </Link>
+            , or{' '}
+            <Link href="/programmes" className="text-ink underline underline-offset-4">
+              pick a premade programme
+            </Link>
+            .
           </p>
         ) : (
           <ul className="mt-7 divide-y divide-line border-y border-line">
@@ -121,6 +126,15 @@ export default function ProgramPage() {
               )
             })}
           </ul>
+        )}
+
+        {data.templates.length > 0 && (
+          <Link
+            href="/programmes"
+            className="mt-6 flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
+          >
+            Start a premade programme
+          </Link>
         )}
 
         {data.program && (
