@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-15 14:39
+
+- Profile has an Admin link to `/admin`, above Sign out. Everyone sees it; anyone who is not an
+  admin gets the usual 404.
+
 ## 2026-09-15 14:25
 
 - Fix a mistyped set: the set squares on the session screen are now tappable. Tap any set, logged
