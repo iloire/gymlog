@@ -36,6 +36,8 @@ export type LocalExerciseNote = {
   userId: string
   exerciseId: string
   notes: string | null
+  /** Absent on rows written before favourites existed. */
+  favoritedAt?: number | null
   createdAt: number
   updatedAt: number
   deletedAt: number | null

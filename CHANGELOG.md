@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-15 13:45
+
+- Favourite exercises: a star on each card in the Exercises grid and on the exercise page, and a
+  Favourites filter chip on the Exercises page and in the workout editor's exercise picker.
+  Favourites sync across devices.
+- `exercise_notes.favorited_at` (migration `0002_exercise_favorites`). The star lives on the
+  per-user notes row, which already has a deterministic id per (user, exercise), so starring
+  offline on two devices merges.
+
 ## 2026-09-15 13:28
 
 - Deleting a workout asks for confirmation first, naming the workout and the programme days that

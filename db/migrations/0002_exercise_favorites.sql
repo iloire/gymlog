@@ -1,0 +1,1 @@
+ALTER TABLE `exercise_notes` ADD `favorited_at` integer;

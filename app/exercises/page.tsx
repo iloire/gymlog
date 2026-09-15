@@ -6,14 +6,22 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 import { ExerciseFrames } from '@/components/exercise-frames'
+import {
+  ExerciseFilterChips,
+  filterExercises,
+  NO_FILTER,
+  primaryMuscles,
+} from '@/components/exercise-filters'
+import { FavoriteButton } from '@/components/favorite-button'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
+import { favoriteExerciseIds } from '@/lib/favorites'
 
 export default function ExercisesPage() {
   const userId = useUserId()
   const [query, setQuery] = useState('')
-  const [muscle, setMuscle] = useState<string | null>(null)
+  const [filter, setFilter] = useState(NO_FILTER)
 
   const exercises = useLiveQuery(
     async () => (userId ? getDb(userId).exercises.toArray() : []),
@@ -21,22 +29,18 @@ export default function ExercisesPage() {
     [],
   )
 
-  const muscles = useMemo(() => {
-    const set = new Set<string>()
-    for (const exercise of exercises) {
-      for (const name of exercise.primaryMuscles ?? []) set.add(name)
-    }
-    return [...set].sort()
-  }, [exercises])
+  const favorites = useLiveQuery(
+    async () => (userId ? favoriteExerciseIds(userId) : new Set<string>()),
+    [userId],
+    new Set<string>(),
+  )
 
-  const results = useMemo(() => {
-    const needle = query.trim().toLowerCase()
-    return exercises
-      .filter((exercise) => exercise.deletedAt === null)
-      .filter((exercise) => !muscle || (exercise.primaryMuscles ?? []).includes(muscle))
-      .filter((exercise) => !needle || exercise.name.toLowerCase().includes(needle))
-      .sort((a, b) => a.name.localeCompare(b.name))
-  }, [exercises, query, muscle])
+  const muscles = useMemo(() => primaryMuscles(exercises), [exercises])
+
+  const results = useMemo(
+    () => filterExercises(exercises, filter, query, favorites),
+    [exercises, filter, query, favorites],
+  )
 
   return (
     <>
@@ -59,33 +63,31 @@ export default function ExercisesPage() {
           />
         </div>
 
-        <div className="-mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
-          <button
-            type="button"
-            onClick={() => setMuscle(null)}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-sm ${
-              muscle === null ? 'bg-ink text-ground' : 'border border-line text-ink-dim'
-            }`}
-          >
-            All
-          </button>
-          {muscles.map((name) => (
-            <button
-              key={name}
-              type="button"
-              onClick={() => setMuscle(name === muscle ? null : name)}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-sm capitalize ${
-                muscle === name ? 'bg-ink text-ground' : 'border border-line text-ink-dim'
-              }`}
-            >
-              {name}
-            </button>
-          ))}
-        </div>
+        <ExerciseFilterChips
+          muscles={muscles}
+          filter={filter}
+          onChange={setFilter}
+          className="-mx-5 mt-3 px-5 pb-1"
+        />
+
+        {filter.favoritesOnly && results.length === 0 && (
+          <p className="mt-6 border-y border-line py-6 text-[15px] text-ink-dim">
+            Tap the star on an exercise to keep it here, and in the picker when you build a workout.
+          </p>
+        )}
 
         <ul className="mt-5 grid grid-cols-2 gap-3">
           {results.slice(0, 200).map((exercise) => (
-            <li key={exercise.id}>
+            <li key={exercise.id} className="relative">
+              {userId && (
+                <FavoriteButton
+                  userId={userId}
+                  exerciseId={exercise.id}
+                  exerciseName={exercise.name}
+                  favorite={favorites.has(exercise.id)}
+                  className="absolute top-1.5 right-1.5 z-10 rounded-full bg-ground/70 p-2 text-white backdrop-blur-sm"
+                />
+              )}
               <Link href={`/exercises/${exercise.id}`} className="block">
                 <ExerciseFrames exercise={exercise} className="aspect-square w-full" />
                 <span className="mt-2 block text-sm leading-snug">{exercise.name}</span>

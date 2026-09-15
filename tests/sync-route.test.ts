@@ -290,6 +290,24 @@ describe('POST /api/sync — pull', () => {
     expect(upToDate.body.changes.exercises).toBeUndefined()
   })
 
+  it('round-trips a favourite star on a global exercise', async () => {
+    await insertExercise('Barbell_Squat')
+    await sync([
+      mutation('exerciseNotes', {
+        id: 'note-1',
+        exerciseId: 'Barbell_Squat',
+        notes: 'Knees out',
+        favoritedAt: 1500,
+      }),
+    ])
+
+    const { body } = await sync()
+
+    expect(body.changes.exerciseNotes).toMatchObject([
+      { id: 'note-1', notes: 'Knees out', favoritedAt: 1500 },
+    ])
+  })
+
   it('includes the server clock for skew correction', async () => {
     const before = Date.now()
     const { body } = await sync()

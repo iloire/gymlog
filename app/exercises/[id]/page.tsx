@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
 import { ExerciseFrames } from '@/components/exercise-frames'
+import { FavoriteButton } from '@/components/favorite-button'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
@@ -59,7 +60,16 @@ export default function ExerciseDetailPage() {
 
         <ExerciseFrames exercise={exercise} className="mt-4 aspect-[4/3] w-full" />
 
-        <h1 className="figure mt-5 text-3xl leading-tight">{exercise.name}</h1>
+        <div className="mt-5 flex items-start justify-between gap-3">
+          <h1 className="figure text-3xl leading-tight">{exercise.name}</h1>
+          <FavoriteButton
+            userId={userId}
+            exerciseId={exercise.id}
+            exerciseName={exercise.name}
+            favorite={note?.favoritedAt != null}
+            className="-mr-2 shrink-0 p-2 text-ink-dim"
+          />
+        </div>
         <p className="mt-1.5 text-sm capitalize text-ink-dim">
           {[exercise.equipment, exercise.level, ...(exercise.primaryMuscles ?? [])]
             .filter(Boolean)

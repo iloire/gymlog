@@ -77,6 +77,8 @@ Text ids, integer epoch-ms timestamps. Every synced table carries
 users            id, email, passwordHash, name, unit('kg'|'lb'), syncRev, createdAt
 exercises        id, userId (NULL = global seed library), name, slug, primaryMuscle,
                  secondaryMuscles, equipment, level, instructions[], images[], cues
+exerciseNotes    id, userId, exerciseId, notes (your cues), favoritedAt (NULL = not starred)
+                 UNIQUE(userId, exerciseId)
 workoutTemplates id, userId, name ("Workout A: Full Body"), notes
 templateItems    id, userId, templateId, exerciseId, position, sets, targetReps,
                  targetRepsMax, targetWeightKg, restSec, notes
@@ -198,7 +200,7 @@ to that repo and not transferable. Swap-in remains possible if Ivan ever buys a 
 | `/session?id=…` | **The gym screen.** One exercise at a time, huge tap targets, set rows pre-created from the prescription and prefilled from last time, ✓ completes a set and auto-starts the rest timer. Screen wake-lock on. |
 | `/workouts`, `/workouts/[id]` | Template list + editor: add exercises, drag to reorder, target sets/reps/rest |
 | `/program` | Mon–Sun grid, one workout per day; end a program and start the next stage |
-| `/exercises`, `/exercises/[id]` | Library with filters (muscle, equipment, level); detail shows the cross-fade, instructions, your own cues, and your history for that lift |
+| `/exercises`, `/exercises/[id]` | Library with filters (favourites, muscle, equipment, level) and a star to favourite a movement — the workout editor's exercise picker filters on the same favourites; detail shows the cross-fade, instructions, your own cues, and your history for that lift |
 | `/history` | Past sessions + per-exercise weight/e1RM progression chart, and the bodyweight chart on the same timeline |
 | `/weight` | Bodyweight log — one tap to enter today's weight, editable history, trend line with a 7-day rolling average (daily weight is noisy; the average is the signal) |
 

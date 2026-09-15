@@ -82,7 +82,7 @@ export const exercises = sqliteTable(
   ],
 )
 
-/** A user's own cues on any exercise, including ones from the global library. */
+/** A user's own cues and favourite star on any exercise, including ones from the global library. */
 export const exerciseNotes = sqliteTable(
   'exercise_notes',
   {
@@ -94,6 +94,8 @@ export const exerciseNotes = sqliteTable(
       .notNull()
       .references(() => exercises.id),
     notes: text('notes'),
+    /** Epoch-ms when starred; null when not a favourite. */
+    favoritedAt: integer('favorited_at'),
     ...syncColumns,
   },
   (t) => [
