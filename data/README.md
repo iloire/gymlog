@@ -67,9 +67,10 @@ used. If none is, the option missing the fewest items is used, and the picker sh
 }
 ```
 
-An exercise needs its library `equipment` value (`barbell`, `dumbbell`, `cable`, `machine`;
-`body only` needs nothing) **plus** anything under `needs`. So item ids for those four must match
-the library values exactly, and `needs` only lists what the library cannot say: a squat needs a
+An exercise needs its library `equipment` value (`barbell`, `dumbbell`, `kettlebells`, `cable`,
+`machine`, `e-z curl bar`, …; `body only` needs nothing, and `other` names no item) **plus**
+anything under `needs`. So item ids must match the library values exactly (a test checks every
+value has one), and `needs` only lists what the library cannot say: a squat needs a
 rack, a chin-up needs a bar, a dumbbell bench press needs a bench.
 
 Your ticked equipment is saved in `localStorage` on the device (`gymlog:equipment`) and never

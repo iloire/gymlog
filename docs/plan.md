@@ -185,9 +185,11 @@ to that repo and not transferable. Swap-in remains possible if Ivan ever buys a 
 
 1. Fetch `dist/exercises.json`.
 2. Filter through **`data/exercise-filter.json`** (config, not code, per house rules): levels
-   beginner+intermediate, categories strength+stretching, gym-available equipment → **438 exercises**.
-3. Download both images, convert to WebP @600px with `sharp` → `public/exercises/<id>/{0,1}.webp`
-   (~21 MB, one-time commit — no CDN dependency, so the library works offline).
+   every level and equipment, every category but cardio → **859 exercises**. (The first cut kept
+   438 — beginner+intermediate strength and stretching on five equipment types — and lost gym
+   staples filed under `other` or `expert`, like hyperextensions, dips and hanging leg raises.)
+3. Download both images, convert to WebP @600px with `sharp` → `public/exercise-media/<id>/{0,1}.webp`
+   (~39 MB, one-time commit — no CDN dependency, so the library works offline).
 4. Emit `db/seed-exercises.json` for `db/seed.ts`.
 
 ---

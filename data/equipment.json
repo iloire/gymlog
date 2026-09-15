@@ -7,13 +7,22 @@
     { "id": "dumbbell", "name": "Dumbbells" },
     { "id": "pull-up-bar", "name": "Pull-up bar" },
     { "id": "cable", "name": "Cable station" },
-    { "id": "machine", "name": "Weight machines" }
+    { "id": "machine", "name": "Weight machines" },
+    { "id": "e-z curl bar", "name": "EZ curl bar" },
+    { "id": "kettlebells", "name": "Kettlebells" },
+    { "id": "bands", "name": "Resistance bands" },
+    { "id": "exercise ball", "name": "Exercise ball" },
+    { "id": "medicine ball", "name": "Medicine ball" },
+    { "id": "foam roll", "name": "Foam roller" }
   ],
   "presets": [
     {
       "id": "full-gym",
       "name": "Full gym",
-      "items": ["barbell", "rack", "bench", "dumbbell", "pull-up-bar", "cable", "machine"]
+      "items": [
+        "barbell", "rack", "bench", "dumbbell", "pull-up-bar", "cable", "machine",
+        "e-z curl bar", "kettlebells", "bands", "exercise ball", "medicine ball", "foam roll"
+      ]
     },
     {
       "id": "home-rack",

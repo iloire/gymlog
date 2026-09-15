@@ -20,7 +20,7 @@ deployed to production** — the workflow waits for Vercel's verdict and smoke-t
   everything you logged before stays exactly as it was.
 - **The gym screen** — one exercise at a time, big thumb-sized steppers, prefilled with what you
   just lifted or what you did last time, a rest timer that beeps, and the screen kept awake.
-- **Exercise library** — 438 movements, each with a start and end photo that fade into one
+- **Exercise library** — 859 movements, each with a start and end photo that fade into one
   another to show the movement.
 - **Bodyweight** — one tap a day, charted as a 7-day average because single readings are noise.
 - **Accounts** — every user sees only their own data; the exercise library is shared.

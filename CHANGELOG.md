@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-15 20:31
+
+- **Exercise library grows from 438 to 859 exercises.** The import filter kept only beginner and
+  intermediate strength and stretching moves on five equipment types, so gym staples were missing:
+  hyperextensions, trap bar deadlift, dips, weighted pull-ups, hip thrusts, sumo deadlift, good
+  mornings, rack pulls, EZ-bar curls, goblet squats, front squats, hanging leg raises. It now takes
+  every level and equipment and every category but cardio. Equipment gains EZ curl bar,
+  kettlebells, bands, exercise ball, medicine ball and foam roller (all in *Full gym*); the library
+  value `other` names no item. Existing exercises are unchanged.
+
 ## 2026-09-15 18:16
 
 - Four styles on **Profile → Appearance**, each with a dark and a light version, chosen alongside

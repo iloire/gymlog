@@ -6,8 +6,8 @@ import type { LocalExercise } from '@/lib/db/dexie'
 /**
  * What you can train with, and what an exercise needs.
  *
- * The library's own `equipment` field (barbell, dumbbell, cable, machine, body
- * only) is the base, and its values double as item ids. It cannot say that a
+ * The library's own `equipment` field (barbell, dumbbell, kettlebells, cable,
+ * machine, body only, …) is the base, and its values double as item ids. It cannot say that a
  * squat needs a rack or a chin-up a bar, so `data/equipment.json` adds those
  * extras for the exercises that need them. Schema: `data/README.md`.
  *
@@ -23,13 +23,17 @@ const Config = z.object({
 
 export const EQUIPMENT = Config.parse(config)
 
-/** The library value for exercises done with nothing at all. */
-const BODY_ONLY = 'body only'
+/**
+ * Library values that name no item: `body only` needs nothing, and `other` is
+ * anything the library has no word for (a hyperextension bench, a sled), so
+ * what it really needs goes under `needs` instead.
+ */
+const NO_ITEM = new Set(['body only', 'other'])
 
 export type EquipmentExercise = Pick<LocalExercise, 'id' | 'equipment'>
 
 export function exerciseNeeds(exercise: EquipmentExercise): string[] {
-  const base = exercise.equipment && exercise.equipment !== BODY_ONLY ? [exercise.equipment] : []
+  const base = exercise.equipment && !NO_ITEM.has(exercise.equipment) ? [exercise.equipment] : []
   return [...new Set([...base, ...(EQUIPMENT.needs[exercise.id] ?? [])])]
 }
 

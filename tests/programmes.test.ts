@@ -66,7 +66,9 @@ describe('data/equipment.json', () => {
   })
 
   it('has an item for every library equipment value, so no exercise is out of reach', () => {
-    const values = new Set(seeds.map((s) => s.equipment).filter((v) => v !== null && v !== 'body only'))
+    const values = new Set(
+      seeds.flatMap((s) => (s.equipment && s.equipment !== 'body only' && s.equipment !== 'other' ? [s.equipment] : [])),
+    )
     expect([...values].filter((value) => !items.has(value))).toEqual([])
   })
 })
@@ -80,6 +82,10 @@ describe('exerciseNeeds', () => {
   it('needs nothing for body-only work, unless an extra says so', () => {
     expect(exerciseNeeds({ id: 'Pushups', equipment: 'body only' })).toEqual([])
     expect(exerciseNeeds({ id: 'Chin-Up', equipment: 'body only' })).toEqual(['pull-up-bar'])
+  })
+
+  it('reads the library value other as no item, since it names none', () => {
+    expect(exerciseNeeds({ id: 'Hyperextensions_(Back_Extensions)', equipment: 'other' })).toEqual([])
   })
 })
 

@@ -105,9 +105,10 @@ describe('the committed exercise library', () => {
   it('only contains what data/exercise-filter.json allows', () => {
     const outside = seeds.filter(
       (s) =>
-        !filterConfig.levels.includes(s.level ?? '') ||
-        !filterConfig.categories.includes(s.category ?? '') ||
-        !filterConfig.equipment.includes(s.equipment ?? ''),
+        !matchesFilter(
+          { ...s, level: s.level ?? '', category: s.category ?? '' },
+          { ...filterConfig, requireImages: false },
+        ),
     )
     expect(outside.map((s) => s.id)).toEqual([])
   })
