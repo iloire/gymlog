@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-15 13:53
+
+- Tapping an exercise in the workout editor opens its details in a dialog (photos, favourite star,
+  cues, history, how to do it) instead of navigating to the exercise page, so you close it and keep
+  building the workout. The exercise page and the dialog share `components/exercise-detail.tsx`.
+
 ## 2026-09-15 13:46
 
 - Sign in and sign up show a picture, picked at random from `data/login-images.json`: across the

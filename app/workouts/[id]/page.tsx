@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { ExercisePicker } from '@/components/exercise-picker'
 import { Nav } from '@/components/nav'
@@ -22,6 +23,7 @@ export default function WorkoutEditorPage() {
   const router = useRouter()
   const { id } = useParams<{ id: string }>()
   const [picking, setPicking] = useState(false)
+  const [viewingExerciseId, setViewingExerciseId] = useState<string | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const data = useLiveQuery(async () => {
@@ -95,6 +97,14 @@ export default function WorkoutEditorPage() {
         />
       )}
 
+      {viewingExerciseId && (
+        <ExerciseDialog
+          userId={userId}
+          exerciseId={viewingExerciseId}
+          onClose={() => setViewingExerciseId(null)}
+        />
+      )}
+
       <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-5 pb-6">
         <Link href="/workouts" className="flex items-center gap-1 text-sm text-ink-dim">
           <ChevronLeft size={18} aria-hidden />
@@ -114,14 +124,18 @@ export default function WorkoutEditorPage() {
           {items.map((item, index) => (
             <li key={item.id} className="rounded-md border border-line bg-surface p-4">
               <div className="flex items-start justify-between gap-3">
-                <Link href={`/exercises/${item.exerciseId}`} className="flex min-w-0 items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setViewingExerciseId(item.exerciseId)}
+                  className="flex min-w-0 items-center gap-3 text-left"
+                >
                   <ExerciseFrames
                     exercise={{ name: item.exerciseName, images: item.exerciseImages }}
                     className="aspect-[3/2] w-20 shrink-0"
                     animate={false}
                   />
                   <span className="text-[15px]">{item.exerciseName}</span>
-                </Link>
+                </button>
                 <div className="flex shrink-0 gap-1 text-ink-dim">
                   <button
                     type="button"
