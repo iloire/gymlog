@@ -1,0 +1,15 @@
+# Allowlist the git-crypt-encrypted env files (see .gitattributes). gitleaks
+# reads the cleartext diff (`git diff --cached` decrypts through git-crypt's
+# textconv), but what lands in the git tree is an AES blob. Keep this list
+# identical to the encrypted paths in .gitattributes — allowlisting a path that
+# is NOT encrypted would let a real plaintext secret through.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "git-crypt encrypted env files"
+paths = [
+  '''^\.env\.local$''',
+  '''^\.env\.prod$''',
+]
