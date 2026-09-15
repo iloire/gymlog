@@ -1,11 +1,13 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
+import { ExerciseDialog } from '@/components/exercise-dialog'
+import { ExerciseFrames } from '@/components/exercise-frames'
 import { RestTimer } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
 import { SetSquares } from '@/components/set-squares'
@@ -34,6 +36,7 @@ function Session() {
   const [position, setPosition] = useState(0)
   const [restEndsAt, setRestEndsAt] = useState<number | null>(null)
   const [draft, setDraft] = useState<{ id: string; weightKg: number | null; reps: number | null } | null>(null)
+  const [viewingExercise, setViewingExercise] = useState(false)
 
   useWakeLock()
 
@@ -48,7 +51,15 @@ function Session() {
       .sort((a, b) => a.position - b.position || a.setIndex - b.setIndex)
 
     const positions = [...new Set(logs.map((log) => log.position))].sort((a, b) => a - b)
-    return { session, logs, positions }
+
+    // Set logs carry the exercise's name but not its photos.
+    const exerciseIds = [...new Set(logs.map((log) => log.exerciseId))]
+    const exercises = new Map(
+      (await db.exercises.bulkGet(exerciseIds)).flatMap((exercise) =>
+        exercise ? [[exercise.id, exercise] as const] : [],
+      ),
+    )
+    return { session, logs, positions, exercises }
   }, [userId, id])
 
   const positions = data?.positions ?? []
@@ -120,28 +131,109 @@ function Session() {
   }
 
   const allDone = data.logs.every((log) => log.completedAt !== null)
+  const exercise = exerciseId ? data.exercises.get(exerciseId) : undefined
+  const exerciseName = groupLogs[0]?.exerciseName ?? 'Workout'
+  const nameAt = (index: number) =>
+    data.logs.find((log) => log.position === positions[index])?.exerciseName
+  const previousName = position > 0 ? nameAt(position - 1) : undefined
+  const nextName = position < positions.length - 1 ? nameAt(position + 1) : undefined
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="flex items-center justify-between border-b border-line px-4 py-3">
+      <header className="flex items-center justify-between px-4 pt-3 pb-1">
         <Link href="/" className="flex items-center gap-1 text-sm text-ink-dim">
           <ChevronLeft size={18} aria-hidden />
           {data.session.templateName}
         </Link>
-        <span className="text-sm text-ink-dim">
-          {positions.length ? `${Math.min(position + 1, positions.length)} / ${positions.length}` : ''}
-        </span>
+        {positions.length > 0 && (
+          <span className="text-sm text-ink-dim">
+            Exercise <span className="figure text-ink">{Math.min(position + 1, positions.length)}</span> of{' '}
+            {positions.length}
+          </span>
+        )}
       </header>
 
-      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-6">
-        <h1 className="figure text-3xl leading-tight">{groupLogs[0]?.exerciseName ?? 'Workout'}</h1>
+      {/* One segment per exercise: filled once every set of it is logged, so the
+          whole workout reads at a glance the way the set squares read one exercise. */}
+      {positions.length > 1 && (
+        <ol className="flex gap-1 px-4 pt-2" aria-hidden>
+          {positions.map((at, index) => {
+            const done = data.logs.every((log) => log.position !== at || log.completedAt !== null)
+            return (
+              <li key={at} className="flex-1">
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setPosition(index)}
+                  className="block w-full py-1.5"
+                >
+                  <span
+                    className={`block h-1 rounded-full ${
+                      done
+                        ? 'bg-plate-blue'
+                        : index === position
+                          ? 'bg-ink'
+                          : 'bg-line'
+                    }`}
+                  />
+                </button>
+              </li>
+            )
+          })}
+        </ol>
+      )}
+
+      {viewingExercise && exerciseId && (
+        <ExerciseDialog
+          userId={userId}
+          exerciseId={exerciseId}
+          onClose={() => setViewingExercise(false)}
+        />
+      )}
+
+      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-4">
+        {exercise?.images?.length ? (
+          // Full-bleed on a phone; the photo shows the movement you are about to
+          // do, and tapping it opens the cues and instructions without leaving.
+          <button
+            type="button"
+            onClick={() => setViewingExercise(true)}
+            aria-label={`About ${exerciseName}`}
+            className="relative -mx-5 block w-[calc(100%+2.5rem)] text-left sm:mx-0 sm:w-full"
+          >
+            <ExerciseFrames
+              exercise={exercise}
+              className="aspect-[3/2] w-full rounded-none sm:rounded-md"
+            />
+            <span className="absolute inset-0 bg-linear-to-t from-ground via-ground/30 via-25% to-transparent to-50% sm:rounded-md" />
+            <span className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-ground/70 text-ink">
+              <Info size={18} aria-hidden />
+            </span>
+          </button>
+        ) : null}
+
+        <h1
+          className={`figure relative text-3xl leading-tight ${exercise?.images?.length ? '-mt-7' : 'mt-2'}`}
+        >
+          {exerciseName}
+        </h1>
 
         <p className="mt-2 text-sm text-ink-dim">
-          {previous
-            ? `Last time: ${previous.sets
-                .map((set) => `${set.weightKg ?? '—'}×${set.reps ?? '—'}`)
-                .join(', ')}`
-            : 'First time logging this one.'}
+          {previous ? (
+            <>
+              Last time{' '}
+              {previous.sets.map((set, index) => (
+                <span key={set.setIndex} className="figure text-ink">
+                  {index > 0 && <span className="text-ink-dim">, </span>}
+                  {set.weightKg ?? '—'}
+                  <span className="text-ink-dim">×</span>
+                  {set.reps ?? '—'}
+                </span>
+              ))}
+            </>
+          ) : (
+            'First time logging this one.'
+          )}
         </p>
 
         <SetSquares logs={groupLogs} activeId={activeSet?.id} />
@@ -194,25 +286,35 @@ function Session() {
           <p className="mt-8 text-ink-dim">This workout has no exercises yet.</p>
         )}
 
-        <div className="mt-10 flex items-center justify-between border-t border-line pt-4">
-          <button
-            type="button"
-            disabled={position === 0}
-            onClick={() => setPosition(position - 1)}
-            className="flex items-center gap-1 py-2 text-sm text-ink-dim disabled:opacity-30"
-          >
-            <ChevronLeft size={16} aria-hidden />
-            Previous
-          </button>
-          <button
-            type="button"
-            disabled={position >= positions.length - 1}
-            onClick={() => setPosition(position + 1)}
-            className="flex items-center gap-1 py-2 text-sm text-ink-dim disabled:opacity-30"
-          >
-            Next
-            <ChevronRight size={16} aria-hidden />
-          </button>
+        <div className="mt-10 grid grid-cols-2 gap-3 border-t border-line pt-3">
+          {previousName ? (
+            <button
+              type="button"
+              onClick={() => setPosition(position - 1)}
+              className="flex min-w-0 items-center gap-1.5 py-2 text-left"
+            >
+              <ChevronLeft size={18} className="shrink-0 text-ink-dim" aria-hidden />
+              <span className="min-w-0">
+                <span className="block text-xs text-ink-dim">Previous</span>
+                <span className="block truncate text-sm">{previousName}</span>
+              </span>
+            </button>
+          ) : (
+            <span />
+          )}
+          {nextName && (
+            <button
+              type="button"
+              onClick={() => setPosition(position + 1)}
+              className="col-start-2 flex min-w-0 items-center justify-end gap-1.5 py-2 text-right"
+            >
+              <span className="min-w-0">
+                <span className="block text-xs text-ink-dim">Next</span>
+                <span className="block truncate text-sm">{nextName}</span>
+              </span>
+              <ChevronRight size={18} className="shrink-0 text-ink-dim" aria-hidden />
+            </button>
+          )}
         </div>
 
         {allDone && !data.session.completedAt && (

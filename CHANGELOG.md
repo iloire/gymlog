@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-15 14:14
+
+- Session screen: the exercise's photos now head the screen, fading into the page under its name,
+  and tapping them opens the exercise's cues and instructions in a dialog. A segment per exercise
+  under the header fills as each is finished, last time's sets read as figures, and Previous /
+  Next show which exercise they go to.
+
 ## 2026-09-15 14:06
 
 - Duplicate workout, in the workout editor: copies the workout and its exercises (sets, reps, rest,

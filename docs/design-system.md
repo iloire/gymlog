@@ -39,6 +39,10 @@ change. No all-caps labels, no monospace for data.
 ## Structure
 
 - **No card kit.** The session screen is a full-bleed stack: one exercise fills the viewport.
+- **The session opens on the movement.** The exercise's library photos cross-fade full-bleed at
+  the top, fading into the ground with the exercise name set on that edge; tapping it opens cues
+  and instructions in a dialog, never a new page. A thin segment per exercise under the header
+  fills blue as each one is finished, and Previous / Next name the exercise they go to.
 - **Set squares carry information.** A row of squares per exercise — filled = done, outlined =
   pending. You read your progress through the workout without parsing text.
 - **The rest timer is a rule that drains** across the bottom edge, above the thumb, rather than a
