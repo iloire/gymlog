@@ -3,39 +3,25 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { db } from '@/db'
-import {
-  bodyWeights,
-  exerciseNotes,
-  exercises,
-  programDays,
-  programs,
-  sessions,
-  setLogs,
-  templateItems,
-  users,
-  workoutTemplates,
-} from '@/db/schema'
+import { exercises, syncedTables as tables, users } from '@/db/schema'
 import { currentUserId } from '@/lib/auth'
 import { SYNC_TABLES, type RejectedMutation, type SyncRow, type SyncTable } from '@/lib/sync/types'
 
-/** Tables a client may write. `exercises` is writable only for its own rows. */
-const tables = {
-  exercises,
-  exerciseNotes,
-  workoutTemplates,
-  templateItems,
-  programs,
-  programDays,
-  sessions,
-  setLogs,
-  bodyWeights,
-} as const
+/**
+ * Parents before children. The outbox holds one entry per row and a re-edit
+ * moves that entry to the back, so a client can legitimately send set logs
+ * ahead of the session they belong to (log sets offline, then tap Finish).
+ * Turso enforces foreign keys, so the server applies in dependency order
+ * rather than trusting the order it was sent.
+ */
+const TABLE_ORDER = new Map(SYNC_TABLES.map((name, index) => [name, index]))
 
 const mutationSchema = z.object({
   id: z.string().min(1),
   table: z.enum(SYNC_TABLES),
   rowId: z.string().min(1),
   row: z.record(z.string(), z.unknown()),
+  queuedAt: z.number().default(0),
 })
 
 const requestSchema = z.object({
@@ -77,9 +63,13 @@ export async function POST(request: Request) {
 
   let rev = user.syncRev
 
-  // --- push (one transaction: either every mutation lands, or none) ----
+  const ordered = [...mutations].sort(
+    (a, b) => (TABLE_ORDER.get(a.table) ?? 0) - (TABLE_ORDER.get(b.table) ?? 0) || a.queuedAt - b.queuedAt,
+  )
+
+  // --- push ---------------------------------------------------------------
   await db.transaction(async (tx) => {
-    for (const mutation of mutations) {
+    for (const mutation of ordered) {
       const table = tables[mutation.table]
       const incoming = mutation.row as SyncRow
       const updatedAt = Number(incoming.updatedAt)
@@ -92,8 +82,8 @@ export async function POST(request: Request) {
           table: mutation.table,
           rowId: mutation.rowId,
           reason,
-          // Never echo another user's row back to the caller.
-          winner: reason === 'forbidden' ? { id: mutation.rowId, updatedAt: 0 } : (existing as SyncRow),
+          // Never echo another user's row back; an invalid row has no winner.
+          winner: reason === 'stale' ? (existing as SyncRow) : { id: mutation.rowId, updatedAt: 0 },
         })
 
       // A row owned by someone else is not ours to touch, and a global library
@@ -109,15 +99,23 @@ export async function POST(request: Request) {
         continue
       }
 
-      rev += 1
       // userId always comes from the JWT — never from the payload.
-      const values = { ...incoming, id: mutation.rowId, userId, rev } as Record<string, unknown>
+      const values = { ...incoming, id: mutation.rowId, userId, rev: rev + 1 } as Record<string, unknown>
 
-      if (existing) {
-        await tx.update(table).set(values).where(eq(table.id, mutation.rowId))
-      } else {
-        await tx.insert(table).values(values as never)
+      try {
+        if (existing) {
+          await tx.update(table).set(values).where(eq(table.id, mutation.rowId))
+        } else {
+          await tx.insert(table).values(values as never)
+        }
+      } catch (error) {
+        // A constraint failure aborts only this statement, not the transaction.
+        console.error(`sync: refused ${mutation.table}/${mutation.rowId}`, error)
+        reject('invalid')
+        continue
       }
+
+      rev += 1
       applied.push(mutation.id)
     }
 

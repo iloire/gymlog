@@ -48,7 +48,9 @@ export function mutationKey(table: SyncTable, rowId: string): string {
 export type SyncRequest = {
   /** `users.syncRev` as of the last successful pull. 0 bootstraps a full snapshot. */
   cursor: number
-  /** Stable per-device id; breaks `updatedAt` ties deterministically. */
+  /** Newest `updatedAt` of the global exercise library already held. 0 = none. */
+  globalCursor: number
+  /** Stable per-device id, so a push can be traced to the phone or laptop that sent it. */
   clientId: string
   mutations: Mutation[]
 }
@@ -60,8 +62,11 @@ export type RejectedMutation = {
   /**
    * `stale` — a newer version is already stored (last-write-wins).
    * `forbidden` — the row belongs to another user or to the global library.
+   * `invalid` — the database refused it (e.g. it references a row that does
+   *   not exist). Rejected rather than retried, so one bad row cannot wedge
+   *   every other change behind it in the outbox forever.
    */
-  reason: 'stale' | 'forbidden'
+  reason: 'stale' | 'forbidden' | 'invalid'
   winner: SyncRow
 }
 
