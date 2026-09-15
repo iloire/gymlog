@@ -61,7 +61,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'bad_request', issues: ['row.updatedAt'] }, { status: 400 })
   }
 
-  let rev = user.syncRev
+  let base = user.syncRev
+  let rev = base
 
   const ordered = [...mutations].sort(
     (a, b) => (TABLE_ORDER.get(a.table) ?? 0) - (TABLE_ORDER.get(b.table) ?? 0) || a.queuedAt - b.queuedAt,
@@ -69,6 +70,16 @@ export async function POST(request: Request) {
 
   // --- push ---------------------------------------------------------------
   await db.transaction(async (tx) => {
+    // Re-read inside the (write-locked) transaction: a token write through
+    // /api/v1, or another device's sync, may have moved the counter since the
+    // read above, and reusing its revs would hide rows from delta pulls.
+    const [fresh] = await tx
+      .select({ syncRev: users.syncRev })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+    base = rev = fresh?.syncRev ?? base
+
     for (const mutation of ordered) {
       const table = tables[mutation.table]
       const incoming = mutation.row as SyncRow
@@ -119,7 +130,7 @@ export async function POST(request: Request) {
       applied.push(mutation.id)
     }
 
-    if (rev !== user.syncRev) {
+    if (rev !== base) {
       await tx.update(users).set({ syncRev: rev }).where(eq(users.id, userId))
     }
   })

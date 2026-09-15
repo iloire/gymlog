@@ -20,17 +20,24 @@ Every screen renders off Dexie (`lib/db/dexie.ts`) via `useLiveQuery`. The sync 
 
 A write goes to Dexie and the outbox in **one transaction** — never one without the other.
 
-The one exception is `/admin`, a desk-only, server-rendered view of every account. It reads only
-through `lib/admin.ts`, which checks `users.role` in the database on every call. Sync must never
-look at the role, and the service worker must never cache `/admin`.
+There are two exceptions, both desk-only and never cached by the service worker:
+
+- `/admin`, a server-rendered view of every account. It reads only through `lib/admin.ts`, which
+  checks `users.role` in the database on every call. Sync must never look at the role.
+- `/api/v1` and its token page `/profile/api` — the API a user points an LLM at. Tokens are
+  `read` or `write`; reads go through `lib/api.ts`, writes through `lib/api-write.ts`, whose
+  `commit()` gives every row `updatedAt = now` and a fresh `rev` in one transaction so phones pull
+  the change on their next sync. Never write a synced table from the server any other way, and
+  never let a token authenticate `/api/sync`.
 
 ### 2. Multi-tenant from day zero
 
 One user today, other people tomorrow, and no migration in between.
 
 - Every user-owned row carries `userId`; every read filters on it.
-- `userId` comes from the JWT server-side (`currentUserId()` in `lib/auth.ts`) and **never** from
-  the request payload.
+- `userId` comes from the JWT server-side (`currentUserId()` in `lib/auth.ts`), or for `/api/v1`
+  from the token's row (`tokenOwner()` in `lib/api-tokens.ts`), and **never** from the request
+  payload.
 - The seed exercise library is `exercises.userId IS NULL` — global, shared, read-only. A user's own
   exercises are the same table with a non-null `userId`.
 - The Dexie database name is namespaced per user id, and logout wipes it. A shared phone must not

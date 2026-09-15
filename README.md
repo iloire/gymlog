@@ -24,6 +24,9 @@ deployed to production** — the workflow waits for Vercel's verdict and smoke-t
   another to show the movement.
 - **Bodyweight** — one tap a day, charted as a 7-day average because single readings are noise.
 - **Accounts** — every user sees only their own data; the exercise library is shared.
+- **API for LLMs** — create a token under Profile → API access and let ChatGPT, Claude or a script
+  read your workouts, history and bodyweight; a read and write token can also rework your workouts
+  and week. Described by an OpenAPI schema at `/api/v1/openapi.json`.
 
 ## Works offline
 

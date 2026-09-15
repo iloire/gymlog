@@ -25,7 +25,7 @@ Components never fetch. The sync engine is the only network caller, and it runs 
 | `db/` | Drizzle schema, migrations, migrate/seed scripts. Server only. |
 | `lib/db/` | Dexie schema + typed accessors. Client only. |
 | `lib/sync/` | Outbox, flush loop, merge rules. |
-| `lib/` | `env`, `env.public`, `auth`, `id`, `users`, `utils`. |
+| `lib/` | `env`, `env.public`, `auth`, `id`, `users`, `utils`; `api*` for the token API. |
 | `scripts/` | One-off tooling (exercise import). Excluded from the Vercel build. |
 | `data/` | Config data files: exercise import filter, sign in pictures, equipment and premade programmes. Schemas in `data/README.md`. |
 | `public/exercise-media/` | Exercise photos, `<id>/{0,1}.webp`. |
@@ -131,6 +131,41 @@ recent sessions with their sets, bodyweight and own exercises. It is read-only.
   everyone else's, so an admin's phone holds only their own log.
 - **No admin in code or seed data.** Grant it from the command line:
   `npm run user:role -- <email> admin` (or `user:role:prod`).
+
+## API for LLMs
+
+`/api/v1` lets a user hand their log to ChatGPT, Claude or a script. It is described by an OpenAPI
+3.1 schema at `/api/v1/openapi.json` (public, no data), whose descriptions are written for the
+model reading them.
+
+| | Read token | Read and write token |
+|---|---|---|
+| `GET /profile`, `/workouts`, `/workouts/{id}`, `/exercises`, `/history`, `/bodyweight` | ✓ | ✓ |
+| `POST /workouts`, `PUT` / `DELETE /workouts/{id}` | | ✓ |
+| `PUT /programme/week`, `PUT /bodyweight` | | ✓ |
+
+- **Tokens** (`api_tokens`, server only, never synced) are created and revoked on `/profile/api`,
+  a server-rendered page with server actions. The secret is `gymlog_` + 32 random bytes, shown
+  once; only its SHA-256 is stored (a random 256-bit secret needs no bcrypt). Revoked tokens stay
+  as a record. At most 10 active per user; `lastUsedAt` is updated at most once a minute.
+- **Tenancy**: `tokenOwner()` finds the token by hash, and its row supplies `userId`. Every read
+  and write filters on it, like `/api/sync` does with the JWT. Tokens never authenticate
+  `/api/sync`.
+- **Reads** (`lib/api.ts`) return names next to ids, drop tombstones and sync columns, and keep
+  weights in kg. History is summarised by `summariseSession()` (`lib/session-summary.ts`), the same
+  function the History screen uses, so an LLM quotes the numbers the app shows.
+- **Writes** (`lib/api-write.ts`) make the server one more of the user's devices. `commit()` bumps
+  `users.syncRev` by the number of rows as the transaction's first statement, then upserts each row
+  with the next `rev` and `updatedAt = now`. Phones pull the rows on their next sync and
+  last-write-wins decides any clash with an edit still in a phone's outbox. The write rules match
+  the app: deletes are tombstones, bodyweight uses the app's deterministic id for the day, and a
+  cleared weekday's `programDays` row is brought back rather than re-created, because the unique
+  index on (programme, weekday) counts tombstoned rows. Logged sessions and sets cannot be written.
+- **Revs under concurrency.** libSQL transactions take the write lock at `BEGIN`, and `/api/sync`
+  re-reads `syncRev` inside its transaction. Reusing a rev another writer had just handed out would
+  let a device whose cursor was already past it skip a row for good.
+- `public/sw.js` skips `/profile/api`, and Profile links to it with a plain `<a>`, so the page
+  holding token names is never cached or prefetched.
 
 ## Why no CRDTs
 

@@ -10,6 +10,8 @@
  * - /api/* is never cached. The sync engine already treats a failed request as
  *   "still offline", and a stale cached sync response would be a lie.
  * - /admin is never cached either: it shows other people's data.
+ * - /profile/api is never cached: it is server-rendered token management and
+ *   only works online.
  *
  * Note `ignoreSearch` on the navigation fallback: /session?id=… caches one
  * document that then serves every session, including ones first opened offline.
@@ -55,6 +57,7 @@ self.addEventListener('fetch', (event) => {
   // Other people's accounts must never land in this device's cache, and sign
   // out does not clear it. The panel is online-only anyway.
   if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) return
+  if (url.pathname === '/profile/api') return
 
   if (IMMUTABLE.some((pattern) => pattern.test(url.pathname))) {
     event.respondWith(cacheFirst(request, ASSETS))

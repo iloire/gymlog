@@ -39,6 +39,21 @@ export default function ProfilePage() {
           <EquipmentPicker />
         </section>
 
+        <section className="mt-8">
+          <h2 className="mb-1 text-xl font-semibold">API access</h2>
+          <p className="mb-4 text-sm text-ink-dim">
+            Tokens that let ChatGPT, Claude or another tool read your log or edit your workouts.
+          </p>
+          {/* A plain <a>: the token page is server-rendered and online-only, so
+              visiting Profile must not prefetch it. */}
+          <a
+            href="/profile/api"
+            className="flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
+          >
+            Manage API tokens
+          </a>
+        </section>
+
         <footer className="mt-10 border-t border-line pt-5">
           {/* Shown to everyone: the role is never synced to the device, and /admin
               404s for anyone who is not an admin. A plain <a>, not <Link>, so the

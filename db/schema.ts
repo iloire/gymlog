@@ -51,6 +51,38 @@ export const users = sqliteTable('users', {
   createdAt: integer('created_at').notNull(),
 })
 
+// ------------------------------------------------------------ api tokens
+
+/**
+ * Personal access tokens for the `/api/v1` API, so a user can let an LLM or
+ * another tool read their log and, with a `write` token, change their plan. Server only — never synced, never on the
+ * device. The secret is shown once at creation; only its SHA-256 is stored,
+ * which is enough for a 256-bit random token (no bcrypt: nothing to brute-force).
+ */
+export const apiTokens = sqliteTable(
+  'api_tokens',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** What the user called it, e.g. "ChatGPT". */
+    name: text('name').notNull(),
+    /** `read` sees the log; `write` can also change workouts, the week and bodyweight. */
+    scope: text('scope', { enum: ['read', 'write'] })
+      .notNull()
+      .default('read'),
+    tokenHash: text('token_hash').notNull().unique(),
+    /** The token's first characters, so the list can tell tokens apart. */
+    prefix: text('prefix').notNull(),
+    createdAt: integer('created_at').notNull(),
+    lastUsedAt: integer('last_used_at'),
+    /** Revoked tokens stay as a record of what had access, and never authenticate again. */
+    revokedAt: integer('revoked_at'),
+  },
+  (t) => [index('tok_user').on(t.userId)],
+)
+
 // ---------------------------------------------------------- exercises
 
 /**
@@ -318,6 +350,7 @@ export const syncedTables = {
 export type SyncedTableName = keyof typeof syncedTables
 
 export type User = typeof users.$inferSelect
+export type ApiToken = typeof apiTokens.$inferSelect
 export type Exercise = typeof exercises.$inferSelect
 export type ExerciseNote = typeof exerciseNotes.$inferSelect
 export type WorkoutTemplate = typeof workoutTemplates.$inferSelect

@@ -2,8 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { destroyDb, type LocalSession, type LocalSetLog, type LocalWorkoutTemplate } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
-import { daysAgo, daysBetween, rotation, sessionHistory, summariseSession } from '@/lib/history'
+import { daysAgo, daysBetween, rotation, sessionHistory } from '@/lib/history'
 import { setLogId } from '@/lib/id'
+import { summariseSession } from '@/lib/session-summary'
 import { logSet, startSession } from '@/lib/sessions'
 
 const USER = 'user-1'

@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-15 17:53
+
+- API access for LLMs (**Profile → API access**, `/profile/api`): create a token, choosing **Read
+  only** or **Read and write**, and hand it to ChatGPT, Claude or a script. The token is shown once
+  with a ready-to-paste prompt; the list shows each token's access and when it was last used, and
+  revoking one takes two taps. Up to 10 at a time.
+- `/api/v1`, described at `/api/v1/openapi.json` (import it straight into a custom GPT's Actions).
+  Any token reads `/profile` (with the week), `/workouts`, `/exercises` (search), `/history` (every
+  trained session with its sets, `from`/`to`/`limit`) and `/bodyweight`. A read and write token can
+  also create, replace and delete workouts, set the week (`PUT /programme/week`) and record
+  bodyweight; the changes reach your phone on its next sync. Logged sets can't be changed.
+- `api_tokens` table (migration `0003_api_tokens`); only a SHA-256 of each token is stored.
+- Fixed a latent race: `/api/sync` now reads the sync counter inside its transaction, so a
+  concurrent write can no longer reuse a revision and hide a row from another device.
+
 ## 2026-09-15 17:28
 
 - History (`/history`, a new tab): every workout you trained, newest first, with its date,

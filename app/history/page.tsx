@@ -9,7 +9,8 @@ import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
 import { formatDay, formatDuration, kg } from '@/lib/format'
-import { daysAgo, rotation, sessionHistory, type HistoryEntry } from '@/lib/history'
+import { daysAgo, rotation, sessionHistory } from '@/lib/history'
+import type { HistoryEntry } from '@/lib/session-summary'
 import { startSession } from '@/lib/sessions'
 
 export default function HistoryPage() {
