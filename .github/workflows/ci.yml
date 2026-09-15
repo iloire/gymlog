@@ -1,0 +1,86 @@
+name: CI
+
+# One badge, three questions: do the tests pass, does it build, and did this
+# exact commit reach production? A green badge means all three.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  deployments: read
+
+env:
+  PRODUCTION_URL: https://gymlog-pi-eosin.vercel.app
+
+jobs:
+  test:
+    name: Test and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24 # matches the Vercel project
+          cache: npm
+
+      - run: npm ci
+
+      # CI has no git-crypt key, so the env files check out as ciphertext.
+      # Remove them rather than let Next try to parse binary as dotenv —
+      # tests and the build need no secrets.
+      - name: Drop encrypted env files
+        run: rm -f .env.local .env.prod
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Lint, typecheck and build
+        run: npm run build
+
+  deploy:
+    name: Production deploy
+    # Vercel deploys main on push; this job does not deploy, it waits for
+    # Vercel's verdict on this commit and then checks the live site.
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Wait for Vercel to finish deploying this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in $(seq 1 90); do
+            id=$(gh api "repos/$GITHUB_REPOSITORY/deployments?sha=$GITHUB_SHA&environment=Production" -q '.[0].id // empty')
+            if [ -n "$id" ]; then
+              state=$(gh api "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" -q '.[0].state // empty')
+              echo "attempt $attempt: deployment $id is ${state:-pending}"
+              case "$state" in
+                success) exit 0 ;;
+                failure|error) echo "::error::Vercel reported the production deploy as $state"; exit 1 ;;
+              esac
+            else
+              echo "attempt $attempt: no deployment for $GITHUB_SHA yet"
+            fi
+            sleep 10
+          done
+          echo "::error::Timed out waiting for Vercel"
+          exit 1
+
+      - name: Smoke-test production
+        run: |
+          check() {
+            code=$(curl -s -o /dev/null -w '%{http_code}' -X "$1" "$PRODUCTION_URL$2")
+            echo "$1 $2 -> $code (want $3)"
+            [ "$code" = "$3" ]
+          }
+          check GET  /login        200
+          check GET  /sw.js        200
+          check GET  /manifest.json 200
+          check GET  /exercise-media/Barbell_Squat/0.webp 200
+          # The sync API must refuse anyone not signed in.
+          check POST /api/sync     401

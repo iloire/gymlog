@@ -18,27 +18,16 @@ import path from 'node:path'
 
 import sharp from 'sharp'
 
-type SourceExercise = {
-  id: string
-  name: string
-  force: string | null
-  level: string
-  mechanic: string | null
-  equipment: string | null
-  primaryMuscles: string[]
-  secondaryMuscles: string[]
-  instructions: string[]
-  category: string
-  images: string[]
-}
+import {
+  matchesFilter,
+  uniqueSlug,
+  type ExerciseFilter,
+  type SourceExercise,
+} from '../lib/exercise-import'
 
-type Filter = {
+type Filter = ExerciseFilter & {
   source: string
   imageBaseUrl: string
-  levels: string[]
-  categories: string[]
-  equipment: string[]
-  requireImages: boolean
   imageWidth: number
   imageQuality: number
 }
@@ -61,23 +50,6 @@ export type SeedExercise = {
 const ROOT = path.resolve(__dirname, '..')
 const MEDIA_DIR = path.join(ROOT, 'public', 'exercise-media')
 const OUT_FILE = path.join(ROOT, 'db', 'seed-exercises.json')
-
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
-function matches(exercise: SourceExercise, filter: Filter): boolean {
-  if (filter.levels.length && !filter.levels.includes(exercise.level)) return false
-  if (filter.categories.length && !filter.categories.includes(exercise.category)) return false
-  if (filter.equipment.length && !filter.equipment.includes(exercise.equipment ?? '')) return false
-  if (filter.requireImages && exercise.images.length < 2) return false
-  return true
-}
 
 async function vendorImage(
   sourceUrl: string,
@@ -112,7 +84,7 @@ async function main() {
   if (!response.ok) throw new Error(`source fetch failed: ${response.status}`)
   const all: SourceExercise[] = await response.json()
 
-  const selected = all.filter((exercise) => matches(exercise, filter))
+  const selected = all.filter((exercise) => matchesFilter(exercise, filter))
   console.log(`${selected.length} of ${all.length} exercises match data/exercise-filter.json`)
 
   const seeds: SeedExercise[] = []
@@ -138,12 +110,7 @@ async function main() {
       continue
     }
 
-    // Slugs are unique per owner; the global library shares one owner (NULL).
-    let slug = slugify(exercise.name)
-    if (usedSlugs.has(slug)) slug = `${slug}-${slugify(exercise.equipment ?? 'alt')}`
-    let suffix = 2
-    while (usedSlugs.has(slug)) slug = `${slugify(exercise.name)}-${suffix++}`
-    usedSlugs.add(slug)
+    const slug = uniqueSlug(exercise.name, exercise.equipment, usedSlugs)
 
     seeds.push({
       id: exercise.id,

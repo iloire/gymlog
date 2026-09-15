@@ -48,3 +48,7 @@ next-env.d.ts
 # local sqlite dev db
 local.db
 local.db-*
+
+# Agent worktrees and per-machine Claude settings
+.claude/worktrees/
+.claude/settings.local.json
