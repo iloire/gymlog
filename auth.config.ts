@@ -6,6 +6,13 @@ import type { NextAuthConfig } from 'next-auth'
  * everything it drags in lives in `lib/auth.ts`.
  */
 export const authConfig = {
+  /**
+   * Auth.js only auto-trusts the Host header on Vercel; anywhere else
+   * (`next start`, a container, a VPS) it refuses every request without this.
+   * Safe here because the app is only ever served from behind a proxy we
+   * control, which sets the host itself.
+   */
+  trustHost: true,
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',

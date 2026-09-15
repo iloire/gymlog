@@ -1,0 +1,32 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { useEffect, useRef } from 'react'
+
+import { useUserId } from '@/components/session-boot'
+import { writeRow } from '@/lib/db/write'
+import { newId } from '@/lib/id'
+
+export default function NewWorkoutPage() {
+  const userId = useUserId()
+  const router = useRouter()
+  const created = useRef(false)
+
+  useEffect(() => {
+    if (!userId || created.current) return
+    created.current = true
+
+    void (async () => {
+      const id = newId()
+      await writeRow(userId, 'workoutTemplates', {
+        id,
+        name: 'New workout',
+        notes: null,
+        archivedAt: null,
+      })
+      router.replace(`/workouts/${id}`)
+    })()
+  }, [userId, router])
+
+  return <main className="p-6 text-ink-dim">Creating…</main>
+}

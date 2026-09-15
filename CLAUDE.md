@@ -62,3 +62,11 @@ npm run exercises:import # re-import the public-domain exercise library
 ```
 
 Next 16 renamed `middleware.ts` to `proxy.ts` — route protection lives in `proxy.ts`.
+
+## Testing offline
+
+**Use a production build** — `npm run build && npx next start -p 3001` — then turn the network
+off. Under `next dev` the service worker ends up serving pre-edit chunks (dev builds are not
+content-hashed and hot reload patches the live page), so offline behaviour looks broken when it
+isn't, or fine when it isn't. See `docs/architecture.md`, "Working offline", for the three things
+that must hold for the app to open with no signal.

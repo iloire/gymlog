@@ -12,6 +12,8 @@ Only `.env.local` (development) and `.env.prod` (production) exist. There is no 
 | `AUTH_SECRET` | yes | server | NextAuth v5 signing key. `openssl rand -base64 32` |
 | `VERCEL_GIT_COMMIT_SHA` | auto | server | Injected by Vercel; renders the SHA in the footer |
 | `NEXT_PUBLIC_APP_NAME` | no | client | Defaults to `gymlog` |
+| `NEXT_PUBLIC_SW_IN_DEV` | no | client | `true` registers the service worker under `next dev`. Off by default — test offline against a production build instead |
+| `NEXT_PUBLIC_COMMIT_SHA` | auto | client | Not set by hand: `next.config.ts` maps it from `VERCEL_GIT_COMMIT_SHA` |
 
 `.vercelignore` excludes every env file from the build context.
 

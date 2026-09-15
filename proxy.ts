@@ -12,6 +12,12 @@ const publicPaths = ['/login', '/signup']
 export default auth((req) => {
   const { pathname } = req.nextUrl
 
+  // API routes authenticate themselves and answer 401 — redirecting a fetch to
+  // an HTML login page would just give the client unparseable JSON.
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next()
+  }
+
   if (publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     return NextResponse.next()
   }

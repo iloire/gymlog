@@ -195,7 +195,7 @@ to that repo and not transferable. Swap-in remains possible if Ivan ever buys a 
 | Route | What it does |
 |---|---|
 | `/` | **Today** — today's workout from the active program, big Start button; or "rest day" + start anything. A one-tap bodyweight entry if today's isn't logged yet. Shows last-sync time, red banner if the outbox is non-empty or sync is >24h stale ("Ready for the gym" check). |
-| `/session/[id]` | **The gym screen.** One exercise at a time, huge tap targets, set rows pre-created from the prescription and prefilled from last time, ✓ completes a set and auto-starts the rest timer. Screen wake-lock on. |
+| `/session?id=…` | **The gym screen.** One exercise at a time, huge tap targets, set rows pre-created from the prescription and prefilled from last time, ✓ completes a set and auto-starts the rest timer. Screen wake-lock on. |
 | `/workouts`, `/workouts/[id]` | Template list + editor: add exercises, drag to reorder, target sets/reps/rest |
 | `/program` | Mon–Sun grid, one workout per day; end a program and start the next stage |
 | `/exercises`, `/exercises/[id]` | Library with filters (muscle, equipment, level); detail shows the cross-fade, instructions, your own cues, and your history for that lift |
@@ -212,19 +212,29 @@ thumb-reachable; this gets used one-handed with chalky hands, which is a real de
 
 Each phase ends in a working app and one commit.
 
-0. **Scaffold** — Next 16 + Tailwind v4 + shadcn, `lib/env.ts`/`env.public.ts`, Drizzle+Turso,
-   NextAuth credentials + `middleware.ts`, `.vercelignore`, SHA footer, `CLAUDE.md`,
-   `docs/{architecture,design-system,env}.md`, `CHANGELOG.md`. Deploy empty to Vercel.
-1. **Exercise library** — import script, seed, `lib/db/dexie.ts` + `lib/sync/client.ts` +
-   `app/api/sync/route.ts`, `/exercises` with the cross-fade. Proves the local-first pipeline
-   end-to-end on read-only data before any writes depend on it.
-2. **Templates + program + bodyweight** — `/workouts` editor, `/program` weekly grid, `/weight`.
-   First offline *writes*; bodyweight is the smallest possible write path, so build it first as the
-   proof that the outbox round-trips.
-3. **The gym screen** — `/session/[id]`, set logging, rest timer, wake lock. The core loop.
-4. **PWA** — manifest, icons, `public/sw.js` (cache-first `/_next/static/*` and `/exercises/*`,
-   network-only `/api/*`), install prompt, background precache of the current program's media.
-5. **Payoff** — last-time prefill, `/history`, progression chart, per-exercise cues.
+0. ~~**Scaffold** — Next 16 + Tailwind v4 + shadcn, `lib/env.ts`/`env.public.ts`, Drizzle+Turso,
+   NextAuth credentials + `proxy.ts` (Next 16 renamed `middleware.ts`), `.vercelignore`, SHA
+   footer, `CLAUDE.md`, `docs/{architecture,design-system,env}.md`, `CHANGELOG.md`.~~ ✅
+   - [ ] Deploy to Vercel — needs a Turso database and Vercel project created first.
+1. ~~**Exercise library** — import script, seed, `lib/db/dexie.ts` + `lib/sync/client.ts` +
+   `app/api/sync/route.ts`, `/exercises` with the cross-fade.~~ ✅
+2. ~~**Templates + program + bodyweight** — `/workouts` editor, `/program` weekly grid, `/weight`.~~ ✅
+3. ~~**The gym screen** — set logging, rest timer, wake lock. The core loop.~~ ✅
+   Lives at `/session?id=…` rather than `/session/[id]` — see `docs/architecture.md`, "Working
+   offline".
+4. **PWA** — partly done.
+   - ~~Manifest, icons, `public/sw.js` (cache-first build assets and `/exercise-media/*`,
+     network-only `/api/*`, network-first navigations with an offline fallback).~~ ✅
+   - [ ] Install prompt.
+   - [ ] "Make available offline" button. The service worker already handles a
+     `precache-media` message; nothing in the app sends it yet, so photos are cached only once
+     viewed.
+5. **Payoff** — partly done.
+   - ~~Last-time prefill on the gym screen.~~ ✅
+   - ~~Per-exercise cues, and per-exercise history on the exercise page.~~ ✅
+   - [ ] `/history` — a list of past sessions.
+   - [ ] Per-exercise weight/e1RM progression chart. (`lastPerformance` already computes e1RM;
+     only the bodyweight chart exists so far.)
 
 ## Verification
 

@@ -1,69 +1,156 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useLiveQuery } from 'dexie-react-hooks'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+
+import { Nav } from '@/components/nav'
+import { useUserId } from '@/components/session-boot'
+import { SyncBadge } from '@/components/sync-badge'
+import { WeightPrompt } from '@/components/weight-prompt'
+import { getDb } from '@/lib/db/dexie'
+import { dayOfWeek, templateForDay, templateItems, today } from '@/lib/queries'
+import { startSession } from '@/lib/sessions'
+
+const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+export default function TodayPage() {
+  const userId = useUserId()
+  const router = useRouter()
+  const [starting, setStarting] = useState(false)
+
+  const plan = useLiveQuery(async () => {
+    if (!userId) return null
+    const db = getDb(userId)
+    const scheduled = await templateForDay(userId)
+    const date = today()
+
+    const templates = (await db.workoutTemplates.toArray()).filter(
+      (t) => t.deletedAt === null && t.archivedAt === null,
+    )
+
+    if (!scheduled) {
+      return { scheduled: null, templates, session: null, exercises: [] as string[] }
+    }
+
+    const template = await db.workoutTemplates.get(scheduled.templateId)
+    const items = await templateItems(userId, scheduled.templateId)
+    const session = await db.sessions
+      .where('scheduledFor')
+      .equals(date)
+      .filter((s) => s.templateId === scheduled.templateId && s.deletedAt === null)
+      .first()
+
+    const exercises = await Promise.all(
+      items.map(async (item) => (await db.exercises.get(item.exerciseId))?.name ?? 'Exercise'),
+    )
+
+    return {
+      scheduled: { ...scheduled, name: template?.name ?? 'Workout', sets: items.length },
+      templates,
+      session: session ?? null,
+      exercises,
+    }
+  }, [userId])
+
+  async function start(templateId: string, programId: string | null) {
+    if (!userId || starting) return
+    setStarting(true)
+    const id = await startSession(userId, templateId, programId)
+    router.push(`/session?id=${id}`)
+  }
+
+  const weekday = WEEKDAYS[dayOfWeek()] ?? ''
+
+  // useLiveQuery yields undefined until IndexedDB answers. Rendering the empty
+  // state during that gap tells you it is a rest day when it isn't — on a cold
+  // start in the gym that is the difference between training and going home.
+  if (plan === undefined) {
+    return (
+      <>
+        <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8" aria-busy="true">
+          <p className="text-sm text-ink-dim">{weekday}</p>
+          <div className="mt-2 h-10 w-48 animate-pulse rounded bg-surface" />
+        </main>
+        <Nav />
+      </>
+    )
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <>
+      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
+        <header className="mb-6">
+          <p className="text-sm text-ink-dim">{weekday}</p>
+          {plan?.scheduled ? (
+            <h1 className="figure mt-1 text-4xl leading-[1.05]">{plan.scheduled.name}</h1>
+          ) : (
+            <h1 className="figure mt-1 text-4xl leading-[1.05]">Rest day</h1>
+          )}
+        </header>
+
+        <SyncBadge />
+
+        {plan?.scheduled ? (
+          <section className="mt-6">
+            <ol className="divide-y divide-line border-y border-line">
+              {plan.exercises.map((name, index) => (
+                <li key={`${name}-${index}`} className="flex items-baseline gap-3 py-3">
+                  <span className="figure w-6 text-sm text-ink-dim">{index + 1}</span>
+                  <span className="text-[15px]">{name}</span>
+                </li>
+              ))}
+            </ol>
+
+            <button
+              type="button"
+              onClick={() => void start(plan.scheduled!.templateId, plan.scheduled!.programId)}
+              disabled={starting}
+              className="mt-6 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift disabled:opacity-60"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+              {plan.session?.startedAt ? 'Continue workout' : 'Start workout'}
+            </button>
+          </section>
+        ) : (
+          <section className="mt-6">
+            <p className="text-[15px] text-ink-dim">
+              Nothing is scheduled for {weekday}.{' '}
+              <Link href="/program" className="text-ink underline underline-offset-4">
+                Set up your week
+              </Link>
+              , or train something anyway.
+            </p>
+
+            {plan?.templates.length ? (
+              <ul className="mt-5 divide-y divide-line border-y border-line">
+                {plan.templates.map((template) => (
+                  <li key={template.id}>
+                    <button
+                      type="button"
+                      onClick={() => void start(template.id, null)}
+                      className="flex w-full items-center justify-between py-4 text-left"
+                    >
+                      <span className="text-[15px]">{template.name}</span>
+                      <span className="text-sm text-ink-dim">Start</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <Link
+                href="/workouts/new"
+                className="mt-6 flex h-16 w-full items-center justify-center rounded-md bg-plate-blue text-lg font-semibold text-white"
+              >
+                Build your first workout
+              </Link>
+            )}
+          </section>
+        )}
+
+        <WeightPrompt />
       </main>
-    </div>
-  );
+      <Nav />
+    </>
+  )
 }

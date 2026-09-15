@@ -128,3 +128,114 @@
     @apply font-sans;
   }
 }
+/* ---------------------------------------------------------------- gymlog
+   The plate code. Colours are taken from competition plates and keep the
+   meaning they have in the sport: blue = the action, red = you beat last
+   time, yellow = rest running. See docs/design-system.md.
+   This app is dark-only and deliberately so — it is read in a gym at night. */
+
+:root,
+.dark {
+  --ground: #12171c;
+  --surface: #1a2129;
+  --surface-high: #222c36;
+  --line: #2c3641;
+  --ink: #edf1f5;
+  --ink-dim: #8a98a6;
+  --plate-blue: #0057b8;
+  --plate-blue-lift: #1a72d8;
+  --plate-red: #d22630;
+  --plate-yellow: #f2c300;
+
+  /* Map the shadcn surface tokens onto the plate palette so its components
+     inherit the theme instead of fighting it. */
+  --background: var(--ground);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--plate-blue);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface-high);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface);
+  --muted-foreground: var(--ink-dim);
+  --accent: var(--surface-high);
+  --accent-foreground: var(--ink);
+  --destructive: var(--plate-red);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--plate-blue-lift);
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-surface-high: var(--surface-high);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-plate-blue: var(--plate-blue);
+  --color-plate-blue-lift: var(--plate-blue-lift);
+  --color-plate-red: var(--plate-red);
+  --color-plate-yellow: var(--plate-yellow);
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    /* Never bounce-scroll a screen someone is tapping mid-set. */
+    overscroll-behavior-y: none;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-variation-settings: 'wdth' 100;
+  }
+
+  /* Weights and reps are the content of this app, so they get the expanded,
+     signage-like cut of Archivo and always line up in a column. */
+  .figure {
+    font-variation-settings: 'wdth' 112;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* Big enough that iOS never zooms the viewport on focus. */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* The two library photos are the start and end of the movement; holding each
+   end of the fade makes it read as a rep rather than a pulse. */
+@keyframes exercise-fade {
+  0%,
+  35% {
+    opacity: 0;
+  }
+  50%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
