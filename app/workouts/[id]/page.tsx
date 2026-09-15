@@ -1,7 +1,7 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronDown, ChevronLeft, ChevronUp, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronUp, Copy, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -15,6 +15,7 @@ import { getDb, type LocalTemplateItem } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
 import { newId } from '@/lib/id'
 import { activeProgram, templateItems } from '@/lib/queries'
+import { duplicateWorkout } from '@/lib/workouts'
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -205,6 +206,15 @@ export default function WorkoutEditorPage() {
         >
           <Plus size={18} aria-hidden />
           Add exercise
+        </button>
+
+        <button
+          type="button"
+          onClick={async () => router.push(`/workouts/${await duplicateWorkout(userId, id)}`)}
+          className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-md border border-line text-sm"
+        >
+          <Copy size={16} aria-hidden />
+          Duplicate workout
         </button>
 
         {confirmingDelete ? (

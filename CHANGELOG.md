@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-15 14:06
+
+- Duplicate workout, in the workout editor: copies the workout and its exercises (sets, reps, rest,
+  targets, notes) as "<name> (copy)" and opens the copy. It is written in one Dexie transaction so
+  a closed tab cannot leave half a copy, and the copy is not put on the programme.
+
 ## 2026-09-15 13:53
 
 - Tapping an exercise in the workout editor opens its details in a dialog (photos, favourite star,
