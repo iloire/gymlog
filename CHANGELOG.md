@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-15 14:12
+
+- Admin panel at `/admin`: every account with a 12-week training strip, workouts, sets, last
+  activity and join date; `/admin/users/[id]` shows one account's programme, workouts, recent
+  sessions with their sets and volume, bodyweight and own exercises. Read-only.
+- `users.role` (`user` | `admin`, migration `0001_user_role`), checked against the database on
+  every admin request; anyone else gets a 404. Sync ignores the role, so an admin uses the app
+  exactly like any other account.
+- `npm run user:role -- <email> <user|admin>` (and `user:role:prod`) grants or revokes admin.
+- The service worker never caches `/admin`.
+
 ## 2026-09-15 14:10
 
 - Deployed to Vercel at https://gymlog-pi-eosin.vercel.app on a Turso production database, and

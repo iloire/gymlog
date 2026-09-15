@@ -38,6 +38,14 @@ export const users = sqliteTable('users', {
   unit: text('unit', { enum: ['kg', 'lb'] })
     .notNull()
     .default('kg'),
+  /**
+   * `admin` unlocks /admin and nothing else. It is read from this column on
+   * every admin request, never from the JWT, and sync never looks at it — an
+   * admin's own log syncs exactly like anyone else's.
+   */
+  role: text('role', { enum: ['user', 'admin'] })
+    .notNull()
+    .default('user'),
   /** Monotonic sync counter, bumped once per written row. */
   syncRev: integer('sync_rev').notNull().default(0),
   createdAt: integer('created_at').notNull(),

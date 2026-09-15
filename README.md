@@ -60,6 +60,7 @@ npm run dev            # http://localhost:3000
 | `npm run db:migrate` / `db:migrate:prod` | Apply migrations to local / production |
 | `npm run db:seed` / `db:seed:prod` | Load the exercise library |
 | `npm run exercises:import` | Re-import the library from free-exercise-db |
+| `npm run user:role -- <email> admin` / `user:role:prod` | Grant (or with `user`, revoke) access to `/admin` |
 
 ## Testing offline
 

@@ -113,6 +113,24 @@ service worker ends up serving pre-edit code offline while the online page looks
 `NEXT_PUBLIC_SW_IN_DEV=true` registers the worker in dev in network-first mode, but a production
 build is the only honest test.
 
+## Admin
+
+`/admin` lists every account and `/admin/users/[id]` shows one account's programme, workouts,
+recent sessions with their sets, bodyweight and own exercises. It is read-only.
+
+- **Server-rendered, on purpose.** The panel is used at a desk, so it is the one place that reads
+  from the server instead of Dexie. It never writes to IndexedDB or the outbox, and `public/sw.js`
+  skips `/admin` so other people's data never lands in a device cache (sign-out does not clear
+  caches).
+- **`users.role` is the only switch** (`user` | `admin`). Every function in `lib/admin.ts` checks it
+  against the database before reading anything, so a role change applies on the next request with
+  no sign-out, and a check does not depend on the layout re-rendering. Anyone who is not an admin
+  gets a 404.
+- **Sync never reads the role.** An admin's `/api/sync` is filtered on their own `userId` like
+  everyone else's, so an admin's phone holds only their own log.
+- **No admin in code or seed data.** Grant it from the command line:
+  `npm run user:role -- <email> admin` (or `user:role:prod`).
+
 ## Why no CRDTs
 
 A training log is not collaborative text. Rows are small and independently addressable, ids for

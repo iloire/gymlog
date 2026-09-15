@@ -9,6 +9,7 @@
  *   so a navigation still resolves with no signal.
  * - /api/* is never cached. The sync engine already treats a failed request as
  *   "still offline", and a stale cached sync response would be a lie.
+ * - /admin is never cached either: it shows other people's data.
  *
  * Note `ignoreSearch` on the navigation fallback: /session?id=… caches one
  * document that then serves every session, including ones first opened offline.
@@ -51,6 +52,9 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url)
   if (url.origin !== self.location.origin) return
   if (url.pathname.startsWith('/api/')) return
+  // Other people's accounts must never land in this device's cache, and sign
+  // out does not clear it. The panel is online-only anyway.
+  if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) return
 
   if (IMMUTABLE.some((pattern) => pattern.test(url.pathname))) {
     event.respondWith(cacheFirst(request, ASSETS))

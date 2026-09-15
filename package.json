@@ -16,6 +16,8 @@
     "db:seed": "dotenv -e .env.local -- tsx db/seed.ts",
     "db:seed:prod": "dotenv -e .env.prod -- tsx db/seed.ts",
     "db:studio": "dotenv -e .env.local -- drizzle-kit studio",
+    "user:role": "dotenv -e .env.local -- tsx scripts/set-role.ts",
+    "user:role:prod": "dotenv -e .env.prod -- tsx scripts/set-role.ts",
     "exercises:import": "tsx scripts/import-exercises.ts"
   },
   "dependencies": {

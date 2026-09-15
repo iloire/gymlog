@@ -20,6 +20,10 @@ Every screen renders off Dexie (`lib/db/dexie.ts`) via `useLiveQuery`. The sync 
 
 A write goes to Dexie and the outbox in **one transaction** — never one without the other.
 
+The one exception is `/admin`, a desk-only, server-rendered view of every account. It reads only
+through `lib/admin.ts`, which checks `users.role` in the database on every call. Sync must never
+look at the role, and the service worker must never cache `/admin`.
+
 ### 2. Multi-tenant from day zero
 
 One user today, other people tomorrow, and no migration in between.
@@ -59,6 +63,7 @@ npm run db:generate      # new migration from db/schema.ts
 npm run db:migrate       # apply to .env.local target
 npm run db:seed
 npm run exercises:import # re-import the public-domain exercise library
+npm run user:role -- <email> <user|admin>   # grant/revoke admin (user:role:prod for prod)
 ```
 
 Next 16 renamed `middleware.ts` to `proxy.ts` — route protection lives in `proxy.ts`.
