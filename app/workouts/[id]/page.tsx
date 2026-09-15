@@ -6,19 +6,23 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { ExerciseFrames } from '@/components/exercise-frames'
 import { ExercisePicker } from '@/components/exercise-picker'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { getDb, type LocalTemplateItem } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
 import { newId } from '@/lib/id'
-import { templateItems } from '@/lib/queries'
+import { activeProgram, templateItems } from '@/lib/queries'
+
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 export default function WorkoutEditorPage() {
   const userId = useUserId()
   const router = useRouter()
   const { id } = useParams<{ id: string }>()
   const [picking, setPicking] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const data = useLiveQuery(async () => {
     if (!userId) return null
@@ -28,19 +32,33 @@ export default function WorkoutEditorPage() {
 
     const items = await templateItems(userId, id)
     const named = await Promise.all(
-      items.map(async (item) => ({
-        ...item,
-        exerciseName: (await db.exercises.get(item.exerciseId))?.name ?? 'Exercise',
-      })),
+      items.map(async (item) => {
+        const exercise = await db.exercises.get(item.exerciseId)
+        return {
+          ...item,
+          exerciseName: exercise?.name ?? 'Exercise',
+          exerciseImages: exercise?.images ?? null,
+        }
+      }),
     )
-    return { template, items: named }
+    // Weekdays in the active programme that run this workout, so deleting it
+    // says what else goes with it.
+    const program = await activeProgram(userId)
+    const scheduledOn = program
+      ? (await db.programDays.where('programId').equals(program.id).toArray())
+          .filter((day) => day.deletedAt === null && day.templateId === id)
+          .map((day) => day.dayOfWeek)
+          .sort()
+      : []
+
+    return { template, items: named, scheduledOn }
   }, [userId, id])
 
   if (!userId || !data) {
     return <main className="p-6 text-ink-dim">Loading…</main>
   }
 
-  const { template, items } = data
+  const { template, items, scheduledOn } = data
 
   async function update(item: LocalTemplateItem, changes: Partial<LocalTemplateItem>) {
     await writeRow(userId!, 'templateItems', { ...item, ...changes })
@@ -96,7 +114,14 @@ export default function WorkoutEditorPage() {
           {items.map((item, index) => (
             <li key={item.id} className="rounded-md border border-line bg-surface p-4">
               <div className="flex items-start justify-between gap-3">
-                <span className="text-[15px]">{item.exerciseName}</span>
+                <Link href={`/exercises/${item.exerciseId}`} className="flex min-w-0 items-center gap-3">
+                  <ExerciseFrames
+                    exercise={{ name: item.exerciseName, images: item.exerciseImages }}
+                    className="aspect-[3/2] w-20 shrink-0"
+                    animate={false}
+                  />
+                  <span className="text-[15px]">{item.exerciseName}</span>
+                </Link>
                 <div className="flex shrink-0 gap-1 text-ink-dim">
                   <button
                     type="button"
@@ -168,16 +193,50 @@ export default function WorkoutEditorPage() {
           Add exercise
         </button>
 
-        <button
-          type="button"
-          onClick={async () => {
-            await deleteRow(userId, 'workoutTemplates', id)
-            router.push('/workouts')
-          }}
-          className="mt-3 h-12 w-full rounded-md border border-line text-sm text-ink-dim"
-        >
-          Delete workout
-        </button>
+        {confirmingDelete ? (
+          <div
+            role="alertdialog"
+            aria-labelledby="delete-workout-title"
+            className="mt-3 rounded-md border border-plate-red p-4"
+          >
+            <p id="delete-workout-title" className="text-[15px]">
+              Delete “{template.name}”?
+            </p>
+            {scheduledOn.length > 0 && (
+              <p className="mt-1 text-sm text-ink-dim">
+                It is on your programme for {scheduledOn.map((day) => WEEKDAYS[day]).join(', ')}.
+              </p>
+            )}
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                autoFocus
+                onClick={() => setConfirmingDelete(false)}
+                className="h-12 rounded-md border border-line text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  await deleteRow(userId, 'workoutTemplates', id)
+                  router.push('/workouts')
+                }}
+                className="h-12 rounded-md bg-plate-red text-sm font-semibold text-white"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmingDelete(true)}
+            className="mt-3 h-12 w-full rounded-md border border-line text-sm text-ink-dim"
+          >
+            Delete workout
+          </button>
+        )}
       </main>
       <Nav />
     </>

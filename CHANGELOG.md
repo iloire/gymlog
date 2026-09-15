@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-15 13:28
+
+- Deleting a workout asks for confirmation first, naming the workout and the programme days that
+  run it.
+- Exercise cards in the workout editor show the exercise's photo (uncropped, 3:2) and link to the
+  exercise page.
+
 ## 2026-09-15 14:12
 
 - Admin panel at `/admin`: every account with a 12-week training strip, workouts, sets, last
