@@ -132,7 +132,8 @@
    The plate code. Colours are taken from competition plates and keep the
    meaning they have in the sport: blue = the action, red = you beat last
    time, yellow = rest running. See docs/design-system.md.
-   This app is dark-only and deliberately so — it is read in a gym at night. */
+   Dark is the default — it is read in a gym at night. Light is a per-device
+   choice on the profile page; lib/theme.ts puts `light` on <html>. */
 
 :root,
 .dark {
@@ -170,6 +171,18 @@
   --radius: 0.5rem;
 }
 
+/* Same plate code on chalk instead of rubber. Only the neutrals flip; yellow
+   darkens to ochre because #f2c300 on a light ground is unreadable as text. */
+:root.light {
+  --ground: #eef1f4;
+  --surface: #ffffff;
+  --surface-high: #e2e7ec;
+  --line: #d2d9e0;
+  --ink: #12171c;
+  --ink-dim: #5a6773;
+  --plate-yellow: #b38600;
+}
+
 @theme inline {
   --color-ground: var(--ground);
   --color-surface: var(--surface);
@@ -187,6 +200,13 @@
 @layer base {
   html {
     color-scheme: dark;
+  }
+
+  html.light {
+    color-scheme: light;
+  }
+
+  html {
     /* Never bounce-scroll a screen someone is tapping mid-set. */
     overscroll-behavior-y: none;
   }

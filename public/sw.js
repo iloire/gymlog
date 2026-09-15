@@ -29,7 +29,7 @@ const IMMUTABLE = DEV ? [/^\/exercise-media\//] : [/^\/_next\/static\//, /^\/exe
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(PAGES).then((cache) => cache.addAll(['/', '/session', '/exercises', '/weight'])),
+    caches.open(PAGES).then((cache) => cache.addAll(['/', '/session', '/exercises', '/weight', '/profile'])),
   )
   self.skipWaiting()
 })

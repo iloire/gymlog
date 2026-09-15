@@ -22,6 +22,27 @@ meaning from the sport rather than from UI convention.
 | `--plate-red` | `#D22630` | The 25 kg plate. **You beat last time.** Never used for errors |
 | `--plate-yellow` | `#F2C300` | The 15 kg plate. **Rest running** |
 
+### Light theme
+
+Dark is the default. Light is a per-device choice on the profile page (Dark / Light / System),
+stored in `localStorage` and never synced — the same person wants dark on the phone at the gym and
+light on a laptop. `lib/theme.ts` holds an inline `<head>` script that puts `light` on `<html>`
+before first paint and follows the OS under System; `app/globals.css` overrides only the neutrals
+under `:root.light`:
+
+| Token | Light value |
+|---|---|
+| `--ground` | `#EEF1F4` |
+| `--surface` | `#FFFFFF` |
+| `--surface-high` | `#E2E7EC` |
+| `--line` | `#D2D9E0` |
+| `--ink` | `#12171C` |
+| `--ink-dim` | `#5A6773` |
+| `--plate-yellow` | `#B38600` — ochre, because `#F2C300` is unreadable as text on a light ground |
+
+Blue and red keep their values. Use the tokens (`text-ink`, `bg-ground`) rather than `text-white`,
+except for text sitting on a plate-coloured fill.
+
 Red means "heaviest", not "danger" — a destructive action gets a plain outline and a confirm, not
 a colour. Nothing is coloured for decoration.
 

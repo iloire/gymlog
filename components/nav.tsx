@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDays, Dumbbell, Library, ListChecks, Scale } from 'lucide-react'
+import { CalendarDays, Dumbbell, Library, ListChecks, Scale, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -10,6 +10,7 @@ const items = [
   { href: '/program', label: 'Week', icon: CalendarDays },
   { href: '/exercises', label: 'Exercises', icon: Library },
   { href: '/weight', label: 'Weight', icon: Scale },
+  { href: '/profile', label: 'Profile', icon: UserRound },
 ]
 
 export function Nav() {

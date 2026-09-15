@@ -85,7 +85,7 @@ export default function ExercisesPage() {
                   exerciseId={exercise.id}
                   exerciseName={exercise.name}
                   favorite={favorites.has(exercise.id)}
-                  className="absolute top-1.5 right-1.5 z-10 rounded-full bg-ground/70 p-2 text-white backdrop-blur-sm"
+                  className="absolute top-1.5 right-1.5 z-10 rounded-full bg-ground/70 p-2 text-ink backdrop-blur-sm"
                 />
               )}
               <Link href={`/exercises/${exercise.id}`} className="block">

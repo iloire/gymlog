@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-15 14:15
+
+- Profile page (`/profile`, new tab in the bottom nav) with your name and email, a theme picker —
+  Dark, Light or System — and sign out, which moves here from the Weight page along with the commit
+  SHA. The theme is saved per device and applied by an inline script before first paint, so there
+  is no dark flash; System follows the OS setting live. Light keeps the plate colours on a chalk
+  ground; yellow darkens to ochre so the rest timer stays readable.
+
 ## 2026-09-15 14:14
 
 - Session screen: the exercise's photos now head the screen, fading into the page under its name,

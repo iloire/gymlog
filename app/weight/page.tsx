@@ -6,10 +6,8 @@ import { useState } from 'react'
 
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
-import { SignOutButton } from '@/components/sign-out-button'
 import { WeightChart } from '@/components/weight-chart'
 import { deleteRow } from '@/lib/db/write'
-import { publicEnv } from '@/lib/env.public'
 import { bodyWeightSeries, today } from '@/lib/queries'
 import { recordBodyWeight } from '@/lib/sessions'
 import { bodyWeightId } from '@/lib/id'
@@ -114,13 +112,6 @@ export default function WeightPage() {
             ))}
           </ul>
         )}
-
-        <footer className="mt-10 border-t border-line pt-5">
-          <SignOutButton />
-          {publicEnv.commitSha && (
-            <p className="mt-4 text-center text-[11px] text-ink-dim">{publicEnv.commitSha}</p>
-          )}
-        </footer>
       </main>
       <Nav />
     </>

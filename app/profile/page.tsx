@@ -1,0 +1,43 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
+
+import { Nav } from '@/components/nav'
+import { SignOutButton } from '@/components/sign-out-button'
+import { ThemePicker } from '@/components/theme-picker'
+import { publicEnv } from '@/lib/env.public'
+
+export default function ProfilePage() {
+  // The session comes from the auth endpoint, so with no signal there is no
+  // name or email to show — the rest of the page works regardless.
+  const { data: session } = useSession()
+  const user = session?.user
+
+  return (
+    <>
+      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
+        <h1 className="figure text-4xl">Profile</h1>
+
+        {user && (
+          <section className="mt-6 border-y border-line py-4">
+            {user.name && <p className="text-lg font-semibold">{user.name}</p>}
+            {user.email && <p className="text-sm text-ink-dim">{user.email}</p>}
+          </section>
+        )}
+
+        <section className="mt-8">
+          <h2 className="mb-4 text-xl font-semibold">Appearance</h2>
+          <ThemePicker />
+        </section>
+
+        <footer className="mt-10 border-t border-line pt-5">
+          <SignOutButton />
+          {publicEnv.commitSha && (
+            <p className="mt-4 text-center text-[11px] text-ink-dim">{publicEnv.commitSha}</p>
+          )}
+        </footer>
+      </main>
+      <Nav />
+    </>
+  )
+}
