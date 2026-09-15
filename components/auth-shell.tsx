@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+import { AuthHero } from '@/components/auth-hero'
+
 export function AuthShell({
   title,
   error,
@@ -10,22 +12,32 @@ export function AuthShell({
   children: ReactNode
 }) {
   return (
-    <main className="flex min-h-dvh flex-col justify-center px-6 py-12">
-      <div className="mx-auto w-full max-w-sm">
-        <p className="figure text-5xl leading-none text-ink">gymlog</p>
-        <p className="mt-2 text-sm text-ink-dim">
-          Your programme, your numbers, signal or no signal.
-        </p>
-
-        <h1 className="mt-10 mb-6 text-xl font-semibold">{title}</h1>
-
-        {error && (
-          <p className="mb-5 border-l-2 border-plate-red bg-surface px-4 py-3 text-sm text-ink">
-            {error}
+    // Phone: the picture across the top with the wordmark on its lower edge and
+    // the form below. Desk: the picture fills the left, the form the right.
+    <main className="min-h-dvh lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+      <div className="relative h-[40dvh] min-h-60 lg:sticky lg:top-0 lg:h-dvh">
+        <AuthHero className="absolute inset-0" />
+        <div className="absolute inset-x-0 bottom-0 px-6 lg:px-14 lg:pb-14">
+          <p className="figure mx-auto max-w-sm text-6xl leading-none text-ink lg:mx-0 lg:max-w-none lg:text-9xl">
+            gymlog
           </p>
-        )}
+        </div>
+      </div>
 
-        {children}
+      <div className="flex flex-col justify-center px-6 pt-5 pb-12 lg:px-14 lg:py-12">
+        <div className="mx-auto w-full max-w-sm">
+          <p className="text-sm text-ink-dim">Your programme, your numbers, signal or no signal.</p>
+
+          <h1 className="mt-10 mb-6 text-xl font-semibold">{title}</h1>
+
+          {error && (
+            <p className="mb-5 border-l-2 border-plate-red bg-surface px-4 py-3 text-sm text-ink">
+              {error}
+            </p>
+          )}
+
+          {children}
+        </div>
       </div>
     </main>
   )

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-15 13:46
+
+- Sign in and sign up show a picture, picked at random from `data/login-images.json`: across the
+  top on a phone with the wordmark on its lower edge, filling the left half on a desk. Three
+  drawn stand-ins ship until photos replace them; `docs/login-images.md` has the art direction,
+  export spec and generator prompts.
+- `/auth-media/` is excluded from the proxy so signed-out visitors can load the pictures.
+
 ## 2026-09-15 13:45
 
 - Favourite exercises: a star on each card in the Exercises grid and on the exercise page, and a

@@ -1,0 +1,8 @@
+{
+  "$comment": "Pictures behind the sign in and sign up forms; one is picked at random per visit. Files live in public/auth-media/. `position` is the CSS object-position used when the picture is cropped. How to make and add one: docs/login-images.md.",
+  "images": [
+    { "src": "/auth-media/plate.webp", "position": "60% 55%" },
+    { "src": "/auth-media/loaded.webp", "position": "45% 60%" },
+    { "src": "/auth-media/knurl.webp", "position": "50% 50%" }
+  ]
+}

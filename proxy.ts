@@ -34,7 +34,8 @@ export default auth((req) => {
 export const config = {
   // Everything except Next internals, the auth endpoints, and static assets.
   // Exercise photos live under /exercise-media/ (not /exercises/, which is a route).
+  // /auth-media/ is the sign in picture, requested before anyone is signed in.
   matcher: [
-    '/((?!api/auth|_next/static|_next/image|exercise-media/|icons/|manifest.json|sw.js|favicon.ico).*)',
+    '/((?!api/auth|_next/static|_next/image|exercise-media/|auth-media/|icons/|manifest.json|sw.js|favicon.ico).*)',
   ],
 }
