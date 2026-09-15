@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.production
+
+.claude/
+docs/
+scripts/
+storybook-static/
