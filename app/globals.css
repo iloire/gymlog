@@ -129,14 +129,21 @@
   }
 }
 /* ---------------------------------------------------------------- gymlog
-   The plate code. Colours are taken from competition plates and keep the
-   meaning they have in the sport: blue = the action, red = you beat last
-   time, yellow = rest running. See docs/design-system.md.
-   Dark is the default — it is read in a gym at night. Light is a per-device
-   choice on the profile page; lib/theme.ts puts `light` on <html>. */
+   Four styles, each with a dark and a light version. Every style keeps the
+   three meanings from the sport: --plate-blue is the action, --plate-red is
+   "you beat last time", --plate-yellow is rest running. The names come from
+   Plate, the original style; in the others they are roles, not hues.
+   See docs/design-system.md.
 
+   lib/theme.ts puts `light` and `data-style` on <html>. Each block sets every
+   token, so a later block never inherits half of an earlier one. The same
+   selectors work on any element, which is how the profile page previews a
+   style inside another. */
+
+/* Plate — competition plate colours on graphite. Dark is the default: it is
+   read in a gym at night. */
 :root,
-.dark {
+[data-style='plate'] {
   --ground: #12171c;
   --surface: #1a2129;
   --surface-high: #222c36;
@@ -147,9 +154,146 @@
   --plate-blue-lift: #1a72d8;
   --plate-red: #d22630;
   --plate-yellow: #f2c300;
+  --radius: 0.5rem;
+  /* One family, two jobs: the width axis carries the difference between a
+     label and a number. */
+  --body-font: var(--font-archivo);
+  --body-width: 'wdth' 100;
+  --figure-font: var(--font-archivo);
+  --figure-weight: 700;
+  --figure-width: 'wdth' 112;
+  --figure-tracking: -0.02em;
+}
 
-  /* Map the shadcn surface tokens onto the plate palette so its components
-     inherit the theme instead of fighting it. */
+/* Same plate code on chalk instead of rubber. Only the neutrals flip; yellow
+   darkens to ochre because #f2c300 on a light ground is unreadable as text. */
+.light:root,
+.light [data-style='plate'] {
+  --ground: #eef1f4;
+  --surface: #ffffff;
+  --surface-high: #e2e7ec;
+  --line: #d2d9e0;
+  --ink: #12171c;
+  --ink-dim: #5a6773;
+  --plate-yellow: #b38600;
+}
+
+/* Whiteboard — the box's workout board: marker on gloss, chalk on slate in the
+   dark. Numbers are hand-written, the way the coach writes the weights up. */
+[data-style='whiteboard'] {
+  --ground: #1f2b27;
+  --surface: #27352f;
+  --surface-high: #2f3f39;
+  --line: #3d5048;
+  --ink: #eef1ea;
+  --ink-dim: #a0b1a8;
+  --plate-blue: #2c68b8;
+  --plate-blue-lift: #5192e6;
+  --plate-red: #d9463e;
+  --plate-yellow: #f0d65c;
+  --radius: 0.25rem;
+  --body-font: var(--font-archivo);
+  --body-width: 'wdth' 100;
+  --figure-font: var(--font-kalam);
+  --figure-weight: 700;
+  --figure-width: normal;
+  --figure-tracking: 0;
+}
+
+.light[data-style='whiteboard'],
+.light [data-style='whiteboard'] {
+  --ground: #f6f8f9;
+  --surface: #ffffff;
+  --surface-high: #e7ecef;
+  --line: #cfd8de;
+  --ink: #1b2230;
+  --ink-dim: #5f6b78;
+  --plate-blue: #1d5fc4;
+  --plate-blue-lift: #2f74dc;
+  --plate-red: #cf2f28;
+  --plate-yellow: #12834f;
+}
+
+/* Iron — an old barbell club: cast iron, bone-white type, enamel green on the
+   machines, safety amber. Tall condensed figures and no rounded corners. */
+[data-style='iron'] {
+  --ground: #1a1917;
+  --surface: #23221f;
+  --surface-high: #2d2b27;
+  --line: #3b3833;
+  --ink: #ece6da;
+  --ink-dim: #9d968a;
+  --plate-blue: #2b6e4c;
+  --plate-blue-lift: #3f9468;
+  --plate-red: #c0392b;
+  --plate-yellow: #e8a317;
+  --radius: 0rem;
+  /* Big Shoulders is too narrow to read small at arm's length, so labels use
+     Archivo pulled in to a semi-condensed width that sits beside it. */
+  --body-font: var(--font-archivo);
+  --body-width: 'wdth' 85;
+  --figure-font: var(--font-big-shoulders);
+  --figure-weight: 800;
+  --figure-width: normal;
+  --figure-tracking: 0.01em;
+}
+
+.light[data-style='iron'],
+.light [data-style='iron'] {
+  --ground: #e2e0db;
+  --surface: #f2f0eb;
+  --surface-high: #d5d2cb;
+  --line: #bdb8af;
+  --ink: #1d1b18;
+  --ink-dim: #605b53;
+  --plate-blue: #256344;
+  --plate-blue-lift: #2f7a54;
+  --plate-red: #a93226;
+  --plate-yellow: #9c6400;
+}
+
+/* Studio — soft and rounded, for a calmer screen: indigo, raspberry and amber
+   on lavender grey, with a round-terminal face. */
+[data-style='studio'] {
+  --ground: #191a2b;
+  --surface: #212338;
+  --surface-high: #2a2c44;
+  --line: #363955;
+  --ink: #ecebf7;
+  --ink-dim: #9d9ebb;
+  --plate-blue: #5452d0;
+  --plate-blue-lift: #7b79f0;
+  --plate-red: #d9507f;
+  --plate-yellow: #f0b43c;
+  --radius: 1rem;
+  --body-font: var(--font-nunito);
+  --body-width: normal;
+  --figure-font: var(--font-nunito);
+  --figure-weight: 800;
+  --figure-width: normal;
+  --figure-tracking: -0.01em;
+}
+
+.light[data-style='studio'],
+.light [data-style='studio'] {
+  --ground: #f1f0f7;
+  --surface: #fdfcff;
+  --surface-high: #e4e2f0;
+  --line: #d3d1e3;
+  --ink: #1f1e33;
+  --ink-dim: #62617d;
+  --plate-blue: #4f4cc9;
+  --plate-blue-lift: #5f5cdb;
+  --plate-red: #c43a6e;
+  --plate-yellow: #a86a00;
+}
+
+/* Map the shadcn surface tokens onto the palette so its components inherit
+   the theme instead of fighting it. Declared wherever a style is, because a
+   custom property resolves its var() where it is set. */
+:root,
+.dark,
+[data-style] {
   --background: var(--ground);
   --foreground: var(--ink);
   --card: var(--surface);
@@ -168,19 +312,6 @@
   --border: var(--line);
   --input: var(--line);
   --ring: var(--plate-blue-lift);
-  --radius: 0.5rem;
-}
-
-/* Same plate code on chalk instead of rubber. Only the neutrals flip; yellow
-   darkens to ochre because #f2c300 on a light ground is unreadable as text. */
-:root.light {
-  --ground: #eef1f4;
-  --surface: #ffffff;
-  --surface-high: #e2e7ec;
-  --line: #d2d9e0;
-  --ink: #12171c;
-  --ink-dim: #5a6773;
-  --plate-yellow: #b38600;
 }
 
 @theme inline {
@@ -194,7 +325,7 @@
   --color-plate-blue-lift: var(--plate-blue-lift);
   --color-plate-red: var(--plate-red);
   --color-plate-yellow: var(--plate-yellow);
-  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--body-font), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -214,16 +345,17 @@
   body {
     background: var(--ground);
     color: var(--ink);
-    font-variation-settings: 'wdth' 100;
+    font-variation-settings: var(--body-width);
   }
 
-  /* Weights and reps are the content of this app, so they get the expanded,
-     signage-like cut of Archivo and always line up in a column. */
+  /* Weights and reps are the content of this app, so they get each style's
+     display cut and always line up in a column. */
   .figure {
-    font-variation-settings: 'wdth' 112;
-    font-weight: 700;
+    font-family: var(--figure-font), ui-sans-serif, system-ui, sans-serif;
+    font-variation-settings: var(--figure-width);
+    font-weight: var(--figure-weight);
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
+    letter-spacing: var(--figure-tracking);
   }
 
   /* Big enough that iOS never zooms the viewport on focus. */

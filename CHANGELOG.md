@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-15 18:16
+
+- Four styles on **Profile → Appearance**, each with a dark and a light version, chosen alongside
+  Dark / Light / System and previewed in their own colours and type: **Plate** (the original
+  competition-plate look), **Whiteboard** (marker on the box's board, chalk on slate in the dark,
+  hand-written figures in Kalam), **Iron** (cast iron, enamel green and safety amber, tall Big
+  Shoulders figures, square corners) and **Studio** (indigo and raspberry, Nunito, rounded).
+  Saved per device like the theme; the extra faces download only when a style uses them.
+
 ## 2026-09-15 17:53
 
 - API access for LLMs (**Profile → API access**, `/profile/api`): create a token, choosing **Read

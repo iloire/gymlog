@@ -28,7 +28,7 @@ Dark is the default. Light is a per-device choice on the profile page (Dark / Li
 stored in `localStorage` and never synced — the same person wants dark on the phone at the gym and
 light on a laptop. `lib/theme.ts` holds an inline `<head>` script that puts `light` on `<html>`
 before first paint and follows the OS under System; `app/globals.css` overrides only the neutrals
-under `:root.light`:
+under `.light`:
 
 | Token | Light value |
 |---|---|
@@ -46,9 +46,40 @@ except for text sitting on a plate-coloured fill.
 Red means "heaviest", not "danger" — a destructive action gets a plain outline and a confirm, not
 a colour. Nothing is coloured for decoration.
 
+## Styles
+
+Plate is one of four styles, picked on the profile page next to the mode and stored per device
+(`gymlog:style`). The theme script sets `data-style` on `<html>`; each style is a block in
+`app/globals.css` for dark and one for `.light`, setting every token so no style inherits half of
+another. The picker previews each style by putting `data-style` on its own tile.
+
+A style may change the palette, the typefaces and the corner radius — nothing else. Every style
+keeps the three meanings, so the token names stay those of Plate and act as roles elsewhere:
+`--plate-blue` is the action, `--plate-red` "you beat last time" (and, in practice, a destructive
+fill with white text, so it must stay a dark enough red), `--plate-yellow` rest running.
+
+| Style | Idea | Action / beat / rest (dark) | Figures | Body | Radius |
+|---|---|---|---|---|---|
+| Plate | Competition plates on graphite | `#0057B8` / `#D22630` / `#F2C300` | Archivo `wdth 112` | Archivo | `0.5rem` |
+| Whiteboard | The box's workout board; chalk on slate in dark | `#2C68B8` / `#D9463E` / `#F0D65C` | Kalam 700 | Archivo | `0.25rem` |
+| Iron | An old barbell club: cast iron and enamel | `#2B6E4C` / `#C0392B` / `#E8A317` | Big Shoulders 800 | Archivo `wdth 85` | `0` |
+| Studio | Soft and calm | `#5452D0` / `#D9507F` / `#F0B43C` | Nunito 800 | Nunito | `1rem` |
+
+Type is set through tokens rather than classes: `--body-font` and `--body-width` for everything,
+and `--figure-font`, `--figure-weight`, `--figure-width`, `--figure-tracking` for `.figure`.
+Iron's body is Archivo rather than Big Shoulders because the condensed face is unreadable at label
+sizes. Only Archivo is preloaded; the other faces download the first time a style uses them and
+the service worker caches them from then on, so a style first picked with no signal shows a
+system fallback until the next time online.
+
+To add a style: a dark and a `.light` block in `globals.css`, its name in `STYLES` and its two
+grounds in `THEME_COLORS` (`lib/theme.ts`), a tile in `components/theme-picker.tsx`, and any new
+face loaded with `preload: false` in `app/layout.tsx`.
+
 ## Type
 
-**Archivo** (variable), one family, doing two jobs through its width axis:
+In Plate, **Archivo** (variable), one family, doing two jobs through its width axis (other styles
+swap the faces, see Styles; the rules below hold for all of them):
 
 - **Figures** — `wdth 112`, `wght 700`, tabular, tight tracking. Weights and reps are the content,
   so they get the expanded, signage-like cut and the largest sizes on the screen.

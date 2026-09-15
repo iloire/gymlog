@@ -3,44 +3,105 @@
 import { Moon, Sun, SunMoon } from 'lucide-react'
 import { useSyncExternalStore } from 'react'
 
-import { readTheme, setTheme, subscribeTheme, type Theme } from '@/lib/theme'
+import {
+  readStyle,
+  readTheme,
+  setStyle,
+  setTheme,
+  subscribeTheme,
+  type Style,
+  type Theme,
+} from '@/lib/theme'
 
-const options: { value: Theme; label: string; icon: typeof Sun }[] = [
+const modes: { value: Theme; label: string; icon: typeof Sun }[] = [
   { value: 'dark', label: 'Dark', icon: Moon },
   { value: 'light', label: 'Light', icon: Sun },
   { value: 'system', label: 'System', icon: SunMoon },
 ]
 
+const styles: { value: Style; label: string; description: string }[] = [
+  { value: 'plate', label: 'Plate', description: 'Competition plate colours' },
+  { value: 'whiteboard', label: 'Whiteboard', description: 'Marker on the box board' },
+  { value: 'iron', label: 'Iron', description: 'Cast iron, square and tall' },
+  { value: 'studio', label: 'Studio', description: 'Soft and rounded' },
+]
+
+const option =
+  'cursor-pointer rounded-md border border-line bg-surface text-sm text-ink-dim has-checked:border-plate-blue-lift has-checked:text-ink has-focus-visible:ring-2 has-focus-visible:ring-ring'
+
 export function ThemePicker() {
   // The stored choice exists only in the browser; the server snapshot is null,
   // so nothing is marked selected until hydration rather than the wrong option.
   const theme = useSyncExternalStore(subscribeTheme, readTheme, () => null)
+  const style = useSyncExternalStore(subscribeTheme, readStyle, () => null)
 
   return (
-    <fieldset>
-      <legend className="mb-2 text-sm text-ink-dim">Theme</legend>
-      <div className="grid grid-cols-3 gap-2">
-        {options.map(({ value, label, icon: Icon }) => (
-          <label
-            key={value}
-            className="flex h-16 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-line bg-surface text-sm text-ink-dim has-checked:border-plate-blue-lift has-checked:text-ink has-focus-visible:ring-2 has-focus-visible:ring-ring"
-          >
-            <input
-              type="radio"
-              name="theme"
-              value={value}
-              checked={theme === value}
-              onChange={() => setTheme(value)}
-              className="sr-only"
-            />
-            <Icon size={20} aria-hidden />
-            {label}
-          </label>
-        ))}
-      </div>
-      <p className="mt-2 text-xs text-ink-dim">
-        Saved on this device only. System follows your phone&apos;s setting.
-      </p>
-    </fieldset>
+    <div className="space-y-6">
+      <fieldset>
+        <legend className="mb-2 text-sm text-ink-dim">Style</legend>
+        <div className="grid grid-cols-2 gap-2">
+          {styles.map(({ value, label, description }) => (
+            <label key={value} className={`${option} flex flex-col overflow-hidden`}>
+              <input
+                type="radio"
+                name="style"
+                value={value}
+                checked={style === value}
+                onChange={() => setStyle(value)}
+                className="sr-only"
+              />
+              <StylePreview style={value} />
+              <span className="px-3 pt-2 font-semibold text-ink">{label}</span>
+              <span className="px-3 pb-2.5 text-xs">{description}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend className="mb-2 text-sm text-ink-dim">Theme</legend>
+        <div className="grid grid-cols-3 gap-2">
+          {modes.map(({ value, label, icon: Icon }) => (
+            <label key={value} className={`${option} flex h-16 flex-col items-center justify-center gap-1`}>
+              <input
+                type="radio"
+                name="theme"
+                value={value}
+                checked={theme === value}
+                onChange={() => setTheme(value)}
+                className="sr-only"
+              />
+              <Icon size={20} aria-hidden />
+              {label}
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-ink-dim">
+          Saved on this device only. System follows your phone&apos;s setting.
+        </p>
+      </fieldset>
+    </div>
+  )
+}
+
+/**
+ * A set as the session screen shows it, drawn in the style itself: the
+ * `data-style` attribute scopes that style's tokens to this box, in whichever
+ * mode is current.
+ */
+function StylePreview({ style }: { style: Style }) {
+  return (
+    <span data-style={style} aria-hidden className="block bg-ground px-3 pt-3 pb-2.5 font-sans text-ink">
+      <span className="figure block text-3xl leading-none">
+        100<span className="ml-1 text-sm text-ink-dim">kg</span>
+      </span>
+      <span className="mt-2.5 flex items-center gap-1">
+        <span className="size-3.5 rounded-sm bg-plate-blue" />
+        <span className="size-3.5 rounded-sm bg-plate-blue" />
+        <span className="size-3.5 rounded-sm border-2 border-plate-red" />
+        <span className="size-3.5 rounded-sm border border-line" />
+      </span>
+      <span className="mt-2.5 block h-1 w-2/3 bg-plate-yellow" />
+    </span>
   )
 }
