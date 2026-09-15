@@ -59,7 +59,7 @@ export default function ExercisesPage() {
           />
         </div>
 
-        <div className="-mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-1">
+        <div className="-mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
           <button
             type="button"
             onClick={() => setMuscle(null)}

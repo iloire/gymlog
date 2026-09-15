@@ -24,7 +24,7 @@ export function Stepper({
   const current = value ?? 0
 
   return (
-    <div className="flex-1">
+    <div className="w-full">
       <div className="mb-1.5 flex items-baseline gap-1.5">
         <span className="text-sm text-ink-dim">{label}</span>
         {unit && <span className="text-xs text-ink-dim">{unit}</span>}
@@ -35,7 +35,7 @@ export function Stepper({
           type="button"
           aria-label={`Decrease ${label}`}
           onClick={() => onChange(Math.max(min, current - step))}
-          className="flex w-14 shrink-0 items-center justify-center text-ink-dim active:bg-surface-high"
+          className="flex w-16 shrink-0 items-center justify-center text-ink-dim active:bg-surface-high"
         >
           <Minus size={20} aria-hidden />
         </button>
@@ -49,14 +49,14 @@ export function Stepper({
             const next = Number(event.target.value.replace(',', '.'))
             if (Number.isFinite(next)) onChange(next)
           }}
-          className="figure h-16 w-full min-w-0 bg-transparent text-center text-3xl outline-none"
+          className="figure h-16 w-full min-w-0 bg-transparent text-center text-4xl outline-none"
         />
 
         <button
           type="button"
           aria-label={`Increase ${label}`}
           onClick={() => onChange(current + step)}
-          className="flex w-14 shrink-0 items-center justify-center text-ink-dim active:bg-surface-high"
+          className="flex w-16 shrink-0 items-center justify-center text-ink-dim active:bg-surface-high"
         >
           <Plus size={20} aria-hidden />
         </button>

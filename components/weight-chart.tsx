@@ -13,14 +13,16 @@ type Entry = { measuredOn: string; weightKg: number; rolling: number }
 export function WeightChart({ series }: { series: Entry[] }) {
   const width = 100
   const height = 34
+  // Inset so dots on the first and last day are not clipped by the SVG edge.
+  const inset = 1.5
 
   const values = series.flatMap((entry) => [entry.weightKg, entry.rolling])
   const min = Math.min(...values)
   const max = Math.max(...values)
   const span = max - min || 1
 
-  const x = (index: number) => (index / Math.max(1, series.length - 1)) * width
-  const y = (value: number) => height - ((value - min) / span) * height
+  const x = (index: number) => inset + (index / Math.max(1, series.length - 1)) * (width - inset * 2)
+  const y = (value: number) => inset + (1 - (value - min) / span) * (height - inset * 2)
 
   const path = series
     .map((entry, index) => `${index === 0 ? 'M' : 'L'}${x(index).toFixed(2)},${y(entry.rolling).toFixed(2)}`)

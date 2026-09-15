@@ -62,7 +62,7 @@ export function ExercisePicker({
         </button>
       </header>
 
-      <div className="flex gap-2 overflow-x-auto border-b border-line px-4 py-3">
+      <div className="flex gap-2 overflow-x-auto border-b border-line px-4 py-3 [scrollbar-width:none]">
         <button
           type="button"
           onClick={() => setMuscle(null)}

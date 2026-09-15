@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense, useCallback, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 import { RestTimer } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
@@ -72,19 +72,24 @@ function Session() {
   // The first set with nothing logged is the one you're about to do.
   const activeSet = groupLogs.find((log) => log.completedAt === null) ?? groupLogs.at(-1)
 
-  // Prefill from last time for this exact set number — the single most useful
-  // number in the app. Falls back to the prescription, then to the set before.
-  const suggestion = useCallback(
-    (log: LocalSetLog) => {
-      const lastSame = previous?.sets.find((set) => set.setIndex === log.setIndex)
-      const lastAny = previous?.sets.at(-1)
-      return {
-        weightKg: log.weightKg ?? lastSame?.weightKg ?? lastAny?.weightKg ?? log.targetWeightKg,
-        reps: log.reps ?? log.targetReps ?? lastSame?.reps ?? null,
-      }
-    },
-    [previous],
-  )
+  // What to put in the steppers for a set, most specific first:
+  //   1. what you already logged for this set (editing it),
+  //   2. the set you just did in this session — after two sets at 77.5 kg the
+  //      third should say 77.5, not last week's number,
+  //   3. the same set number last time, then any set last time,
+  //   4. the prescription.
+  function suggestion(log: LocalSetLog) {
+    const justDone = groupLogs
+      .filter((set) => set.completedAt !== null && set.setIndex < log.setIndex)
+      .at(-1)
+    const lastSame = previous?.sets.find((set) => set.setIndex === log.setIndex)
+    const lastAny = previous?.sets.at(-1)
+    return {
+      weightKg:
+        log.weightKg ?? justDone?.weightKg ?? lastSame?.weightKg ?? lastAny?.weightKg ?? log.targetWeightKg,
+      reps: log.reps ?? log.targetReps ?? justDone?.reps ?? lastSame?.reps ?? null,
+    }
+  }
 
   if (!userId || !data) {
     return <main className="p-6 text-ink-dim">Loading…</main>
@@ -143,7 +148,9 @@ function Session() {
 
         {activeSet ? (
           <section className="mt-8">
-            <div className="flex items-end gap-3">
+            {/* Stacked, not side by side: two steppers across a phone leave ~58px for
+                the number, which truncates 77.5 and anything over 100 kg. */}
+            <div className="flex flex-col gap-4">
               <Stepper
                 label="Weight"
                 unit="kg"
