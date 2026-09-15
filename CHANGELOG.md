@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-15 14:10
+
+- Deployed to Vercel at https://gymlog-pi-eosin.vercel.app on a Turso production database, and
+  verified there end to end: signed up, logged a workout offline, reconnected, and every set
+  reached production exactly once.
+- Fixed: a push containing a row ahead of the row it references (sets before their session, after
+  logging offline and then tapping Finish) failed as a whole, stalling that user's sync for good.
+  The server now applies parents first and rejects a genuinely orphaned row as `invalid`.
+- Fixed: deterministic ids joined their parts with `|`, so different inputs could share an id.
+  They now hash a JSON-encoded name. Changed while production held no rows built on them.
+- Fixed: the weight on the gym screen was truncated ("77.!") because two steppers shared a phone's
+  width; they now stack. The next set prefills from the set you just did, not last week's number.
+- Fixed: the first Vercel build failed because typechecking ran before Next generated its route
+  types; it only passed locally thanks to a stale `.next` folder.
+- 113 unit tests, run by GitHub Actions on every push and pull request. The workflow then waits
+  for Vercel's result for the same commit and smoke-tests production, so the README badge is green
+  only when tests, build and deploy all succeed.
+- README with screenshots and the CI badge.
+
 ## 2026-09-15 13:20
 
 - The app works with no signal. Verified on a production build: with the network off, the home

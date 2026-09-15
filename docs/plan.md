@@ -215,7 +215,8 @@ Each phase ends in a working app and one commit.
 0. ~~**Scaffold** — Next 16 + Tailwind v4 + shadcn, `lib/env.ts`/`env.public.ts`, Drizzle+Turso,
    NextAuth credentials + `proxy.ts` (Next 16 renamed `middleware.ts`), `.vercelignore`, SHA
    footer, `CLAUDE.md`, `docs/{architecture,design-system,env}.md`, `CHANGELOG.md`.~~ ✅
-   - [ ] Deploy to Vercel — needs a Turso database and Vercel project created first.
+   - ~~Deploy to Vercel~~ ✅ — https://gymlog-pi-eosin.vercel.app, Turso in `aws-eu-west-1`.
+   - ~~Unit tests in GitHub Actions, gating on the production deploy, with a README badge~~ ✅
 1. ~~**Exercise library** — import script, seed, `lib/db/dexie.ts` + `lib/sync/client.ts` +
    `app/api/sync/route.ts`, `/exercises` with the cross-fade.~~ ✅
 2. ~~**Templates + program + bodyweight** — `/workouts` editor, `/program` weekly grid, `/weight`.~~ ✅

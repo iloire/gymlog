@@ -52,14 +52,29 @@ Components never fetch. The sync engine is the only network caller, and it runs 
   from two devices is vanishingly rare and either answer is fine, so it wasn't worth a column on
   every table.) This is acceptable *only* because the conflict grain is one set, not one workout:
   two devices touching different sets both win.
-- **Rejections** come back as `stale` (a newer version is stored) or `forbidden` (the row belongs
-  to another user, or to the read-only global library). A forbidden rejection never echoes the
-  other user's row back.
+- **Rejections** come back as `stale` (a newer version is stored), `forbidden` (the row belongs to
+  another user, or to the read-only global library) or `invalid` (the database refused it, e.g. a
+  row referencing one that does not exist). A forbidden rejection never echoes the other user's
+  row back. Every rejection is final — the client drops it from the outbox — so one bad row can
+  never block the changes queued behind it.
+- **Parents first.** The server sorts each push into schema dependency order (`SYNC_TABLES`, which
+  a test keeps identical to `syncedTables` in `db/schema.ts`) before applying it. Turso enforces
+  foreign keys, and the client's order cannot be trusted: re-editing a row moves its outbox entry
+  to the back, so logging sets offline and then tapping Finish sends the session *after* its sets.
+  Before this, that push failed as a whole and the user's sync stalled for good.
 - **Clock offset**: the response carries `serverTime`; the client stores
   `clockOffset = serverTime - Date.now()` in `meta` and stamps every `updatedAt` as
   `Date.now() + clockOffset`. Without this a phone four minutes fast wins every conflict forever.
 - **Deletes** are ordinary upserts with `deletedAt` set, so the same rule decides delete-vs-edit.
 - `userId` is always taken from the JWT and overwritten on every incoming row.
+
+## Deterministic ids
+
+Sessions, set logs, weigh-ins and exercise notes hash their natural key into a UUIDv5
+(`lib/id.ts`), so two devices that create the same thing offline create the same row. The hashed
+name is a JSON array (`["session", userId, date, templateId]`), not delimiter-joined text, which
+would let `('a|b', 'c')` and `('a', 'b|c')` collide. **The namespace and this encoding are
+permanent** — changing either gives every existing row a new id.
 
 ## The outbox
 
