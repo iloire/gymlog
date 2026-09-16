@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-16 08:05
+
+- The exercise picker in the workout editor no longer puts its search box under the phone's
+  status bar when gymlog is installed on the home screen; it also clears the home indicator.
+
 ## 2026-09-16 07:55
 
 - **Weight moves off the bottom bar into Profile.** Seven tabs left each one cramped, and the

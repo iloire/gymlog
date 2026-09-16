@@ -52,7 +52,7 @@ export function ExercisePicker({
   )
 
   return (
-    <div className="fixed inset-0 z-20 flex flex-col bg-ground">
+    <div className="fixed inset-0 z-20 flex flex-col bg-ground pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <header className="flex items-center gap-3 border-b border-line px-4 py-3">
         <div className="flex h-12 flex-1 items-center gap-2 rounded-md border border-line bg-surface px-3">
           <Search size={18} className="text-ink-dim" aria-hidden />
