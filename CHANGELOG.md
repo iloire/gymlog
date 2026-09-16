@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-16 11:34
+
+- **Body-part badges on Workouts.** Each row on the Workouts list shows what the workout covers —
+  Legs, Back, Chest, Arms… — weighted by its planned sets, so Upper A and Lower B read apart at a
+  glance. Same `bodyParts()` and pills as Today.
+
 ## 2026-09-16 11:30
 
 - **No bodyweight box on Today.** The daily weigh-in prompt took space on the screen you open at the

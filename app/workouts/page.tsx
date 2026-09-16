@@ -4,8 +4,10 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 
+import { BodyPartBadges } from '@/components/body-part-badges'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
+import { bodyParts } from '@/lib/body-parts'
 import { getDb } from '@/lib/db/dexie'
 
 export default function WorkoutsPage() {
@@ -22,7 +24,10 @@ export default function WorkoutsPage() {
       templates.map(async (template) => {
         const items = (await db.templateItems.where('templateId').equals(template.id).toArray())
           .filter((item) => item.deletedAt === null)
-        return { ...template, exerciseCount: items.length }
+          .sort((a, b) => a.position - b.position)
+        const exercises = await db.exercises.bulkGet(items.map((item) => item.exerciseId))
+        const parts = bodyParts(items.map((item, index) => ({ exercise: exercises[index], sets: item.sets })))
+        return { ...template, exerciseCount: items.length, parts }
       }),
     )
   }, [userId])
@@ -39,9 +44,12 @@ export default function WorkoutsPage() {
           <ul className="mt-7 divide-y divide-line border-y border-line">
             {workouts.map((workout) => (
               <li key={workout.id}>
-                <Link href={`/workouts/${workout.id}`} className="flex items-baseline justify-between py-4">
-                  <span className="text-[15px]">{workout.name}</span>
-                  <span className="text-sm text-ink-dim">
+                <Link href={`/workouts/${workout.id}`} className="flex items-baseline justify-between gap-3 py-4">
+                  <div className="min-w-0">
+                    <span className="block text-[15px]">{workout.name}</span>
+                    <BodyPartBadges parts={workout.parts} className="mt-1.5" />
+                  </div>
+                  <span className="shrink-0 text-sm text-ink-dim">
                     {workout.exerciseCount} {workout.exerciseCount === 1 ? 'exercise' : 'exercises'}
                   </span>
                 </Link>
