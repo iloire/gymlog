@@ -58,6 +58,16 @@ describe('summariseSession', () => {
     ])
   })
 
+  it('carries the note on an exercise, even when its first set was not logged', () => {
+    const entry = summariseSession(session(), [
+      set({ exerciseId: 'Squat', setIndex: 1, notes: 'Close to my limit' }),
+      set({ exerciseId: 'Squat', setIndex: 2, weightKg: 100, reps: 3, completedAt: 1_000 }),
+      set({ exerciseId: 'Bench', position: 2, setIndex: 1, weightKg: 60, reps: 8, completedAt: 2_000 }),
+    ])
+
+    expect(entry.exercises.map((exercise) => exercise.notes)).toEqual(['Close to my limit', null])
+  })
+
   it('adds up cardio minutes apart from volume', () => {
     const entry = summariseSession(session(), [
       set({ exerciseId: 'Stairmaster', setIndex: 1, durationSec: 480, completedAt: 1_000 }),

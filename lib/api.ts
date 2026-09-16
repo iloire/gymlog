@@ -273,6 +273,7 @@ export async function apiHistory(userId: string, query: z.infer<typeof historyQu
         notes: row.notes,
         exercises: entry.exercises.map((exercise) => ({
           name: exercise.name,
+          notes: exercise.notes,
           sets: exercise.sets.map((set) => ({
             set: set.setIndex,
             weightKg: set.weightKg,

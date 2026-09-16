@@ -199,7 +199,11 @@ export function openApiSpec(origin: string) {
               description: 'Exercises in the order performed, each with its logged sets only.',
               items: {
                 type: 'object',
-                properties: { name: { type: 'string' }, sets: { type: 'array', items: ref('Set') } },
+                properties: {
+                  name: { type: 'string' },
+                  notes: { ...nullable('string'), description: 'The person’s own comment on this exercise that day — how it went, how close to their limit.' },
+                  sets: { type: 'array', items: ref('Set') },
+                },
               },
             },
           },

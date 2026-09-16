@@ -140,6 +140,7 @@ function SessionRow({ entry }: { entry: HistoryEntry }) {
                     </li>
                   ))}
                 </ol>
+                {exercise.notes && <p className="mt-0.5 text-sm italic text-ink-dim">“{exercise.notes}”</p>}
               </li>
             ))}
           </ul>

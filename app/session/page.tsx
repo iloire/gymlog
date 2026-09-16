@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
 import { ExerciseDialog } from '@/components/exercise-dialog'
+import { ExerciseNote } from '@/components/exercise-note'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { ExercisePicker } from '@/components/exercise-picker'
 import { RestTimer } from '@/components/rest-timer'
@@ -174,6 +175,8 @@ function Session() {
     goTo(index === -1 ? positions.length : index)
   }
 
+  const previousNote = previous?.sets.find((set) => set.notes)?.notes
+
   const allDone = data.logs.every((log) => log.completedAt !== null)
   const exerciseName = groupLogs[0]?.exerciseName ?? 'Workout'
   const nameAt = (index: number) =>
@@ -291,6 +294,7 @@ function Session() {
             'First time logging this one.'
           )}
         </p>
+        {previousNote && <p className="mt-1 text-sm italic text-ink-dim">“{previousNote}”</p>}
 
         <SetSquares
           logs={groupLogs}
@@ -360,6 +364,8 @@ function Session() {
                 Undo this set
               </button>
             )}
+
+            {groupLogs[0] && <ExerciseNote key={groupLogs[0].id} userId={userId} log={groupLogs[0]} />}
           </section>
         ) : (
           <p className="mt-8 text-ink-dim">This workout has no exercises yet.</p>

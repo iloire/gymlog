@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-16 09:45
+
+- **A note on an exercise, for that workout.** Under the log button on the gym screen a quiet
+  *Add a note* opens a small box for how it went — a grinder of a last rep, a weight close to your
+  limit. It shows under that exercise in History and on the exercise page, and the next time you do
+  the exercise it appears in quotes under *Last time*. `/api/v1` history returns it as the
+  exercise's `notes`.
+
 ## 2026-09-16 08:45
 
 - **Cardio, logged as time.** The library gains its 14 cardio machines and moves — Stairmaster,

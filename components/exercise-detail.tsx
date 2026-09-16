@@ -100,13 +100,16 @@ export function ExerciseDetail({
           <h2 className="mb-2 text-sm text-ink-dim">Your history</h2>
           <ul className="divide-y divide-line border-y border-line">
             {history.map((sets) => (
-              <li key={sets[0]?.id} className="flex items-baseline justify-between gap-4 py-3">
-                <span className="text-sm text-ink-dim">
-                  {new Date(sets[0]?.performedAt ?? 0).toLocaleDateString()}
+              <li key={sets[0]?.id} className="py-3">
+                <span className="flex items-baseline justify-between gap-4">
+                  <span className="text-sm text-ink-dim">
+                    {new Date(sets[0]?.performedAt ?? 0).toLocaleDateString()}
+                  </span>
+                  <span className="figure text-right text-[15px]">{sets.map(formatSet).join('  ')}</span>
                 </span>
-                <span className="figure text-right text-[15px]">
-                  {sets.map(formatSet).join('  ')}
-                </span>
+                {sets.find((set) => set.notes) && (
+                  <span className="mt-1 block text-sm italic text-ink-dim">“{sets.find((set) => set.notes)?.notes}”</span>
+                )}
               </li>
             ))}
           </ul>

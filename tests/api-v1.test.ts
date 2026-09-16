@@ -108,6 +108,7 @@ async function trainedSession(
     weightKg: number | null
     reps: number | null
     durationSec?: number
+    notes?: string
     isWarmup?: boolean
   }[],
 ) {
@@ -246,12 +247,13 @@ describe('GET /history', () => {
   it('reports cardio as minutes, apart from volume', async () => {
     await trainedSession(ALICE, 'a1', '2026-09-01', [
       { exerciseId: 'stairs', setIndex: 1, weightKg: null, reps: null, durationSec: 480 },
-      { exerciseId: 'squat', setIndex: 1, weightKg: 60, reps: 5 },
+      { exerciseId: 'squat', setIndex: 1, weightKg: 60, reps: 5, notes: 'Close to my limit' },
     ])
 
     const { body } = await get('/history', await tokenFor(ALICE))
 
     expect(body.sessions[0]).toMatchObject({ volumeKg: 300, cardioMin: 8 })
+    expect(body.sessions[0].exercises.map((e: { notes: string | null }) => e.notes)).toEqual([null, 'Close to my limit'])
     expect(body.sessions[0].exercises[0].sets[0]).toMatchObject({ durationSec: 480, reps: null })
   })
 

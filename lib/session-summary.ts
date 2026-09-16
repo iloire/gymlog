@@ -12,6 +12,8 @@ export type HistoryExercise = {
   name: string
   /** Logged sets only, in order. */
   sets: LocalSetLog[]
+  /** The note on this exercise in this session, kept on its first set log. */
+  notes: string | null
 }
 
 export type HistoryEntry = {
@@ -46,7 +48,11 @@ export function summariseSession(session: LocalSession, logs: LocalSetLog[]): Hi
   for (const log of done) {
     const last = exercises.at(-1)
     if (last?.exerciseId === log.exerciseId) last.sets.push(log)
-    else exercises.push({ exerciseId: log.exerciseId, name: log.exerciseName, sets: [log] })
+    else exercises.push({ exerciseId: log.exerciseId, name: log.exerciseName, sets: [log], notes: null })
+  }
+  // From every set, done or not: the note is on the first set, which may not have been logged.
+  for (const exercise of exercises) {
+    exercise.notes = ordered.find((log) => log.exerciseId === exercise.exerciseId && log.notes)?.notes ?? null
   }
 
   const times = done.map((log) => log.completedAt as number)

@@ -150,6 +150,22 @@ describe('logging sets', () => {
     expect(await getDb(USER).outbox.get(mutationKey('setLogs', set!.id))).toBeDefined()
   })
 
+  it('saves a note on the exercise without touching the set logged on the same row', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [set] = await logsFor(id)
+    await logSet(USER, set!, { weightKg: 100, reps: 3 })
+
+    // Exactly the write the note field makes.
+    await writeRow(USER, 'setLogs', { id: set!.id, notes: 'Close to my limit' })
+
+    expect(await getDb(USER).setLogs.get(set!.id)).toMatchObject({
+      weightKg: 100,
+      reps: 3,
+      completedAt: expect.any(Number),
+      notes: 'Close to my limit',
+    })
+  })
+
   it('undoes a set by clearing its completion but keeping the numbers', async () => {
     const id = await startSession(USER, 'tpl', null, DATE)
     const [set] = await logsFor(id)
