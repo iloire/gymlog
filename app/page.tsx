@@ -10,7 +10,6 @@ import { Nav } from '@/components/nav'
 import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
 import { SyncBadge } from '@/components/sync-badge'
-import { WeightPrompt } from '@/components/weight-prompt'
 import { bodyParts } from '@/lib/body-parts'
 import { getDb } from '@/lib/db/dexie'
 import { formatMinutes, kg } from '@/lib/format'
@@ -136,8 +135,6 @@ export default function TodayPage() {
               <WorkoutList templates={others} onStart={(id) => void start(id, null)} />
             </details>
           )}
-
-          <WeightPrompt />
         </main>
         <Nav />
       </>
@@ -208,8 +205,6 @@ export default function TodayPage() {
             )}
           </section>
         )}
-
-        <WeightPrompt />
       </main>
       <Nav />
     </>

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-16 11:30
+
+- **No bodyweight box on Today.** The daily weigh-in prompt took space on the screen you open at the
+  gym for something logged rarely; it is still one tap away on Profile → Bodyweight.
+
 ## 2026-09-16 11:26
 
 - **Body-part badges on Today.** Each session trained today is tagged Legs, Chest, Back, Shoulders,
