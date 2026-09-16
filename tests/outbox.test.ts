@@ -48,6 +48,17 @@ describe('outbox', () => {
     expect(queued?.row.deletedAt).toBe(row?.deletedAt)
   })
 
+  it('keeps a row deleted on an edit, and restores it only when told to', async () => {
+    await writeRow(USER, 'workoutTemplates', { id: 'tpl-1', name: 'Full Body A' })
+    await deleteRow(USER, 'workoutTemplates', 'tpl-1')
+
+    await writeRow(USER, 'workoutTemplates', { id: 'tpl-1', name: 'Renamed' })
+    expect((await getDb(USER).workoutTemplates.get('tpl-1'))?.deletedAt).toBeTypeOf('number')
+
+    await writeRow(USER, 'workoutTemplates', { id: 'tpl-1', deletedAt: null })
+    expect((await getDb(USER).workoutTemplates.get('tpl-1'))?.deletedAt).toBeNull()
+  })
+
   it('preserves createdAt across edits but moves updatedAt', async () => {
     const first = await writeRow(USER, 'setLogs', { id: 'set-2', reps: 5 })
     await new Promise((resolve) => setTimeout(resolve, 5))

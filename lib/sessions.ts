@@ -2,7 +2,7 @@
 
 import { isCardio } from '@/lib/cardio'
 import { getDb, type LocalExercise, type LocalSession, type LocalSetLog } from '@/lib/db/dexie'
-import { writeRow } from '@/lib/db/write'
+import { deleteRow, writeRow } from '@/lib/db/write'
 import { bodyWeightId, sessionId, setLogId } from '@/lib/id'
 import { dateToEpoch, templateItems, today } from '@/lib/queries'
 
@@ -147,10 +147,34 @@ export async function addToSession(
         completedAt: null,
         performedAt: dateToEpoch(session.scheduledFor),
         notes: null,
+        // Brings back sets left by an earlier removeFromSession().
+        deletedAt: null,
       })
     }
   })
   return position
+}
+
+/**
+ * Take an exercise out of a session — a wrong pick, or one you skipped. Its
+ * sets are soft-deleted, logged or not, so it leaves History and "last time"
+ * everywhere once synced. Re-opening the workout does not bring it back: the
+ * rows still exist, so startSession() skips them.
+ */
+export async function removeFromSession(
+  userId: string,
+  sessionId: string,
+  exerciseId: string,
+): Promise<void> {
+  const db = getDb(userId)
+  await db.transaction('rw', [db.setLogs, db.outbox, db.meta], async () => {
+    const logs = await db.setLogs.where('sessionId').equals(sessionId).toArray()
+    for (const log of logs) {
+      if (log.exerciseId === exerciseId && log.deletedAt === null) {
+        await deleteRow(userId, 'setLogs', log.id)
+      }
+    }
+  })
 }
 
 /** The template key of the one "Extra" session a day holds for exercises done off-plan. */

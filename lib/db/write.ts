@@ -31,7 +31,8 @@ export async function writeRow(
       userId,
       createdAt: existing?.createdAt ?? timestamp,
       updatedAt: timestamp,
-      deletedAt: (row.deletedAt as number | null | undefined) ?? existing?.deletedAt ?? null,
+      // Only an explicit `deletedAt` changes it, and `null` restores a deleted row.
+      deletedAt: 'deletedAt' in row ? ((row.deletedAt as number | null) ?? null) : (existing?.deletedAt ?? null),
     }
 
     await db.table(table).put(saved)

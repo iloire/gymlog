@@ -24,6 +24,7 @@ import {
   clearSet,
   finishSession,
   logSet,
+  removeFromSession,
 } from '@/lib/sessions'
 import { useWakeLock } from '@/lib/use-wake-lock'
 
@@ -53,6 +54,8 @@ function Session() {
   const [draft, setDraft] = useState<({ id: string } & Values) | null>(null)
   const [viewingExercise, setViewingExercise] = useState(false)
   const [picking, setPicking] = useState(false)
+  // The exercise being confirmed for removal, so moving to another one drops the prompt.
+  const [removing, setRemoving] = useState<string | null>(null)
 
   useWakeLock()
 
@@ -421,6 +424,52 @@ function Session() {
           <Plus size={16} aria-hidden />
           Add exercise
         </button>
+
+        {exerciseId &&
+          (removing === exerciseId ? (
+            <div
+              role="alertdialog"
+              aria-labelledby="remove-exercise-title"
+              className="mt-3 rounded-md border border-plate-red p-4"
+            >
+              <p id="remove-exercise-title" className="text-[15px]">
+                Remove {exerciseName} from this workout?
+              </p>
+              {groupLogs.some((log) => log.completedAt !== null) && (
+                <p className="mt-1 text-sm text-ink-dim">The sets you logged for it go too.</p>
+              )}
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  autoFocus
+                  onClick={() => setRemoving(null)}
+                  className="h-12 rounded-md border border-line text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await removeFromSession(userId, id, exerciseId)
+                    setRemoving(null)
+                    // The next exercise slides into this index; past the end, the last one shows.
+                    goTo(Math.max(0, Math.min(position, positions.length - 2)))
+                  }}
+                  className="h-12 rounded-md bg-plate-red text-sm font-semibold text-white"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setRemoving(exerciseId)}
+              className="mt-3 h-12 w-full rounded-md border border-line text-sm text-ink-dim"
+            >
+              Remove exercise
+            </button>
+          ))}
 
         {allDone && !data.session.completedAt && (
           <button

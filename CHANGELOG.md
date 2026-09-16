@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-16 14:15
+
+- **Remove an exercise from a workout.** The session screen has *Remove exercise* under *Add
+  exercise*, with a confirm that warns when sets are already logged. It works on any past workout
+  opened from History. The exercise's sets are soft-deleted and synced, so it leaves History and
+  "last time"; re-opening the workout does not bring it back, and adding it again starts fresh sets.
+- **Fix: `writeRow` could never restore a deleted row.** `deletedAt` was merged with `??`, so an
+  explicit `null` fell back to the old tombstone. Only an explicit `deletedAt` now changes it.
+
 ## 2026-09-16 12:58
 
 - **Training calendar and week streak on History.** History opens on how many weeks in a row you

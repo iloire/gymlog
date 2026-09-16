@@ -12,6 +12,7 @@ import {
   finishSession,
   logSet,
   recordBodyWeight,
+  removeFromSession,
   rescheduleSession,
   startSession,
 } from '@/lib/sessions'
@@ -248,6 +249,52 @@ describe('cardio', () => {
 
     const added = (await logsFor(id)).filter((log) => log.exerciseId === 'Row')
     expect(added.map((log) => [log.setIndex, log.restSec])).toEqual([[1, 90], [2, 90], [3, 90]])
+  })
+})
+
+describe('removeFromSession', () => {
+  it('soft-deletes every set of the exercise, logged or not, and queues each for sync', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [first] = await logsFor(id)
+    await logSet(USER, first!, { weightKg: 60, reps: 5 })
+
+    await removeFromSession(USER, id, 'Squat')
+
+    const logs = await logsFor(id)
+    const squats = logs.filter((log) => log.exerciseId === 'Squat')
+    expect(squats).toHaveLength(3)
+    expect(squats.every((log) => typeof log.deletedAt === 'number')).toBe(true)
+    for (const log of squats) {
+      expect((await getDb(USER).outbox.get(mutationKey('setLogs', log.id)))?.row.deletedAt).toBe(log.deletedAt)
+    }
+    expect(logs.filter((log) => log.exerciseId === 'Bench').map((log) => log.deletedAt)).toEqual([null, null])
+  })
+
+  it('stays removed when the workout is opened again', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    await removeFromSession(USER, id, 'Squat')
+
+    await startSession(USER, 'tpl', null, DATE)
+
+    const live = (await logsFor(id)).filter((log) => log.deletedAt === null)
+    expect(live.map((log) => log.exerciseId)).toEqual(['Bench', 'Bench'])
+  })
+
+  it('comes back as fresh sets when the exercise is added again', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [first] = await logsFor(id)
+    await logSet(USER, first!, { weightKg: 60, reps: 5 })
+    await removeFromSession(USER, id, 'Squat')
+
+    const session = (await getDb(USER).sessions.get(id))!
+    await addToSession(USER, session, (await getDb(USER).exercises.get('Squat'))!)
+
+    const squats = (await logsFor(id)).filter((log) => log.exerciseId === 'Squat')
+    expect(squats.map((log) => [log.deletedAt, log.position, log.completedAt, log.weightKg])).toEqual([
+      [null, 3, null, null],
+      [null, 3, null, null],
+      [null, 3, null, null],
+    ])
   })
 })
 
