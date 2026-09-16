@@ -153,6 +153,43 @@ export async function addToSession(
   return position
 }
 
+/** The template key of the one "Extra" session a day holds for exercises done off-plan. */
+const EXTRA = 'extra'
+
+/**
+ * "Do this now" from an exercise's page: log it today without touching the
+ * programme or any workout. It joins the session you have open today — the
+ * unfinished one started last — or, with none open, today's *Extra* session,
+ * which belongs to no workout and is created under a deterministic id so two
+ * devices share it. Returns where to go on the gym screen.
+ */
+export async function doExerciseToday(
+  userId: string,
+  exercise: LocalExercise,
+  date = today(),
+): Promise<{ sessionId: string; position: number }> {
+  const db = getDb(userId)
+  const open = (await db.sessions.where('scheduledFor').equals(date).toArray())
+    .filter((session) => session.deletedAt === null && session.completedAt === null)
+    .sort((a, b) => (b.startedAt ?? 0) - (a.startedAt ?? 0))[0]
+
+  const session =
+    open ??
+    (await db.sessions.get(sessionId(userId, date, EXTRA))) ??
+    ((await writeRow(userId, 'sessions', {
+      id: sessionId(userId, date, EXTRA),
+      programId: null,
+      templateId: null,
+      templateName: 'Extra',
+      scheduledFor: date,
+      startedAt: Date.now(),
+      completedAt: null,
+      notes: null,
+    })) as LocalSession)
+
+  return { sessionId: session.id, position: await addToSession(userId, session, exercise) }
+}
+
 export async function clearSet(userId: string, log: LocalSetLog): Promise<void> {
   await writeRow(userId, 'setLogs', { ...log, completedAt: null })
 }

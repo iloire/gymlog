@@ -1,6 +1,7 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
+import type { ReactNode } from 'react'
 
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { FavoriteButton } from '@/components/favorite-button'
@@ -19,10 +20,13 @@ export function ExerciseDetail({
   userId,
   exerciseId,
   titleId,
+  action,
 }: {
   userId: string
   exerciseId: string
   titleId?: string
+  /** Shown under the name — the exercise page's "Do this now". */
+  action?: ReactNode
 }) {
   const data = useLiveQuery(async () => {
     const db = getDb(userId)
@@ -77,6 +81,7 @@ export function ExerciseDetail({
           .filter(Boolean)
           .join(', ')}
       </p>
+      {action}
 
       <section className="mt-7">
         <h2 className="mb-2 text-sm text-ink-dim">Your cues</h2>

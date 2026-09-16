@@ -8,6 +8,7 @@ import {
   activeSet,
   addToSession,
   clearSet,
+  doExerciseToday,
   finishSession,
   logSet,
   recordBodyWeight,
@@ -247,6 +248,53 @@ describe('cardio', () => {
 
     const added = (await logsFor(id)).filter((log) => log.exerciseId === 'Row')
     expect(added.map((log) => [log.setIndex, log.restSec])).toEqual([[1, 90], [2, 90], [3, 90]])
+  })
+})
+
+describe('doExerciseToday', () => {
+  const curl = async () => {
+    await writeRow(USER, 'exercises', { id: 'Curl', userId: null, name: 'Barbell Curl', slug: 'curl', category: 'strength' })
+    return (await getDb(USER).exercises.get('Curl'))!
+  }
+
+  it('opens an Extra session for today when none is open, leaving the plan alone', async () => {
+    const templateItemsBefore = await getDb(USER).templateItems.toArray()
+
+    const { sessionId: id, position } = await doExerciseToday(USER, await curl(), DATE)
+
+    expect(id).toBe(sessionId(USER, DATE, 'extra'))
+    expect(await getDb(USER).sessions.get(id)).toMatchObject({
+      templateId: null,
+      programId: null,
+      templateName: 'Extra',
+      scheduledFor: DATE,
+      completedAt: null,
+    })
+    expect((await logsFor(id)).map((log) => [log.exerciseId, log.position])).toEqual([
+      ['Curl', position], ['Curl', position], ['Curl', position],
+    ])
+    expect(await getDb(USER).templateItems.toArray()).toEqual(templateItemsBefore)
+    expect(await getDb(USER).programs.count()).toBe(0)
+  })
+
+  it('reuses the day’s Extra session for the next exercise', async () => {
+    const first = await doExerciseToday(USER, await curl(), DATE)
+    await writeRow(USER, 'exercises', { id: 'Row', userId: null, name: 'Barbell Row', slug: 'row' })
+    const second = await doExerciseToday(USER, (await getDb(USER).exercises.get('Row'))!, DATE)
+
+    expect(second.sessionId).toBe(first.sessionId)
+    expect(second.position).toBe(first.position + 1)
+  })
+
+  it('joins the workout already open today instead, but not a finished one or another day', async () => {
+    const workout = await startSession(USER, 'tpl', null, DATE)
+    expect((await doExerciseToday(USER, await curl(), DATE)).sessionId).toBe(workout)
+
+    await finishSession(USER, (await getDb(USER).sessions.get(workout))!)
+    await writeRow(USER, 'exercises', { id: 'Row', userId: null, name: 'Barbell Row', slug: 'row' })
+    const row = (await getDb(USER).exercises.get('Row'))!
+    expect((await doExerciseToday(USER, row, DATE)).sessionId).toBe(sessionId(USER, DATE, 'extra'))
+    expect((await doExerciseToday(USER, row, '2026-09-16')).sessionId).toBe(sessionId(USER, '2026-09-16', 'extra'))
   })
 })
 

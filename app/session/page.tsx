@@ -44,9 +44,10 @@ type Values = { weightKg: number | null; reps: number | null; durationSec: numbe
 function Session() {
   const userId = useUserId()
   const router = useRouter()
-  const id = useSearchParams().get('id') ?? ''
+  const params = useSearchParams()
+  const id = params.get('id') ?? ''
 
-  const [position, setPosition] = useState(0)
+  const [chosenPosition, setPosition] = useState<number | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [restEndsAt, setRestEndsAt] = useState<number | null>(null)
   const [draft, setDraft] = useState<({ id: string } & Values) | null>(null)
@@ -78,6 +79,16 @@ function Session() {
   }, [userId, id])
 
   const positions = data?.positions ?? []
+  // Opened with ?exercise= ("Do this now"): start on that exercise until you move.
+  const requested = params.get('exercise')
+  const position =
+    chosenPosition ??
+    Math.max(
+      0,
+      positions.findIndex((at) =>
+        (data?.logs ?? []).some((log) => log.position === at && log.exerciseId === requested),
+      ),
+    )
   const currentPosition = positions[Math.min(position, positions.length - 1)]
   const groupLogs = (data?.logs ?? []).filter((log) => log.position === currentPosition)
   const exerciseId = groupLogs[0]?.exerciseId

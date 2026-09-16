@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-16 10:10
+
+- **Do this now** on an exercise's page logs that exercise today without changing your week or
+  any workout. It joins the workout you have open today, or else a separate *Extra* session for
+  the day, and opens the gym screen on that exercise. The next one you add the same way goes into
+  the same session.
+
 ## 2026-09-16 09:55
 
 - Installed on the home screen, every screen now starts below the phone's status bar. The gym
