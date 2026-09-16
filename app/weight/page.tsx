@@ -2,6 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Trash2 } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 
 import { Nav } from '@/components/nav'
@@ -39,7 +40,10 @@ export default function WeightPage() {
   return (
     <>
       <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
-        <h1 className="figure text-4xl">Weight</h1>
+        <Link href="/profile" className="text-sm text-ink-dim underline-offset-4 hover:text-ink hover:underline">
+          Profile
+        </Link>
+        <h1 className="figure mt-2 text-4xl">Weight</h1>
 
         {latest ? (
           <p className="mt-2 text-sm text-ink-dim">

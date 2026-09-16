@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 
 import { EquipmentPicker } from '@/components/equipment-picker'
@@ -25,6 +26,19 @@ export default function ProfilePage() {
             {user.email && <p className="text-sm text-ink-dim">{user.email}</p>}
           </section>
         )}
+
+        <section className="mt-8">
+          <h2 className="mb-1 text-xl font-semibold">Bodyweight</h2>
+          <p className="mb-4 text-sm text-ink-dim">
+            Your weigh-ins and the 7-day trend. Today&apos;s weight is asked for on Today.
+          </p>
+          <Link
+            href="/weight"
+            className="flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
+          >
+            Weight log
+          </Link>
+        </section>
 
         <section className="mt-8">
           <h2 className="mb-4 text-xl font-semibold">Appearance</h2>

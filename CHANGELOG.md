@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-16 07:55
+
+- **Weight moves off the bottom bar into Profile.** Seven tabs left each one cramped, and the
+  weight log is rarely opened, so it is now *Profile → Bodyweight → Weight log*, with a link back
+  to Profile and the Profile tab lit while you are on it. Today's weight is still asked for on
+  Today.
+
 ## 2026-09-16 07:49
 
 - **More ways to find an exercise.** A *Filters* button on the Exercises page and in the workout
