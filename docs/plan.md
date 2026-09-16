@@ -199,7 +199,7 @@ to that repo and not transferable. Swap-in remains possible if Ivan ever buys a 
 
 | Route | What it does |
 |---|---|
-| `/` | **Today** — today's workout from the active program, big Start button; or "rest day" + start anything. A one-tap bodyweight entry if today's isn't logged yet. Shows last-sync time, red banner if the outbox is non-empty or sync is >24h stale ("Ready for the gym" check). |
+| `/` | **Today** — today's workout from the active program, big Start button; or "rest day" + start anything. Once a set is logged today it becomes today's log, each session tagged with the body parts it worked (`bodyParts()` in `lib/body-parts.ts` folds the library's muscles into Legs, Chest, Back, Shoulders, Arms, Core, Cardio). A one-tap bodyweight entry if today's isn't logged yet. Shows last-sync time, red banner if the outbox is non-empty or sync is >24h stale ("Ready for the gym" check). |
 | `/session?id=…` | **The gym screen.** One exercise at a time, huge tap targets, set rows pre-created from the prescription and prefilled from last time, ✓ completes a set and auto-starts the rest timer. Cardio (`category = 'cardio'`) logs minutes instead: `set_logs.duration_sec`, prescribed by `template_items.target_duration_sec`. *Add exercise* appends one to the session under way — a warm-up that is not in the workout. Screen wake-lock on. |
 | `/workouts`, `/workouts/[id]` | Template list + editor: add exercises, drag to reorder, target sets/reps/rest |
 | `/program` | Mon–Sun grid, one workout per day; end a program and start the next stage |

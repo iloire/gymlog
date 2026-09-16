@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-16 11:26
+
+- **Body-part badges on Today.** Each session trained today is tagged Legs, Chest, Back, Shoulders,
+  Arms, Core or Cardio, most sets first, so you can see at a glance what you worked. The library's
+  17 muscles fold into those parts in `lib/body-parts.ts`; exercises without muscles are left out.
+
 ## 2026-09-16 10:25
 
 - **Today becomes today's log once you train.** As soon as a set is logged today, the Today screen

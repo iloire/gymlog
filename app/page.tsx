@@ -5,11 +5,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { BodyPartBadges } from '@/components/body-part-badges'
 import { Nav } from '@/components/nav'
 import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
 import { SyncBadge } from '@/components/sync-badge'
 import { WeightPrompt } from '@/components/weight-prompt'
+import { bodyParts } from '@/lib/body-parts'
 import { getDb } from '@/lib/db/dexie'
 import { formatMinutes, kg } from '@/lib/format'
 import { daysAgo, rotation, sessionHistory, trainedOn, type Rotation } from '@/lib/history'
@@ -34,7 +36,15 @@ export default function TodayPage() {
     // Off-schedule, the workout you have gone longest without comes first.
     const templates = rotation(await db.workoutTemplates.toArray(), history)
     // Once a set is logged today, the screen is today's log rather than a choice of workout.
-    const trained = trainedOn(history, date)
+    const trained = await Promise.all(
+      trainedOn(history, date).map(async (entry) => {
+        const exercises = await db.exercises.bulkGet(entry.exercises.map((exercise) => exercise.exerciseId))
+        const parts = bodyParts(
+          entry.exercises.map((exercise, index) => ({ exercise: exercises[index], sets: exercise.sets.length })),
+        )
+        return { entry, parts }
+      }),
+    )
 
     if (!scheduled) {
       return { scheduled: null, templates, trained, session: null, exercises: [] as string[] }
@@ -87,10 +97,10 @@ export default function TodayPage() {
 
   if (plan?.trained.length) {
     const scheduled = plan.scheduled
-    const scheduledDone = plan.trained.some((entry) => entry.session.templateId === scheduled?.templateId)
+    const scheduledDone = plan.trained.some(({ entry }) => entry.session.templateId === scheduled?.templateId)
     // Starting a workout already trained today would only re-open it; its Continue is above.
     const others = plan.templates.filter(
-      ({ template }) => !plan.trained.some((entry) => entry.session.templateId === template.id),
+      ({ template }) => !plan.trained.some(({ entry }) => entry.session.templateId === template.id),
     )
 
     return (
@@ -104,8 +114,8 @@ export default function TodayPage() {
           <SyncBadge />
 
           <section className="mt-6 divide-y divide-line border-y border-line">
-            {plan.trained.map((entry) => (
-              <TodaySession key={entry.session.id} entry={entry} />
+            {plan.trained.map(({ entry, parts }) => (
+              <TodaySession key={entry.session.id} entry={entry} parts={parts} />
             ))}
           </section>
 
@@ -231,7 +241,7 @@ function WorkoutList({ templates, onStart }: { templates: Rotation[]; onStart: (
 }
 
 /** One session trained today: what is logged so far, and the way back into it. */
-function TodaySession({ entry }: { entry: HistoryEntry }) {
+function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }) {
   const { session, setsDone, setsPlanned, volumeKg, cardioSec, exercises } = entry
   const totals = [
     `${setsDone}/${setsPlanned} sets`,
@@ -245,6 +255,7 @@ function TodaySession({ entry }: { entry: HistoryEntry }) {
         <h2 className="min-w-0 truncate text-lg">{session.templateName}</h2>
         <span className="shrink-0 text-sm text-ink-dim">{totals.join(' · ')}</span>
       </div>
+      <BodyPartBadges parts={parts} className="mt-2" />
       <div className="mt-3">
         <SessionSets exercises={exercises} />
       </div>
