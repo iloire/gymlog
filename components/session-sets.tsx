@@ -1,0 +1,24 @@
+import { formatSet } from '@/lib/format'
+import type { HistoryExercise } from '@/lib/session-summary'
+
+/** A session's logged sets, one line per exercise with its note — shared by History and Today. */
+export function SessionSets({ exercises }: { exercises: HistoryExercise[] }) {
+  return (
+    <ul className="space-y-2">
+      {exercises.map((exercise) => (
+        <li key={exercise.exerciseId}>
+          <span className="block text-sm text-ink-dim">{exercise.name}</span>
+          <ol className="flex flex-wrap gap-x-4 gap-y-1">
+            {exercise.sets.map((set) => (
+              <li key={set.id} className="figure text-[15px]">
+                {formatSet(set)}
+                {set.isWarmup && <span className="ml-0.5 text-ink-dim">w</span>}
+              </li>
+            ))}
+          </ol>
+          {exercise.notes && <p className="mt-0.5 text-sm italic text-ink-dim">“{exercise.notes}”</p>}
+        </li>
+      ))}
+    </ul>
+  )
+}

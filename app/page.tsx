@@ -6,11 +6,14 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { Nav } from '@/components/nav'
+import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
 import { SyncBadge } from '@/components/sync-badge'
 import { WeightPrompt } from '@/components/weight-prompt'
 import { getDb } from '@/lib/db/dexie'
-import { daysAgo, rotation, sessionHistory } from '@/lib/history'
+import { formatMinutes, kg } from '@/lib/format'
+import { daysAgo, rotation, sessionHistory, trainedOn, type Rotation } from '@/lib/history'
+import type { HistoryEntry } from '@/lib/session-summary'
 import { dayOfWeek, templateForDay, templateItems, today } from '@/lib/queries'
 import { startSession } from '@/lib/sessions'
 
@@ -27,11 +30,14 @@ export default function TodayPage() {
     const scheduled = await templateForDay(userId)
     const date = today()
 
+    const history = await sessionHistory(userId)
     // Off-schedule, the workout you have gone longest without comes first.
-    const templates = rotation(await db.workoutTemplates.toArray(), await sessionHistory(userId))
+    const templates = rotation(await db.workoutTemplates.toArray(), history)
+    // Once a set is logged today, the screen is today's log rather than a choice of workout.
+    const trained = trainedOn(history, date)
 
     if (!scheduled) {
-      return { scheduled: null, templates, session: null, exercises: [] as string[] }
+      return { scheduled: null, templates, trained, session: null, exercises: [] as string[] }
     }
 
     const template = await db.workoutTemplates.get(scheduled.templateId)
@@ -49,6 +55,7 @@ export default function TodayPage() {
     return {
       scheduled: { ...scheduled, name: template?.name ?? 'Workout', sets: items.length },
       templates,
+      trained,
       session: session ?? null,
       exercises,
     }
@@ -72,6 +79,55 @@ export default function TodayPage() {
         <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8" aria-busy="true">
           <p className="text-sm text-ink-dim">{weekday}</p>
           <div className="mt-2 h-10 w-48 animate-pulse rounded bg-surface" />
+        </main>
+        <Nav />
+      </>
+    )
+  }
+
+  if (plan?.trained.length) {
+    const scheduled = plan.scheduled
+    const scheduledDone = plan.trained.some((entry) => entry.session.templateId === scheduled?.templateId)
+    // Starting a workout already trained today would only re-open it; its Continue is above.
+    const others = plan.templates.filter(
+      ({ template }) => !plan.trained.some((entry) => entry.session.templateId === template.id),
+    )
+
+    return (
+      <>
+        <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
+          <header className="mb-6">
+            <p className="text-sm text-ink-dim">{weekday}</p>
+            <h1 className="figure mt-1 text-4xl leading-[1.05]">Today</h1>
+          </header>
+
+          <SyncBadge />
+
+          <section className="mt-6 divide-y divide-line border-y border-line">
+            {plan.trained.map((entry) => (
+              <TodaySession key={entry.session.id} entry={entry} />
+            ))}
+          </section>
+
+          {scheduled && !scheduledDone && (
+            <button
+              type="button"
+              onClick={() => void start(scheduled.templateId, scheduled.programId)}
+              disabled={starting}
+              className="mt-6 h-14 w-full rounded-md border border-line text-base font-semibold disabled:opacity-60"
+            >
+              {plan.session?.startedAt ? 'Continue' : 'Start'} {scheduled.name}
+            </button>
+          )}
+
+          {others.length > 0 && (
+            <details className="mt-6">
+              <summary className="cursor-pointer text-sm text-ink-dim">Start another workout</summary>
+              <WorkoutList templates={others} onStart={(id) => void start(id, null)} />
+            </details>
+          )}
+
+          <WeightPrompt />
         </main>
         <Nav />
       </>
@@ -123,25 +179,7 @@ export default function TodayPage() {
             </p>
 
             {plan?.templates.length ? (
-              <ul className="mt-5 divide-y divide-line border-y border-line">
-                {plan.templates.map(({ template, lastDone }) => (
-                  <li key={template.id}>
-                    <button
-                      type="button"
-                      onClick={() => void start(template.id, null)}
-                      className="flex w-full items-center justify-between gap-3 py-4 text-left"
-                    >
-                      <span className="min-w-0">
-                        <span className="block text-[15px]">{template.name}</span>
-                        <span className="block text-sm text-ink-dim">
-                          {lastDone ? `Last done ${daysAgo(lastDone)}` : 'Not done yet'}
-                        </span>
-                      </span>
-                      <span className="shrink-0 text-sm text-ink-dim">Start</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <WorkoutList templates={plan.templates} onStart={(id) => void start(id, null)} />
             ) : (
               <>
                 <Link
@@ -165,5 +203,66 @@ export default function TodayPage() {
       </main>
       <Nav />
     </>
+  )
+}
+
+function WorkoutList({ templates, onStart }: { templates: Rotation[]; onStart: (templateId: string) => void }) {
+  return (
+    <ul className="mt-5 divide-y divide-line border-y border-line">
+      {templates.map(({ template, lastDone }) => (
+        <li key={template.id}>
+          <button
+            type="button"
+            onClick={() => onStart(template.id)}
+            className="flex w-full items-center justify-between gap-3 py-4 text-left"
+          >
+            <span className="min-w-0">
+              <span className="block text-[15px]">{template.name}</span>
+              <span className="block text-sm text-ink-dim">
+                {lastDone ? `Last done ${daysAgo(lastDone)}` : 'Not done yet'}
+              </span>
+            </span>
+            <span className="shrink-0 text-sm text-ink-dim">Start</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/** One session trained today: what is logged so far, and the way back into it. */
+function TodaySession({ entry }: { entry: HistoryEntry }) {
+  const { session, setsDone, setsPlanned, volumeKg, cardioSec, exercises } = entry
+  const totals = [
+    `${setsDone}/${setsPlanned} sets`,
+    volumeKg > 0 ? kg(volumeKg) : null,
+    cardioSec > 0 ? `${formatMinutes(cardioSec)} cardio` : null,
+  ].filter(Boolean)
+
+  return (
+    <article className="py-4">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="min-w-0 truncate text-lg">{session.templateName}</h2>
+        <span className="shrink-0 text-sm text-ink-dim">{totals.join(' · ')}</span>
+      </div>
+      <div className="mt-3">
+        <SessionSets exercises={exercises} />
+      </div>
+      {session.completedAt === null ? (
+        <Link
+          href={`/session?id=${session.id}`}
+          className="mt-4 flex h-14 w-full items-center justify-center rounded-md bg-plate-blue text-base font-semibold text-white transition-colors hover:bg-plate-blue-lift"
+        >
+          Continue {session.templateName}
+        </Link>
+      ) : (
+        <Link
+          href={`/session?id=${session.id}`}
+          className="mt-3 inline-block text-sm text-ink-dim underline underline-offset-4"
+        >
+          Finished · open to fix a set
+        </Link>
+      )}
+    </article>
   )
 }

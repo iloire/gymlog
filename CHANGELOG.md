@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-16 10:25
+
+- **Today becomes today's log once you train.** As soon as a set is logged today, the Today screen
+  stops offering workouts to start and shows what you have done: each session with its sets,
+  kg, cardio minutes and notes, updating as you log, with *Continue* back into one still open. A
+  scheduled workout not yet done keeps its own Start button, and *Start another workout* folds
+  the rest away. History and Today share one set list.
+
 ## 2026-09-16 10:10
 
 - **Do this now** on an exercise's page logs that exercise today without changing your week or

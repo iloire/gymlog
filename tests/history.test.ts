@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { destroyDb, type LocalSession, type LocalSetLog, type LocalWorkoutTemplate } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
-import { daysAgo, daysBetween, rotation, sessionHistory } from '@/lib/history'
+import { daysAgo, daysBetween, rotation, sessionHistory, trainedOn } from '@/lib/history'
 import { setLogId } from '@/lib/id'
 import { summariseSession } from '@/lib/session-summary'
 import { logSet, startSession } from '@/lib/sessions'
@@ -115,6 +115,18 @@ describe('sessionHistory', () => {
 
     expect(history.map((entry) => entry.session.id)).toEqual([newer, older])
     expect(history[0]).toMatchObject({ setsDone: 1, setsPlanned: 2, volumeKg: 300 })
+  })
+
+  it('gives Today the sessions trained that day, not ones only opened or on other days', async () => {
+    const legs = await startSession(USER, 'tplA', null, '2026-09-16')
+    await startSession(USER, 'tplB', null, '2026-09-16') // opened, nothing logged yet
+    const yesterday = await startSession(USER, 'tplB', null, '2026-09-15')
+    await logFirstSet(legs)
+    await logFirstSet(yesterday)
+
+    const today = trainedOn(await sessionHistory(USER), '2026-09-16')
+
+    expect(today.map((entry) => entry.session.id)).toEqual([legs])
   })
 
   it('drops a deleted session', async () => {

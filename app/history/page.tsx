@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { Nav } from '@/components/nav'
+import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
-import { formatDay, formatDuration, formatMinutes, formatSet, kg } from '@/lib/format'
+import { formatDay, formatDuration, formatMinutes, kg } from '@/lib/format'
 import { daysAgo, rotation, sessionHistory } from '@/lib/history'
 import type { HistoryEntry } from '@/lib/session-summary'
 import { startSession } from '@/lib/sessions'
@@ -128,22 +129,7 @@ function SessionRow({ entry }: { entry: HistoryEntry }) {
         </summary>
 
         <div className="pb-4">
-          <ul className="space-y-2">
-            {exercises.map((exercise) => (
-              <li key={exercise.exerciseId}>
-                <span className="block text-sm text-ink-dim">{exercise.name}</span>
-                <ol className="flex flex-wrap gap-x-4 gap-y-1">
-                  {exercise.sets.map((set) => (
-                    <li key={set.id} className="figure text-[15px]">
-                      {formatSet(set)}
-                      {set.isWarmup && <span className="ml-0.5 text-ink-dim">w</span>}
-                    </li>
-                  ))}
-                </ol>
-                {exercise.notes && <p className="mt-0.5 text-sm italic text-ink-dim">“{exercise.notes}”</p>}
-              </li>
-            ))}
-          </ul>
+          <SessionSets exercises={exercises} />
           <Link
             href={`/session?id=${session.id}`}
             className="mt-4 inline-block text-sm text-ink-dim underline underline-offset-4"

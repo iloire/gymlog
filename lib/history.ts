@@ -32,6 +32,11 @@ export async function sessionHistory(userId: string): Promise<HistoryEntry[]> {
     )
 }
 
+/** The sessions trained on one calendar date, from `sessionHistory` and in its order. */
+export function trainedOn(history: HistoryEntry[], date: string): HistoryEntry[] {
+  return history.filter((entry) => entry.session.scheduledFor === date)
+}
+
 export type Rotation = { template: LocalWorkoutTemplate; lastDone: string | null }
 
 /**
