@@ -20,6 +20,8 @@ export type HistoryEntry = {
   setsPlanned: number
   /** Sum of weight × reps over logged working sets, in kg. */
   volumeKg: number
+  /** Sum of logged timed sets (cardio), in seconds. */
+  cardioSec: number
   /** First logged set to last, or null with fewer than two sets. */
   durationMs: number | null
   exercises: HistoryExercise[]
@@ -57,6 +59,7 @@ export function summariseSession(session: LocalSession, logs: LocalSetLog[]): Hi
     volumeKg: done
       .filter((log) => !log.isWarmup)
       .reduce((sum, log) => sum + (log.weightKg ?? 0) * (log.reps ?? 0), 0),
+    cardioSec: done.reduce((sum, log) => sum + (log.durationSec ?? 0), 0),
     durationMs,
     exercises,
   }

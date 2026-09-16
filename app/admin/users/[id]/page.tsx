@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 
 import { WeekStrip } from '@/components/admin/week-strip'
 import { adminUserDetail, type AdminUserDetail } from '@/lib/admin'
-import { formatDay, kg } from '@/lib/format'
+import { formatDay, formatSet, kg } from '@/lib/format'
 
 export const metadata: Metadata = { title: 'Admin' }
 
@@ -181,7 +181,7 @@ function SessionRow({ session }: { session: AdminUserDetail['sessions'][number] 
                         >
                           {set.completedAt === null
                             ? 'not done'
-                            : `${set.weightKg ?? 0}×${set.reps ?? 0}${set.isWarmup ? ' w' : ''}`}
+                            : `${formatSet(set)}${set.isWarmup ? ' w' : ''}`}
                         </li>
                       ))}
                     </ol>

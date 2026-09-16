@@ -6,6 +6,7 @@ import { bodyWeightId, sessionId, setLogId } from '@/lib/id'
 import { dateToEpoch } from '@/lib/queries'
 import {
   activeSet,
+  addToSession,
   clearSet,
   finishSession,
   logSet,
@@ -177,6 +178,59 @@ describe('logging sets', () => {
     const id = await startSession(USER, 'tpl', null, DATE)
     await finishSession(USER, (await getDb(USER).sessions.get(id))!)
     expect((await getDb(USER).sessions.get(id))?.completedAt).toBeTypeOf('number')
+  })
+})
+
+describe('cardio', () => {
+  const stairmaster = { id: 'Stairmaster', userId: null, name: 'Stairmaster', slug: 'stairmaster', category: 'cardio' }
+
+  it('snapshots the minutes a workout prescribes, and logs time instead of weight × reps', async () => {
+    await writeRow(USER, 'exercises', stairmaster)
+    await writeRow(USER, 'templateItems', {
+      id: 'i0', templateId: 'tpl', exerciseId: 'Stairmaster', position: 0,
+      sets: 1, targetReps: 1, targetRepsMax: null, targetWeightKg: null, targetDurationSec: 600, restSec: 60,
+    })
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [warmUp, squat] = await logsFor(id)
+
+    expect(warmUp).toMatchObject({ exerciseId: 'Stairmaster', targetDurationSec: 600, durationSec: null })
+    expect(squat).toMatchObject({ exerciseId: 'Squat', targetDurationSec: null })
+
+    await logSet(USER, warmUp!, { weightKg: null, reps: null, durationSec: 480 })
+    expect(await getDb(USER).setLogs.get(warmUp!.id)).toMatchObject({ durationSec: 480, completedAt: expect.any(Number) })
+  })
+
+  it('adds cardio to a session under way as one timed set at the end, and never twice', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const session = (await getDb(USER).sessions.get(id))!
+    await writeRow(USER, 'exercises', stairmaster)
+    const exercise = (await getDb(USER).exercises.get('Stairmaster'))!
+
+    expect(await addToSession(USER, session, exercise)).toBe(3)
+    expect(await addToSession(USER, session, exercise)).toBe(3)
+
+    const added = (await logsFor(id)).filter((log) => log.exerciseId === 'Stairmaster')
+    expect(added).toEqual([
+      expect.objectContaining({
+        id: setLogId(id, 'Stairmaster', 1),
+        position: 3,
+        restSec: null,
+        performedAt: dateToEpoch(DATE),
+        completedAt: null,
+      }),
+    ])
+    expect(await getDb(USER).outbox.get(mutationKey('setLogs', added[0]!.id))).toBeDefined()
+  })
+
+  it('adds any other exercise as three sets with rest', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const session = (await getDb(USER).sessions.get(id))!
+    await writeRow(USER, 'exercises', { id: 'Row', userId: null, name: 'Barbell Row', slug: 'row', category: 'strength' })
+
+    await addToSession(USER, session, (await getDb(USER).exercises.get('Row'))!)
+
+    const added = (await logsFor(id)).filter((log) => log.exerciseId === 'Row')
+    expect(added.map((log) => [log.setIndex, log.restSec])).toEqual([[1, 90], [2, 90], [3, 90]])
   })
 })
 

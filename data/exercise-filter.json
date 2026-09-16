@@ -3,7 +3,7 @@
   "source": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json",
   "imageBaseUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/",
   "levels": [],
-  "categories": ["strength", "stretching", "powerlifting", "olympic weightlifting", "strongman", "plyometrics"],
+  "categories": ["strength", "stretching", "powerlifting", "olympic weightlifting", "strongman", "plyometrics", "cardio"],
   "equipment": [],
   "requireImages": true,
   "imageWidth": 600,

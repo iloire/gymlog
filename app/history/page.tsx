@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
-import { formatDay, formatDuration, kg } from '@/lib/format'
+import { formatDay, formatDuration, formatMinutes, formatSet, kg } from '@/lib/format'
 import { daysAgo, rotation, sessionHistory } from '@/lib/history'
 import type { HistoryEntry } from '@/lib/session-summary'
 import { startSession } from '@/lib/sessions'
@@ -103,7 +103,7 @@ export default function HistoryPage() {
 }
 
 function SessionRow({ entry }: { entry: HistoryEntry }) {
-  const { session, setsDone, setsPlanned, volumeKg, durationMs, exercises } = entry
+  const { session, setsDone, setsPlanned, volumeKg, cardioSec, durationMs, exercises } = entry
 
   return (
     <li>
@@ -117,7 +117,10 @@ function SessionRow({ entry }: { entry: HistoryEntry }) {
             </span>
           </span>
           <span className="shrink-0 text-right">
-            <span className="figure block text-[15px]">{volumeKg > 0 ? kg(volumeKg) : '—'}</span>
+            <span className="figure block text-[15px]">
+              {/* A cardio-only session has no volume; its minutes say what was done. */}
+              {volumeKg > 0 ? kg(volumeKg) : cardioSec > 0 ? formatMinutes(cardioSec) : '—'}
+            </span>
             <span className="block text-sm text-ink-dim">
               {setsDone}/{setsPlanned} sets
             </span>
@@ -132,8 +135,7 @@ function SessionRow({ entry }: { entry: HistoryEntry }) {
                 <ol className="flex flex-wrap gap-x-4 gap-y-1">
                   {exercise.sets.map((set) => (
                     <li key={set.id} className="figure text-[15px]">
-                      {/* No weight is a bodyweight set, not a 0 kg one. */}
-                      {set.weightKg ? `${set.weightKg}×${set.reps ?? 0}` : `${set.reps ?? 0} reps`}
+                      {formatSet(set)}
                       {set.isWarmup && <span className="ml-0.5 text-ink-dim">w</span>}
                     </li>
                   ))}

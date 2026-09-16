@@ -185,7 +185,8 @@ to that repo and not transferable. Swap-in remains possible if Ivan ever buys a 
 
 1. Fetch `dist/exercises.json`.
 2. Filter through **`data/exercise-filter.json`** (config, not code, per house rules): levels
-   every level and equipment, every category but cardio → **859 exercises**. (The first cut kept
+   every level, equipment and category → **873 exercises**, the last 14 of them cardio machines
+   (Stairmaster, bikes, treadmill, rower), logged as time instead of weight × reps. (The first cut kept
    438 — beginner+intermediate strength and stretching on five equipment types — and lost gym
    staples filed under `other` or `expert`, like hyperextensions, dips and hanging leg raises.)
 3. Download both images, convert to WebP @600px with `sharp` → `public/exercise-media/<id>/{0,1}.webp`
@@ -199,7 +200,7 @@ to that repo and not transferable. Swap-in remains possible if Ivan ever buys a 
 | Route | What it does |
 |---|---|
 | `/` | **Today** — today's workout from the active program, big Start button; or "rest day" + start anything. A one-tap bodyweight entry if today's isn't logged yet. Shows last-sync time, red banner if the outbox is non-empty or sync is >24h stale ("Ready for the gym" check). |
-| `/session?id=…` | **The gym screen.** One exercise at a time, huge tap targets, set rows pre-created from the prescription and prefilled from last time, ✓ completes a set and auto-starts the rest timer. Screen wake-lock on. |
+| `/session?id=…` | **The gym screen.** One exercise at a time, huge tap targets, set rows pre-created from the prescription and prefilled from last time, ✓ completes a set and auto-starts the rest timer. Cardio (`category = 'cardio'`) logs minutes instead: `set_logs.duration_sec`, prescribed by `template_items.target_duration_sec`. *Add exercise* appends one to the session under way — a warm-up that is not in the workout. Screen wake-lock on. |
 | `/workouts`, `/workouts/[id]` | Template list + editor: add exercises, drag to reorder, target sets/reps/rest |
 | `/program` | Mon–Sun grid, one workout per day; end a program and start the next stage |
 | `/exercises`, `/exercises/[id]` | Library with a search that matches every word in any order, quick chips (favourites, what your equipment allows, muscle) and a Filters panel (equipment, type, level, compound or isolation, push or pull; several values in a group match any), and a star to favourite a movement — the workout editor's exercise picker uses the same filters (`components/exercise-filters.tsx`); detail shows the cross-fade, instructions, your own cues, and your history for that lift |

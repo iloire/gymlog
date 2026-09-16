@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-16 08:45
+
+- **Cardio, logged as time.** The library gains its 14 cardio machines and moves — Stairmaster,
+  Step Mill, treadmill walking, jogging and running, stationary and recumbent bike, elliptical,
+  rowing machine, rope jumping and more — and a cardio set records **minutes** instead of weight ×
+  reps. In a workout it asks for sets, minutes and rest (10 min by default); on the gym screen it
+  shows one *Time* stepper and *Log 8 min*, and last time reads *8 min*. History shows a cardio-only
+  session's minutes where volume would be, and each set as *8 min*; the exercise page and the admin
+  view do the same. **Add exercise** on the gym screen adds a movement to the session under way —
+  the stair machine you warmed up on — without changing the workout. `/api/v1` returns
+  `targetDurationSec`, `durationSec`, `cardioMin` and an exercise's `category`, and accepts
+  `targetDurationSec` when writing a workout. Migration 0004 adds the three nullable columns.
+
 ## 2026-09-16 08:05
 
 - The exercise picker in the workout editor no longer puts its search box under the phone's

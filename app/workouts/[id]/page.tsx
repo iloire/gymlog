@@ -11,6 +11,7 @@ import { ExerciseFrames } from '@/components/exercise-frames'
 import { ExercisePicker } from '@/components/exercise-picker'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
+import { CARDIO_ITEM, isCardio } from '@/lib/cardio'
 import { getDb, type LocalTemplateItem } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
 import { newId } from '@/lib/id'
@@ -41,6 +42,7 @@ export default function WorkoutEditorPage() {
           ...item,
           exerciseName: exercise?.name ?? 'Exercise',
           exerciseImages: exercise?.images ?? null,
+          cardio: isCardio(exercise) || item.targetDurationSec != null,
         }
       }),
     )
@@ -86,12 +88,12 @@ export default function WorkoutEditorPage() {
               templateId: id,
               exerciseId: exercise.id,
               position: (items.at(-1)?.position ?? 0) + 1,
-              sets: 3,
-              targetReps: 10,
               targetRepsMax: null,
               targetWeightKg: null,
-              restSec: 90,
               notes: null,
+              ...(isCardio(exercise)
+                ? CARDIO_ITEM
+                : { sets: 3, targetReps: 10, targetDurationSec: null, restSec: 90 }),
             })
             setPicking(false)
           }}
@@ -174,12 +176,22 @@ export default function WorkoutEditorPage() {
                   min={1}
                   onChange={(sets) => void update(item, { sets })}
                 />
-                <NumberField
-                  label="Reps"
-                  value={item.targetReps}
-                  min={1}
-                  onChange={(targetReps) => void update(item, { targetReps })}
-                />
+                {item.cardio ? (
+                  <NumberField
+                    label="Time"
+                    unit="min"
+                    value={Math.round((item.targetDurationSec ?? CARDIO_ITEM.targetDurationSec) / 60)}
+                    min={1}
+                    onChange={(minutes) => void update(item, { targetDurationSec: minutes * 60 })}
+                  />
+                ) : (
+                  <NumberField
+                    label="Reps"
+                    value={item.targetReps}
+                    min={1}
+                    onChange={(targetReps) => void update(item, { targetReps })}
+                  />
+                )}
                 <NumberField
                   label="Rest"
                   unit="s"

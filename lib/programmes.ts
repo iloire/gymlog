@@ -177,6 +177,7 @@ export async function adoptProgramme(
             targetRepsMax: null,
             // 20 kg is an empty barbell, not a sensible dumbbell or machine weight.
             targetWeightKg: swapped ? null : (slot.startKg ?? null),
+            targetDurationSec: null,
             restSec: slot.restSec,
             notes: slot.notes ?? null,
           })

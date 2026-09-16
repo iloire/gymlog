@@ -308,6 +308,15 @@ describe('POST /api/sync — pull', () => {
     ])
   })
 
+  it('round-trips a timed cardio set', async () => {
+    await insertExercise('Barbell_Squat')
+    await sync([session('s-1'), setLog('sl-1', 's-1', { weightKg: null, reps: null, targetDurationSec: 600, durationSec: 480 })])
+
+    const { body } = await sync()
+
+    expect(body.changes.setLogs).toMatchObject([{ id: 'sl-1', targetDurationSec: 600, durationSec: 480, reps: null }])
+  })
+
   it('includes the server clock for skew correction', async () => {
     const before = Date.now()
     const { body } = await sync()

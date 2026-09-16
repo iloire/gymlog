@@ -64,6 +64,8 @@ export type LocalTemplateItem = {
   targetReps: number
   targetRepsMax: number | null
   targetWeightKg: number | null
+  /** Absent on rows written before cardio existed. */
+  targetDurationSec?: number | null
   restSec: number
   notes: string | null
   createdAt: number
@@ -121,9 +123,12 @@ export type LocalSetLog = {
   targetReps: number | null
   targetRepsMax: number | null
   targetWeightKg: number | null
+  /** Absent on rows written before cardio existed, like `durationSec`. */
+  targetDurationSec?: number | null
   restSec: number | null
   weightKg: number | null
   reps: number | null
+  durationSec?: number | null
   isWarmup: boolean
   completedAt: number | null
   performedAt: number

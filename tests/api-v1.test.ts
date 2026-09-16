@@ -61,6 +61,7 @@ beforeEach(async () => {
   await db.insert(exercises).values([
     { ...row, id: 'squat', userId: null, name: 'Barbell Squat', slug: 'squat', equipment: 'barbell' },
     { ...row, id: 'bench', userId: null, name: 'Bench Press', slug: 'bench', equipment: 'barbell' },
+    { ...row, id: 'stairs', userId: null, name: 'Stairmaster', slug: 'stairs', equipment: 'machine', category: 'cardio' },
     { ...row, id: 'bobs-move', userId: BOB, name: 'Bob Squat', slug: 'bobs-move', equipment: 'barbell' },
   ])
 })
@@ -101,7 +102,14 @@ async function trainedSession(
   userId: string,
   id: string,
   scheduledFor: string,
-  sets: { exerciseId: string; setIndex: number; weightKg: number; reps: number; isWarmup?: boolean }[],
+  sets: {
+    exerciseId: string
+    setIndex: number
+    weightKg: number | null
+    reps: number | null
+    durationSec?: number
+    isWarmup?: boolean
+  }[],
 ) {
   await db.insert(sessions).values({ ...row, id, userId, templateName: 'Full body A', scheduledFor })
   for (const [position, set] of sets.entries()) {
@@ -110,8 +118,8 @@ async function trainedSession(
       id: `${id}-${set.exerciseId}-${set.setIndex}`,
       userId,
       sessionId: id,
-      exerciseName: set.exerciseId === 'squat' ? 'Barbell Squat' : 'Bench Press',
-      position: set.exerciseId === 'squat' ? 1 : 2,
+      exerciseName: { squat: 'Barbell Squat', bench: 'Bench Press', stairs: 'Stairmaster' }[set.exerciseId] ?? '',
+      position: ['stairs', 'squat', 'bench'].indexOf(set.exerciseId),
       completedAt: 1_000 + position * 120_000,
       performedAt: 0,
       ...set,
@@ -235,6 +243,18 @@ describe('GET /history', () => {
     expect(JSON.stringify(body)).not.toContain('"rev"')
   })
 
+  it('reports cardio as minutes, apart from volume', async () => {
+    await trainedSession(ALICE, 'a1', '2026-09-01', [
+      { exerciseId: 'stairs', setIndex: 1, weightKg: null, reps: null, durationSec: 480 },
+      { exerciseId: 'squat', setIndex: 1, weightKg: 60, reps: 5 },
+    ])
+
+    const { body } = await get('/history', await tokenFor(ALICE))
+
+    expect(body.sessions[0]).toMatchObject({ volumeKg: 300, cardioMin: 8 })
+    expect(body.sessions[0].exercises[0].sets[0]).toMatchObject({ durationSec: 480, reps: null })
+  })
+
   it('leaves out deleted sessions and sets', async () => {
     await trainedSession(ALICE, 'a1', '2026-09-01', [
       { exerciseId: 'squat', setIndex: 1, weightKg: 60, reps: 5 },
@@ -343,6 +363,24 @@ describe('writes', () => {
     expect(pulled.changes.workoutTemplates).toEqual([expect.objectContaining({ id: body.id, userId: ALICE })])
     expect(pulled.changes.templateItems?.map((item) => item.position)).toEqual([1, 2])
     expect(pulled.cursor).toBe(before.cursor + 3)
+  })
+
+  it('creates a workout with a timed cardio warm-up', async () => {
+    const token = await tokenFor(ALICE, 'write')
+    const warmUp = { exerciseId: 'stairs', sets: 1, targetReps: 1, targetDurationSec: 600, restSec: 60 }
+
+    const { status, body } = await call('POST', '/workouts', token, {
+      body: { ...squatDay, exercises: [warmUp, ...squatDay.exercises] },
+    })
+
+    expect(status).toBe(201)
+    expect(body.exercises.map((item: { targetDurationSec: number | null }) => item.targetDurationSec)).toEqual([
+      600,
+      null,
+      null,
+    ])
+    const found = await get('/exercises', token, '?q=stair')
+    expect(found.body.exercises).toEqual([expect.objectContaining({ id: 'stairs', category: 'cardio' })])
   })
 
   it('replaces a workout, reusing item ids and tombstoning the ones left over', async () => {

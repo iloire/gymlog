@@ -1,6 +1,7 @@
 'use client'
 
-import { getDb, type LocalSession, type LocalSetLog } from '@/lib/db/dexie'
+import { isCardio } from '@/lib/cardio'
+import { getDb, type LocalExercise, type LocalSession, type LocalSetLog } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
 import { bodyWeightId, sessionId, setLogId } from '@/lib/id'
 import { dateToEpoch, templateItems, today } from '@/lib/queries'
@@ -60,9 +61,11 @@ export async function startSession(
         targetReps: item.targetReps,
         targetRepsMax: item.targetRepsMax,
         targetWeightKg: item.targetWeightKg,
+        targetDurationSec: item.targetDurationSec ?? null,
         restSec: item.restSec,
         weightKg: null,
         reps: null,
+        durationSec: null,
         isWarmup: false,
         completedAt: null,
         performedAt,
@@ -90,7 +93,7 @@ export function activeSet(logs: LocalSetLog[], selectedId: string | null): Local
 export async function logSet(
   userId: string,
   log: LocalSetLog,
-  values: { weightKg: number | null; reps: number | null },
+  values: { weightKg: number | null; reps: number | null; durationSec?: number | null },
 ): Promise<void> {
   await writeRow(userId, 'setLogs', {
     ...log,
@@ -98,6 +101,56 @@ export async function logSet(
     // Correcting a set later keeps when it was done, not when it was fixed.
     completedAt: log.completedAt ?? Date.now(),
   })
+}
+
+/**
+ * Add an exercise to a session that is already under way — the stair machine
+ * you warmed up on, which is not in the workout. It goes last, as one timed
+ * set for cardio or three sets otherwise, and returns its position. The
+ * set-log ids are the usual deterministic ones, so an exercise already in the
+ * session is not added twice: its position comes back instead.
+ */
+export async function addToSession(
+  userId: string,
+  session: LocalSession,
+  exercise: LocalExercise,
+): Promise<number> {
+  const db = getDb(userId)
+  const logs = (await db.setLogs.where('sessionId').equals(session.id).toArray()).filter(
+    (log) => log.deletedAt === null,
+  )
+  const already = logs.find((log) => log.exerciseId === exercise.id)
+  if (already) return already.position
+
+  const position = Math.max(0, ...logs.map((log) => log.position)) + 1
+  const cardio = isCardio(exercise)
+
+  await db.transaction('rw', [db.setLogs, db.outbox, db.meta], async () => {
+    for (let setIndex = 1; setIndex <= (cardio ? 1 : 3); setIndex += 1) {
+      await writeRow(userId, 'setLogs', {
+        id: setLogId(session.id, exercise.id, setIndex),
+        sessionId: session.id,
+        exerciseId: exercise.id,
+        exerciseName: exercise.name,
+        position,
+        setIndex,
+        // No prescription: the steppers start from last time instead.
+        targetReps: null,
+        targetRepsMax: null,
+        targetWeightKg: null,
+        targetDurationSec: null,
+        restSec: cardio ? null : 90,
+        weightKg: null,
+        reps: null,
+        durationSec: null,
+        isWarmup: false,
+        completedAt: null,
+        performedAt: dateToEpoch(session.scheduledFor),
+        notes: null,
+      })
+    }
+  })
+  return position
 }
 
 export async function clearSet(userId: string, log: LocalSetLog): Promise<void> {

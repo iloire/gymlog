@@ -1,6 +1,7 @@
 'use client'
 
 import type { LocalSetLog } from '@/lib/db/dexie'
+import { formatSet } from '@/lib/format'
 
 /**
  * A row of squares: filled means done, outlined means still to do. You read
@@ -35,7 +36,7 @@ export function SetSquares({
               aria-pressed={active}
               aria-label={
                 done
-                  ? `Set ${log.setIndex}, ${log.weightKg ?? '—'} kg × ${log.reps ?? '—'}`
+                  ? `Set ${log.setIndex}, ${log.durationSec != null ? formatSet(log) : `${log.weightKg ?? '—'} kg × ${log.reps ?? '—'}`}`
                   : `Set ${log.setIndex}`
               }
               className={`flex h-14 min-w-14 flex-col items-center justify-center rounded-sm px-2 ${
@@ -46,7 +47,12 @@ export function SetSquares({
                     : 'border border-line text-ink-dim'
               }`}
             >
-              {done ? (
+              {done && log.durationSec != null ? (
+                <>
+                  <span className="figure text-base leading-none">{Number((log.durationSec / 60).toFixed(1))}</span>
+                  <span className="mt-0.5 text-[11px] leading-none opacity-80">min</span>
+                </>
+              ) : done ? (
                 <>
                   <span className="figure text-base leading-none">{log.weightKg ?? '—'}</span>
                   <span className="mt-0.5 text-[11px] leading-none opacity-80">×{log.reps ?? '—'}</span>

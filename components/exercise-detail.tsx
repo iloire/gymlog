@@ -6,6 +6,7 @@ import { ExerciseFrames } from '@/components/exercise-frames'
 import { FavoriteButton } from '@/components/favorite-button'
 import { getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
+import { formatSet } from '@/lib/format'
 import { exerciseNoteId } from '@/lib/id'
 
 /**
@@ -104,7 +105,7 @@ export function ExerciseDetail({
                   {new Date(sets[0]?.performedAt ?? 0).toLocaleDateString()}
                 </span>
                 <span className="figure text-right text-[15px]">
-                  {sets.map((set) => `${set.weightKg ?? '—'}×${set.reps ?? '—'}`).join('  ')}
+                  {sets.map(formatSet).join('  ')}
                 </span>
               </li>
             ))}

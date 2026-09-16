@@ -259,6 +259,7 @@ export async function adminUserDetail(userId: string) {
           setIndex: setLogs.setIndex,
           weightKg: setLogs.weightKg,
           reps: setLogs.reps,
+          durationSec: setLogs.durationSec,
           isWarmup: setLogs.isWarmup,
           completedAt: setLogs.completedAt,
         })

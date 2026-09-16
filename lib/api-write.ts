@@ -69,6 +69,7 @@ const workoutExercise = z
     targetReps: z.number().int().min(1).max(100),
     targetRepsMax: z.number().int().min(1).max(100).nullable().default(null),
     targetWeightKg: z.number().min(0).max(1000).nullable().default(null),
+    targetDurationSec: z.number().int().min(1).max(4 * 3600).nullable().default(null),
     restSec: z.number().int().min(0).max(1800).default(90),
     notes: z.string().max(500).nullable().default(null),
   })

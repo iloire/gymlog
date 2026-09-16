@@ -37,6 +37,7 @@ export async function duplicateWorkout(userId: string, templateId: string): Prom
         targetReps: item.targetReps,
         targetRepsMax: item.targetRepsMax,
         targetWeightKg: item.targetWeightKg,
+        targetDurationSec: item.targetDurationSec ?? null,
         restSec: item.restSec,
         notes: item.notes,
       })

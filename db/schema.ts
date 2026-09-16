@@ -172,6 +172,8 @@ export const templateItems = sqliteTable(
     /** Non-null makes the prescription a range, e.g. 8–12. */
     targetRepsMax: integer('target_reps_max'),
     targetWeightKg: real('target_weight_kg'),
+    /** Cardio (a timed exercise) prescribes minutes instead of reps; null otherwise. */
+    targetDurationSec: integer('target_duration_sec'),
     restSec: integer('rest_sec').notNull().default(90),
     notes: text('notes'),
     ...syncColumns,
@@ -286,11 +288,14 @@ export const setLogs = sqliteTable(
     targetReps: integer('target_reps'),
     targetRepsMax: integer('target_reps_max'),
     targetWeightKg: real('target_weight_kg'),
+    targetDurationSec: integer('target_duration_sec'),
     restSec: integer('rest_sec'),
 
     // What actually happened. NULL completedAt = the set is not done yet.
     weightKg: real('weight_kg'),
     reps: integer('reps'),
+    /** How long a timed set (cardio) lasted; null for weight × reps sets. */
+    durationSec: integer('duration_sec'),
     isWarmup: integer('is_warmup', { mode: 'boolean' }).notNull().default(false),
     completedAt: integer('completed_at'),
 

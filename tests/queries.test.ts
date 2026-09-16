@@ -90,6 +90,13 @@ describe('lastPerformance', () => {
     expect(result?.sets.map((set) => set.weightKg)).toEqual([60])
   })
 
+  it('counts a timed set, which has minutes and no reps', async () => {
+    const day = dateToEpoch('2026-09-08')
+    await loggedSet('s-cardio', 1, 0, 0, day, { weightKg: null, reps: null, durationSec: 480 })
+
+    expect((await lastPerformance(USER, SQUAT))?.sets.map((set) => set.durationSec)).toEqual([480])
+  })
+
   it('returns null for an exercise never logged', async () => {
     expect(await lastPerformance(USER, 'Never_Done')).toBeNull()
   })

@@ -58,6 +58,17 @@ describe('summariseSession', () => {
     ])
   })
 
+  it('adds up cardio minutes apart from volume', () => {
+    const entry = summariseSession(session(), [
+      set({ exerciseId: 'Stairmaster', setIndex: 1, durationSec: 480, completedAt: 1_000 }),
+      set({ exerciseId: 'Squat', position: 2, setIndex: 1, weightKg: 60, reps: 5, completedAt: 2_000 }),
+      set({ exerciseId: 'Bike', position: 3, setIndex: 1, durationSec: 300 }),
+    ])
+
+    expect(entry.cardioSec).toBe(480)
+    expect(entry.volumeKg).toBe(300)
+  })
+
   it('has no duration with a single logged set', () => {
     const entry = summariseSession(session(), [set({ reps: 5, completedAt: 1 })])
     expect(entry.durationMs).toBeNull()

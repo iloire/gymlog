@@ -36,3 +36,14 @@ export function formatDuration(ms: number): string {
   const rest = minutes % 60
   return rest === 0 ? `${Math.floor(minutes / 60)} h` : `${Math.floor(minutes / 60)} h ${rest} min`
 }
+
+/** '8 min', '7.5 min'. Timed sets are stored in seconds and entered in minutes. */
+export function formatMinutes(seconds: number): string {
+  return `${Number((seconds / 60).toFixed(1))} min`
+}
+
+/** One logged set: '8 min' when timed, '80×5' with a weight, '12 reps' without — a bodyweight set, not a 0 kg one. */
+export function formatSet(set: { weightKg: number | null; reps: number | null; durationSec?: number | null }): string {
+  if (set.durationSec != null) return formatMinutes(set.durationSec)
+  return set.weightKg ? `${set.weightKg}×${set.reps ?? 0}` : `${set.reps ?? 0} reps`
+}

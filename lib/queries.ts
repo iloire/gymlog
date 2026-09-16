@@ -90,7 +90,7 @@ export async function lastPerformance(
         alive(log) &&
         log.completedAt !== null &&
         !log.isWarmup &&
-        log.reps !== null &&
+        (log.reps !== null || log.durationSec != null) &&
         log.sessionId !== beforeSessionId,
     )
     .limit(60)

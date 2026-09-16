@@ -1,24 +1,36 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronLeft, ChevronRight, Info } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Info, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseFrames } from '@/components/exercise-frames'
+import { ExercisePicker } from '@/components/exercise-picker'
 import { RestTimer } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
 import { SetSquares } from '@/components/set-squares'
 import { Stepper } from '@/components/stepper'
-import { getDb, type LocalSetLog } from '@/lib/db/dexie'
+import { isCardio } from '@/lib/cardio'
+import { getDb, type LocalExercise, type LocalSetLog } from '@/lib/db/dexie'
+import { formatMinutes } from '@/lib/format'
 import { lastPerformance, type LastPerformance } from '@/lib/queries'
-import { activeSet as pickActiveSet, clearSet, finishSession, logSet } from '@/lib/sessions'
+import {
+  activeSet as pickActiveSet,
+  addToSession,
+  clearSet,
+  finishSession,
+  logSet,
+} from '@/lib/sessions'
 import { useWakeLock } from '@/lib/use-wake-lock'
 
 const WEIGHT_STEP = 2.5 // the smallest pair of plates
 const REP_STEP = 1
+const MINUTE_STEP = 1
+
+type Values = { weightKg: number | null; reps: number | null; durationSec: number | null }
 
 /**
  * The session lives at `/session?id=…` rather than `/session/<id>`.
@@ -36,8 +48,9 @@ function Session() {
   const [position, setPosition] = useState(0)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [restEndsAt, setRestEndsAt] = useState<number | null>(null)
-  const [draft, setDraft] = useState<{ id: string; weightKg: number | null; reps: number | null } | null>(null)
+  const [draft, setDraft] = useState<({ id: string } & Values) | null>(null)
   const [viewingExercise, setViewingExercise] = useState(false)
+  const [picking, setPicking] = useState(false)
 
   useWakeLock()
 
@@ -95,7 +108,7 @@ function Session() {
   //      third should say 77.5, not last week's number,
   //   3. the same set number last time, then any set last time,
   //   4. the prescription.
-  function suggestion(log: LocalSetLog) {
+  function suggestion(log: LocalSetLog): Values {
     const justDone = groupLogs
       .filter((set) => set.completedAt !== null && set.setIndex < log.setIndex)
       .at(-1)
@@ -105,6 +118,13 @@ function Session() {
       weightKg:
         log.weightKg ?? justDone?.weightKg ?? lastSame?.weightKg ?? lastAny?.weightKg ?? log.targetWeightKg,
       reps: log.reps ?? log.targetReps ?? justDone?.reps ?? lastSame?.reps ?? null,
+      durationSec:
+        log.durationSec ??
+        log.targetDurationSec ??
+        justDone?.durationSec ??
+        lastSame?.durationSec ??
+        lastAny?.durationSec ??
+        null,
     }
   }
 
@@ -119,9 +139,13 @@ function Session() {
       ? draft
       : activeSet
         ? { id: activeSet.id, ...suggestion(activeSet) }
-        : { id: '', weightKg: null, reps: null }
+        : { id: '', weightKg: null, reps: null, durationSec: null }
+  const exercise = exerciseId ? data.exercises.get(exerciseId) : undefined
+  // Cardio by the library's category, or by the rows themselves if the exercise is not loaded.
+  const timed =
+    isCardio(exercise) || groupLogs.some((log) => log.targetDurationSec != null || log.durationSec != null)
   const beatsLastTime =
-    previous && values.weightKg !== null && values.weightKg > (previous.topSet.weightKg ?? 0)
+    !timed && previous && values.weightKg !== null && values.weightKg > (previous.topSet.weightKg ?? 0)
 
   async function completeSet() {
     if (!activeSet || !userId) return
@@ -141,8 +165,16 @@ function Session() {
     }
   }
 
+  async function addExercise(picked: LocalExercise) {
+    if (!userId || !data) return
+    const at = await addToSession(userId, data.session, picked)
+    const index = positions.indexOf(at)
+    setPicking(false)
+    // A new exercise goes last, one past the positions read before it was added.
+    goTo(index === -1 ? positions.length : index)
+  }
+
   const allDone = data.logs.every((log) => log.completedAt !== null)
-  const exercise = exerciseId ? data.exercises.get(exerciseId) : undefined
   const exerciseName = groupLogs[0]?.exerciseName ?? 'Workout'
   const nameAt = (index: number) =>
     data.logs.find((log) => log.position === positions[index])?.exerciseName
@@ -194,6 +226,13 @@ function Session() {
         </ol>
       )}
 
+      {picking && (
+        <ExercisePicker
+          onClose={() => setPicking(false)}
+          onPick={(picked) => void addExercise(picked)}
+        />
+      )}
+
       {viewingExercise && exerciseId && (
         <ExerciseDialog
           userId={userId}
@@ -236,9 +275,15 @@ function Session() {
               {previous.sets.map((set, index) => (
                 <span key={set.setIndex} className="figure text-ink">
                   {index > 0 && <span className="text-ink-dim">, </span>}
-                  {set.weightKg ?? '—'}
-                  <span className="text-ink-dim">×</span>
-                  {set.reps ?? '—'}
+                  {set.durationSec != null ? (
+                    formatMinutes(set.durationSec)
+                  ) : (
+                    <>
+                      {set.weightKg ?? '—'}
+                      <span className="text-ink-dim">×</span>
+                      {set.reps ?? '—'}
+                    </>
+                  )}
                 </span>
               ))}
             </>
@@ -261,19 +306,31 @@ function Session() {
             {/* Stacked, not side by side: two steppers across a phone leave ~58px for
                 the number, which truncates 77.5 and anything over 100 kg. */}
             <div className="flex flex-col gap-4">
-              <Stepper
-                label="Weight"
-                unit="kg"
-                value={values.weightKg}
-                step={WEIGHT_STEP}
-                onChange={(weightKg) => setDraft({ ...values, weightKg })}
-              />
-              <Stepper
-                label="Reps"
-                value={values.reps}
-                step={REP_STEP}
-                onChange={(reps) => setDraft({ ...values, reps })}
-              />
+              {timed ? (
+                <Stepper
+                  label="Time"
+                  unit="min"
+                  value={values.durationSec === null ? null : Number((values.durationSec / 60).toFixed(1))}
+                  step={MINUTE_STEP}
+                  onChange={(minutes) => setDraft({ ...values, durationSec: Math.round(minutes * 60) })}
+                />
+              ) : (
+                <>
+                  <Stepper
+                    label="Weight"
+                    unit="kg"
+                    value={values.weightKg}
+                    step={WEIGHT_STEP}
+                    onChange={(weightKg) => setDraft({ ...values, weightKg })}
+                  />
+                  <Stepper
+                    label="Reps"
+                    value={values.reps}
+                    step={REP_STEP}
+                    onChange={(reps) => setDraft({ ...values, reps })}
+                  />
+                </>
+              )}
             </div>
 
             {beatsLastTime && (
@@ -287,7 +344,11 @@ function Session() {
               onClick={() => void completeSet()}
               className="mt-6 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift"
             >
-              {activeSet.completedAt ? `Update set ${activeSet.setIndex}` : `Log set ${activeSet.setIndex}`}
+              {timed && groupLogs.length === 1
+                ? `${activeSet.completedAt ? 'Update' : 'Log'} ${values.durationSec ? formatMinutes(values.durationSec) : 'time'}`
+                : activeSet.completedAt
+                  ? `Update set ${activeSet.setIndex}`
+                  : `Log set ${activeSet.setIndex}`}
             </button>
 
             {activeSet.completedAt && (
@@ -334,6 +395,15 @@ function Session() {
             </button>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={() => setPicking(true)}
+          className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-md border border-line text-sm text-ink-dim"
+        >
+          <Plus size={16} aria-hidden />
+          Add exercise
+        </button>
 
         {allDone && !data.session.completedAt && (
           <button
