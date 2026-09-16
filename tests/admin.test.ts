@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { exercises, sessions, setLogs, users } from '@/db/schema'
+import { weekStart } from '@/lib/calendar'
 
 import { createTestDb, insertUser, type TestDb } from './helpers/server-db'
 
@@ -14,7 +15,7 @@ vi.mock('@/db', () => ({
 }))
 vi.mock('@/lib/auth', () => ({ currentUserId: async () => state.userId }))
 
-const { adminOverview, adminUserDetail, requireAdmin, weekStart } = await import('@/lib/admin')
+const { adminOverview, adminUserDetail, requireAdmin } = await import('@/lib/admin')
 
 const today = new Date().toISOString().slice(0, 10)
 const now = Date.now()
@@ -98,13 +99,5 @@ describe('admin reads', () => {
 
   it('404s an unknown account', async () => {
     await expectNotFound(adminUserDetail('nobody'))
-  })
-})
-
-describe('weekStart', () => {
-  it('returns the Monday of the week', () => {
-    expect(weekStart('2026-09-15')).toBe('2026-09-14')
-    expect(weekStart('2026-09-14')).toBe('2026-09-14')
-    expect(weekStart('2026-09-20')).toBe('2026-09-14')
   })
 })

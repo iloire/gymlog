@@ -169,6 +169,10 @@ Sessions done versus planned this week, total volume, and a gentle streak — en
 guilt-tripping. The admin panel's 12-week training strip (`lib/admin.ts`) is a ready starting
 point for a personal version.
 
+~~The streak~~ ✅ — History opens on a week streak and a month calendar (`lib/calendar.ts`,
+`components/training-calendar.tsx`). Weeks count, not days, so a rest day never breaks it. Still to
+do: sessions done versus planned, and weekly volume.
+
 ### 3.5 Notes and effort — S
 
 Per-session and per-set notes (the `notes` columns exist; no UI writes them), and an optional

@@ -8,9 +8,12 @@ import { useState } from 'react'
 import { Nav } from '@/components/nav'
 import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
+import { TrainingCalendar } from '@/components/training-calendar'
+import { streakMessage, weekStreak } from '@/lib/calendar'
 import { getDb } from '@/lib/db/dexie'
 import { formatDay, formatDuration, formatMinutes, kg } from '@/lib/format'
-import { daysAgo, rotation, sessionHistory } from '@/lib/history'
+import { daysAgo, rotation, sessionHistory, trainedOn } from '@/lib/history'
+import { today } from '@/lib/queries'
 import type { HistoryEntry } from '@/lib/session-summary'
 import { startSession } from '@/lib/sessions'
 
@@ -18,6 +21,7 @@ export default function HistoryPage() {
   const userId = useUserId()
   const router = useRouter()
   const [starting, setStarting] = useState(false)
+  const [selected, setSelected] = useState<string | null>(null)
 
   const data = useLiveQuery(async () => {
     if (!userId) return null
@@ -38,6 +42,9 @@ export default function HistoryPage() {
   }
 
   const count = data.history.length
+  const date = today()
+  const trained = new Set(data.history.map((entry) => entry.session.scheduledFor))
+  const streak = weekStreak(trained, date)
 
   return (
     <>
@@ -48,6 +55,36 @@ export default function HistoryPage() {
             ? 'Every workout you log shows up here.'
             : `${count} ${count === 1 ? 'workout' : 'workouts'} logged`}
         </p>
+
+        {count > 0 && (
+          <>
+            <section className="mt-7 flex items-center gap-4" aria-label="Streak">
+              <span className="figure text-6xl leading-none">{streak.current}</span>
+              <span className="min-w-0">
+                <span className="block text-[15px]">
+                  {streak.current === 1 ? 'week' : 'weeks'} in a row
+                  <span className="text-ink-dim">
+                    {' '}
+                    · {streak.thisWeek} {streak.thisWeek === 1 ? 'day' : 'days'} this week
+                  </span>
+                </span>
+                <span className="block text-sm text-ink-dim">{streakMessage(streak)}</span>
+              </span>
+            </section>
+
+            <div className="mt-7">
+              <TrainingCalendar trained={trained} today={date} selected={selected} onSelect={setSelected} />
+            </div>
+
+            {selected && (
+              <ul className="mt-4 divide-y divide-line border-y border-line" aria-label={formatDay(selected)}>
+                {trainedOn(data.history, selected).map((entry) => (
+                  <SessionRow key={entry.session.id} entry={entry} open />
+                ))}
+              </ul>
+            )}
+          </>
+        )}
 
         {data.rotation.length > 1 && count > 0 && (
           <section className="mt-7">
@@ -103,12 +140,12 @@ export default function HistoryPage() {
   )
 }
 
-function SessionRow({ entry }: { entry: HistoryEntry }) {
+function SessionRow({ entry, open = false }: { entry: HistoryEntry; open?: boolean }) {
   const { session, setsDone, setsPlanned, volumeKg, cardioSec, durationMs, exercises } = entry
 
   return (
     <li>
-      <details className="group">
+      <details className="group" open={open}>
         <summary className="flex cursor-pointer list-none items-center gap-3 rounded-sm py-3 outline-none focus-visible:ring-2 focus-visible:ring-plate-blue-lift [&::-webkit-details-marker]:hidden">
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[15px]">{session.templateName}</span>

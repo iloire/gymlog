@@ -14,6 +14,7 @@ import {
   workoutTemplates,
 } from '@/db/schema'
 import { currentUserId } from '@/lib/auth'
+import { addDays, weekStart } from '@/lib/calendar'
 
 /**
  * The admin data access layer. Everything under /admin reads through here, and
@@ -25,8 +26,6 @@ import { currentUserId } from '@/lib/auth'
  * bar, so the local-first rule does not apply to it. Nothing here is written
  * to IndexedDB or the outbox, and the service worker never caches /admin.
  */
-
-const DAY_MS = 86_400_000
 
 /**
  * `"table"."column"`. Drizzle drops the table prefix when a select reads from a
@@ -65,13 +64,6 @@ const trained = sql`exists (
     and ${q(setLogs.deletedAt)} is null
 )`
 
-/** 'YYYY-MM-DD' for the Monday starting the week that holds `isoDate`. */
-export function weekStart(isoDate: string): string {
-  const date = new Date(`${isoDate}T00:00:00Z`)
-  const offset = (date.getUTCDay() + 6) % 7
-  return new Date(date.getTime() - offset * DAY_MS).toISOString().slice(0, 10)
-}
-
 export type WeekActivity = { weekOf: string; days: number }
 
 /** The last `weeks` Mondays, oldest first, each with how many days were trained. */
@@ -82,9 +74,9 @@ function bucketWeeks(dates: string[], today: string, weeks: number): WeekActivit
     counts.set(week, (counts.get(week) ?? new Set()).add(date))
   }
 
-  const thisWeek = new Date(`${weekStart(today)}T00:00:00Z`).getTime()
+  const thisWeek = weekStart(today)
   return Array.from({ length: weeks }, (_, i) => {
-    const weekOf = new Date(thisWeek - (weeks - 1 - i) * 7 * DAY_MS).toISOString().slice(0, 10)
+    const weekOf = addDays(thisWeek, -(weeks - 1 - i) * 7)
     return { weekOf, days: counts.get(weekOf)?.size ?? 0 }
   })
 }
@@ -92,12 +84,6 @@ function bucketWeeks(dates: string[], today: string, weeks: number): WeekActivit
 /** Server calendar date. Close enough for a desk view; screens use the device's. */
 function serverToday(): string {
   return new Date().toISOString().slice(0, 10)
-}
-
-function daysBefore(isoDate: string, days: number): string {
-  return new Date(new Date(`${isoDate}T00:00:00Z`).getTime() - days * DAY_MS)
-    .toISOString()
-    .slice(0, 10)
 }
 
 // --------------------------------------------------------------- overview
@@ -156,7 +142,7 @@ export async function adminOverview(): Promise<AdminOverview> {
     .orderBy(desc(users.createdAt))
 
   const today = serverToday()
-  const since = weekStart(daysBefore(today, (OVERVIEW_WEEKS - 1) * 7))
+  const since = weekStart(addDays(today, -(OVERVIEW_WEEKS - 1) * 7))
 
   const trainedDays = await db
     .selectDistinct({ userId: sessions.userId, date: sessions.scheduledFor })
@@ -284,7 +270,7 @@ export async function adminUserDetail(userId: string) {
       and(
         eq(sessions.userId, userId),
         isNull(sessions.deletedAt),
-        gte(sessions.scheduledFor, weekStart(daysBefore(today, (DETAIL_WEEKS - 1) * 7))),
+        gte(sessions.scheduledFor, weekStart(addDays(today, -(DETAIL_WEEKS - 1) * 7))),
         trained,
       ),
     )

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-16 12:58
+
+- **Training calendar and week streak on History.** History opens on how many weeks in a row you
+  have trained, with a line on what keeps it going, and a month calendar where trained days fill in
+  plate blue and a rule lights beside each week that counts. Rest days are never marked as missed,
+  and this week only breaks the streak once it is over. Tap a trained day to see its workouts; page
+  back through earlier months.
+
 ## 2026-09-16 11:34
 
 - **Body-part badges on Workouts.** Each row on the Workouts list shows what the workout covers —
