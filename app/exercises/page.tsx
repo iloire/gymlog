@@ -5,10 +5,13 @@ import { Search } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
+import { useEquipment } from '@/components/equipment-picker'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import {
   ExerciseFilterChips,
+  facetOptions,
   filterExercises,
+  isFiltered,
   NO_FILTER,
   primaryMuscles,
 } from '@/components/exercise-filters'
@@ -16,12 +19,14 @@ import { FavoriteButton } from '@/components/favorite-button'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
+import { exerciseEquipment } from '@/lib/equipment'
 import { favoriteExerciseIds } from '@/lib/favorites'
 
 export default function ExercisesPage() {
   const userId = useUserId()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState(NO_FILTER)
+  const equipment = useEquipment()
 
   const exercises = useLiveQuery(
     async () => (userId ? getDb(userId).exercises.toArray() : []),
@@ -36,11 +41,14 @@ export default function ExercisesPage() {
   )
 
   const muscles = useMemo(() => primaryMuscles(exercises), [exercises])
+  const options = useMemo(() => facetOptions(exercises), [exercises])
+  const have = useMemo(() => (equipment ? new Set(equipment) : null), [equipment])
 
   const results = useMemo(
-    () => filterExercises(exercises, filter, query, favorites),
-    [exercises, filter, query, favorites],
+    () => filterExercises(exercises, filter, query, favorites, have),
+    [exercises, filter, query, favorites, have],
   )
+  const narrowed = isFiltered(filter) || query.trim() !== ''
 
   return (
     <>
@@ -65,14 +73,30 @@ export default function ExercisesPage() {
 
         <ExerciseFilterChips
           muscles={muscles}
+          options={options}
           filter={filter}
           onChange={setFilter}
+          hasEquipment={equipment !== null}
           className="-mx-5 mt-3 px-5 pb-1"
+          panelClassName="mt-3 rounded-md border border-line bg-surface p-4"
         />
 
-        {filter.favoritesOnly && results.length === 0 && (
+        {narrowed && exercises.length > 0 && (
+          <p className="mt-4 flex items-baseline justify-between text-sm text-ink-dim">
+            {results.length === 1 ? '1 exercise' : `${results.length} exercises`}
+            {isFiltered(filter) && (
+              <button type="button" onClick={() => setFilter(NO_FILTER)} className="text-ink underline">
+                Clear filters
+              </button>
+            )}
+          </p>
+        )}
+
+        {results.length === 0 && exercises.length > 0 && (
           <p className="mt-6 border-y border-line py-6 text-[15px] text-ink-dim">
-            Tap the star on an exercise to keep it here, and in the picker when you build a workout.
+            {filter.favoritesOnly && favorites.size === 0
+              ? 'Tap the star on an exercise to keep it here, and in the picker when you build a workout.'
+              : 'Nothing matches. Try fewer filters.'}
           </p>
         )}
 
@@ -92,7 +116,7 @@ export default function ExercisesPage() {
                 <ExerciseFrames exercise={exercise} className="aspect-square w-full" />
                 <span className="mt-2 block text-sm leading-snug">{exercise.name}</span>
                 <span className="block text-xs capitalize text-ink-dim">
-                  {exercise.equipment ?? 'bodyweight'}
+                  {exerciseEquipment(exercise)}
                 </span>
               </Link>
             </li>

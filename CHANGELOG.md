@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-16 07:49
+
+- **More ways to find an exercise.** A *Filters* button on the Exercises page and in the workout
+  editor's picker opens equipment, type (strength, stretching, powerlifting…), level, compound or
+  isolation, and push or pull. Pick several in a group to match any of them (barbell or
+  dumbbells); groups combine. *My equipment* shows only what the equipment chosen on
+  Programmes allows. Search matches every word in any order, so "incline press" finds Barbell
+  Incline Bench Press, and a count with *Clear filters* shows how many are left. Exercises with no
+  equipment in the library now read *Bodyweight* everywhere instead of *Body Only* on some.
+
 ## 2026-09-15 20:31
 
 - **Exercise library grows from 438 to 859 exercises.** The import filter kept only beginner and

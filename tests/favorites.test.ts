@@ -73,7 +73,7 @@ describe('filterExercises', () => {
       'Squat',
     ])
     expect(
-      names(filterExercises(library, { muscle: 'quadriceps', favoritesOnly: true }, '', favorites)),
+      names(filterExercises(library, { ...NO_FILTER, muscle: 'quadriceps', favoritesOnly: true }, '', favorites)),
     ).toEqual(['Squat'])
     expect(names(filterExercises(library, { ...NO_FILTER, favoritesOnly: true }, 'cu', favorites))).toEqual([
       'Curl',

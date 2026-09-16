@@ -42,6 +42,14 @@ export function missingEquipment(exercise: EquipmentExercise, have: ReadonlySet<
   return exerciseNeeds(exercise).filter((item) => !have.has(item))
 }
 
+/**
+ * The library's equipment, with `body only` and the empty field most stretches
+ * and bodyweight moves carry read as one `bodyweight`.
+ */
+export function exerciseEquipment(exercise: Pick<LocalExercise, 'equipment'>): string {
+  return !exercise.equipment || exercise.equipment === 'body only' ? 'bodyweight' : exercise.equipment
+}
+
 export function equipmentName(id: string): string {
   return EQUIPMENT.items.find((item) => item.id === id)?.name ?? id
 }

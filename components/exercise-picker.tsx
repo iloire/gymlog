@@ -4,15 +4,18 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { Search, Star, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
+import { useEquipment } from '@/components/equipment-picker'
 import { useUserId } from '@/components/session-boot'
 import {
   ExerciseFilterChips,
+  facetOptions,
   filterExercises,
   NO_FILTER,
   primaryMuscles,
 } from '@/components/exercise-filters'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
+import { exerciseEquipment } from '@/lib/equipment'
 import { favoriteExerciseIds } from '@/lib/favorites'
 
 export function ExercisePicker({
@@ -25,6 +28,7 @@ export function ExercisePicker({
   const userId = useUserId()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState(NO_FILTER)
+  const equipment = useEquipment()
 
   const exercises = useLiveQuery(
     async () => (userId ? getDb(userId).exercises.toArray() : []),
@@ -39,10 +43,12 @@ export function ExercisePicker({
   )
 
   const muscles = useMemo(() => primaryMuscles(exercises), [exercises])
+  const options = useMemo(() => facetOptions(exercises), [exercises])
+  const have = useMemo(() => (equipment ? new Set(equipment) : null), [equipment])
 
   const results = useMemo(
-    () => filterExercises(exercises, filter, query, favorites).slice(0, 80),
-    [exercises, filter, query, favorites],
+    () => filterExercises(exercises, filter, query, favorites, have).slice(0, 80),
+    [exercises, filter, query, favorites, have],
   )
 
   return (
@@ -66,9 +72,12 @@ export function ExercisePicker({
 
       <ExerciseFilterChips
         muscles={muscles}
+        options={options}
         filter={filter}
         onChange={setFilter}
+        hasEquipment={equipment !== null}
         className="border-b border-line px-4 py-3"
+        panelClassName="max-h-[45vh] overflow-y-auto border-b border-line bg-surface px-4 py-3"
       />
 
       <ul className="flex-1 divide-y divide-line overflow-y-auto">
@@ -83,7 +92,7 @@ export function ExercisePicker({
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[15px]">{exercise.name}</span>
                 <span className="block truncate text-sm capitalize text-ink-dim">
-                  {exercise.equipment ?? 'bodyweight'}
+                  {exerciseEquipment(exercise)}
                 </span>
               </span>
               {favorites.has(exercise.id) && (
@@ -100,7 +109,9 @@ export function ExercisePicker({
           <li className="px-4 py-8 text-center text-ink-dim">
             {filter.favoritesOnly && favorites.size === 0
               ? 'No favourites yet. Star exercises on the Exercises page.'
-              : `Nothing matches “${query}”.`}
+              : query.trim()
+                ? `Nothing matches “${query}”.`
+                : 'Nothing matches. Try fewer filters.'}
           </li>
         )}
       </ul>
