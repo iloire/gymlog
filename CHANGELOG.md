@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-16 09:55
+
+- Installed on the home screen, every screen now starts below the phone's status bar. The gym
+  screen's back link and *Exercise 3 of 4* sat under the clock, so there was no visible way back;
+  the exercise info dialog's close button could land there too.
+
 ## 2026-09-16 09:45
 
 - **A note on an exercise, for that workout.** Under the log button on the gym screen a quiet

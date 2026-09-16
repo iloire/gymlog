@@ -14,7 +14,7 @@ export function AuthShell({
   return (
     // Phone: the picture across the top with the wordmark on its lower edge and
     // the form below. Desk: the picture fills the left, the form the right.
-    <main className="min-h-dvh lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+    <main className="flex-1 lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
       <div className="relative h-[40dvh] min-h-60 lg:sticky lg:top-0 lg:h-dvh">
         <AuthHero className="absolute inset-0" />
         <div className="absolute inset-x-0 bottom-0 px-6 lg:px-14 lg:pb-14">

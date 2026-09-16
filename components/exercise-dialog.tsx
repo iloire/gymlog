@@ -47,7 +47,7 @@ export function ExerciseDialog({
         // A click on the dialog element itself is a click on the backdrop.
         if (event.target === event.currentTarget) close()
       }}
-      className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-md border border-line bg-ground p-0 text-ink backdrop:bg-black/70"
+      className="m-auto max-h-[calc(100dvh-2rem-2*env(safe-area-inset-top))] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-md border border-line bg-ground p-0 text-ink backdrop:bg-black/70"
     >
       <div className="px-5 pt-3 pb-6">
         <div className="flex justify-end">

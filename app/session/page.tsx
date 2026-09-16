@@ -185,7 +185,7 @@ function Session() {
   const nextName = position < positions.length - 1 ? nameAt(position + 1) : undefined
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex flex-1 flex-col">
       <header className="flex items-center justify-between px-4 pt-3 pb-1">
         <Link href="/" className="flex items-center gap-1 text-sm text-ink-dim">
           <ChevronLeft size={18} aria-hidden />

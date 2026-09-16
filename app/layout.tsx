@@ -49,7 +49,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-full flex flex-col bg-ground text-ink">
+      {/* Installed on a phone the page runs under a translucent status bar
+          (statusBarStyle above, viewportFit cover), so every screen starts below it. */}
+      <body className="min-h-full flex flex-col bg-ground text-ink pt-[env(safe-area-inset-top)]">
         <SessionBoot>{children}</SessionBoot>
       </body>
     </html>
