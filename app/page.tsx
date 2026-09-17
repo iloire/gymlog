@@ -1,7 +1,7 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Plus } from 'lucide-react'
+import { ChevronRight, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -10,20 +10,22 @@ import { BodyPartBadges } from '@/components/body-part-badges'
 import { ExercisePicker } from '@/components/exercise-picker'
 import { Nav } from '@/components/nav'
 import { SessionSets } from '@/components/session-sets'
-import { useUserId } from '@/components/session-boot'
+import { useSync, useUserId } from '@/components/session-boot'
 import { SyncBadge } from '@/components/sync-badge'
 import { bodyParts } from '@/lib/body-parts'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
 import { formatMinutes, kg } from '@/lib/format'
-import { daysAgo, rotation, sessionHistory, trainedOn, type Rotation } from '@/lib/history'
+import { daysAgo, isNewAccount, rotation, sessionHistory, trainedOn, type Rotation } from '@/lib/history'
 import type { HistoryEntry } from '@/lib/session-summary'
 import { dayOfWeek, templateForDay, templateItems, today } from '@/lib/queries'
 import { addToSession, startSession } from '@/lib/sessions'
+import { lastSyncAt } from '@/lib/sync/client'
 
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 export default function TodayPage() {
   const userId = useUserId()
+  const { status } = useSync()
   const router = useRouter()
   const [starting, setStarting] = useState(false)
 
@@ -35,7 +37,12 @@ export default function TodayPage() {
 
     const history = await sessionHistory(userId)
     // Off-schedule, the workout you have gone longest without comes first.
-    const templates = rotation(await db.workoutTemplates.toArray(), history)
+    const allTemplates = await db.workoutTemplates.toArray()
+    const templates = rotation(allTemplates, history)
+    // An empty phone is only a new account once a sync has said so: signing in
+    // on a second device starts just as empty, until the first pull lands.
+    const fresh = isNewAccount(allTemplates, history)
+    const synced = (await lastSyncAt(userId)) !== null
     // Once a set is logged today, the screen is today's log rather than a choice of workout.
     const trained = await Promise.all(
       trainedOn(history, date).map(async (entry) => {
@@ -48,7 +55,7 @@ export default function TodayPage() {
     )
 
     if (!scheduled) {
-      return { scheduled: null, templates, trained, session: null, exercises: [] as string[] }
+      return { scheduled: null, templates, trained, session: null, exercises: [] as string[], fresh, synced }
     }
 
     const template = await db.workoutTemplates.get(scheduled.templateId)
@@ -69,6 +76,8 @@ export default function TodayPage() {
       trained,
       session: session ?? null,
       exercises,
+      fresh,
+      synced,
     }
   }, [userId])
 
@@ -84,7 +93,12 @@ export default function TodayPage() {
   // useLiveQuery yields undefined until IndexedDB answers. Rendering the empty
   // state during that gap tells you it is a rest day when it isn't — on a cold
   // start in the gym that is the difference between training and going home.
-  if (plan === undefined) {
+  // The same goes for an empty phone whose first sync is still on its way: it
+  // may be a new account, or yours on a new device. With no signal there is
+  // nothing to wait for.
+  const awaitingFirstSync = plan?.fresh && !plan.synced && status !== 'offline' && status !== 'error'
+
+  if (plan === undefined || awaitingFirstSync) {
     return (
       <>
         <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8" aria-busy="true">
@@ -95,6 +109,8 @@ export default function TodayPage() {
       </>
     )
   }
+
+  if (plan?.fresh) return <Welcome />
 
   if (plan?.trained.length) {
     const scheduled = plan.scheduled
@@ -190,26 +206,67 @@ export default function TodayPage() {
             {plan?.templates.length ? (
               <WorkoutList templates={plan.templates} onStart={(id) => void start(id, null)} />
             ) : (
-              <>
-                <Link
-                  href="/programmes"
-                  className="mt-6 flex h-16 w-full items-center justify-center rounded-md bg-plate-blue text-lg font-semibold text-white"
-                >
-                  Pick a premade programme
-                </Link>
-                <Link
-                  href="/workouts/new"
-                  className="mt-3 flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
-                >
-                  Build your own workout
-                </Link>
-              </>
+              // Every workout archived or deleted, with a log behind you.
+              <SetupChoices />
             )}
           </section>
         )}
       </main>
       <Nav />
     </>
+  )
+}
+
+/**
+ * A new account's first screen. Nothing is scheduled because nothing exists
+ * yet, so it says what the app is for and offers the two ways to get a plan.
+ */
+function Welcome() {
+  return (
+    <>
+      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
+        <header>
+          <p className="text-sm text-ink-dim">Welcome to gymlog</p>
+          <h1 className="figure mt-1 text-4xl leading-[1.05]">Start with a plan</h1>
+          <p className="mt-3 text-[15px] text-ink-dim">
+            Good to have you. Each day this screen shows the workout you planned, and you log the
+            weight and reps you actually lifted. First it needs a plan.
+          </p>
+        </header>
+
+        <SetupChoices />
+      </main>
+      <Nav />
+    </>
+  )
+}
+
+/** The two ways to get workouts: copy a premade programme, or write your own. */
+function SetupChoices() {
+  return (
+    <div className="mt-6 flex flex-col gap-3">
+      <Link
+        href="/programmes"
+        className="flex items-center gap-3 rounded-md bg-plate-blue px-4 py-4 text-white transition-colors hover:bg-plate-blue-lift"
+      >
+        <span className="min-w-0 flex-1">
+          <span className="block text-lg font-semibold">Pick a premade programme</span>
+          <span className="mt-0.5 block text-sm opacity-85">
+            A ready-made week matched to the equipment you have. Change anything afterwards.
+          </span>
+        </span>
+        <ChevronRight size={20} aria-hidden className="shrink-0" />
+      </Link>
+      <Link href="/workouts/new" className="flex items-center gap-3 rounded-md border border-line px-4 py-4">
+        <span className="min-w-0 flex-1">
+          <span className="block text-lg font-semibold">Build your own</span>
+          <span className="mt-0.5 block text-sm text-ink-dim">
+            Write a workout exercise by exercise, then put it on the days you train.
+          </span>
+        </span>
+        <ChevronRight size={20} aria-hidden className="shrink-0 text-ink-dim" />
+      </Link>
+    </div>
   )
 }
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-17 22:40
+
+- **A new account opens on a welcome, not "Rest day".** With no workouts and nothing logged, Today
+  said *Rest day* and "nothing is scheduled" — untrue, and no way to greet anyone. It now welcomes
+  you and offers the two ways to a plan, each with a line on what it does: *Pick a premade
+  programme* or *Build your own*. Signing in to an existing account on a new phone shows the
+  loading state until the first sync lands, rather than welcoming you to an app you already use.
+
 ## 2026-09-17 22:36
 
 - **Sets are logged in order.** Any set square could be tapped, so set 3 could be logged with 1 and

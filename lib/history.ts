@@ -37,6 +37,15 @@ export function trainedOn(history: HistoryEntry[], date: string): HistoryEntry[]
   return history.filter((entry) => entry.session.scheduledFor === date)
 }
 
+/**
+ * Nothing built and nothing logged: the account has not been set up yet, which
+ * is not the same as a day with nothing scheduled. An archived workout still
+ * counts as having been here.
+ */
+export function isNewAccount(templates: LocalWorkoutTemplate[], history: HistoryEntry[]): boolean {
+  return history.length === 0 && !templates.some(alive)
+}
+
 export type Rotation = { template: LocalWorkoutTemplate; lastDone: string | null }
 
 /**

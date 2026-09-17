@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { destroyDb, type LocalSession, type LocalSetLog, type LocalWorkoutTemplate } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
-import { daysAgo, daysBetween, rotation, sessionHistory, trainedOn } from '@/lib/history'
+import { daysAgo, daysBetween, isNewAccount, rotation, sessionHistory, trainedOn } from '@/lib/history'
 import { setLogId } from '@/lib/id'
 import { summariseSession } from '@/lib/session-summary'
 import { logSet, startSession } from '@/lib/sessions'
@@ -167,6 +167,23 @@ describe('rotation', () => {
     )
 
     expect(order.map((r) => r.template.name)).toEqual(['Arms', 'Legs'])
+  })
+})
+
+describe('isNewAccount', () => {
+  it('is new with no workouts and nothing logged', () => {
+    expect(isNewAccount([], [])).toBe(true)
+    expect(isNewAccount([template('t1', 'Deleted', { deletedAt: 1 })], [])).toBe(true)
+  })
+
+  it('is not new once a workout exists, even an archived one', () => {
+    expect(isNewAccount([template('t1', 'Push')], [])).toBe(false)
+    expect(isNewAccount([template('t1', 'Old', { archivedAt: 1 })], [])).toBe(false)
+  })
+
+  it('is not new with a logged workout whose template is gone', () => {
+    const entry = summariseSession(session(), [set({ completedAt: 1, weightKg: 60, reps: 5 })])
+    expect(isNewAccount([template('t1', 'Deleted', { deletedAt: 1 })], [entry])).toBe(false)
   })
 })
 
