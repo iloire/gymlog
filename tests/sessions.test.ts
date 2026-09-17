@@ -7,7 +7,6 @@ import { dateToEpoch } from '@/lib/queries'
 import {
   activeSet,
   addToSession,
-  clearSet,
   doExerciseToday,
   finishSession,
   logSet,
@@ -166,16 +165,6 @@ describe('logging sets', () => {
       completedAt: expect.any(Number),
       notes: 'Close to my limit',
     })
-  })
-
-  it('undoes a set by clearing its completion but keeping the numbers', async () => {
-    const id = await startSession(USER, 'tpl', null, DATE)
-    const [set] = await logsFor(id)
-    await logSet(USER, set!, { weightKg: 60, reps: 5 })
-
-    await clearSet(USER, (await getDb(USER).setLogs.get(set!.id))!)
-
-    expect(await getDb(USER).setLogs.get(set!.id)).toMatchObject({ completedAt: null, weightKg: 60 })
   })
 
   it('keeps when a set was done when it is corrected later', async () => {

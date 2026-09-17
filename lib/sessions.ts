@@ -214,10 +214,6 @@ export async function doExerciseToday(
   return { sessionId: session.id, position: await addToSession(userId, session, exercise) }
 }
 
-export async function clearSet(userId: string, log: LocalSetLog): Promise<void> {
-  await writeRow(userId, 'setLogs', { ...log, completedAt: null })
-}
-
 export async function finishSession(userId: string, session: LocalSession): Promise<void> {
   await writeRow(userId, 'sessions', { ...session, completedAt: Date.now() })
 }

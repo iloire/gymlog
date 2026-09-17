@@ -21,7 +21,6 @@ import { lastPerformance, type LastPerformance } from '@/lib/queries'
 import {
   activeSet as pickActiveSet,
   addToSession,
-  clearSet,
   finishSession,
   logSet,
   removeFromSession,
@@ -368,16 +367,6 @@ function Session() {
                   ? `Update set ${activeSet.setIndex}`
                   : `Log set ${activeSet.setIndex}`}
             </button>
-
-            {activeSet.completedAt && (
-              <button
-                type="button"
-                onClick={() => void clearSet(userId, activeSet)}
-                className="mt-3 h-12 w-full rounded-md border border-line text-sm text-ink-dim"
-              >
-                Undo this set
-              </button>
-            )}
 
             {groupLogs[0] && <ExerciseNote key={groupLogs[0].id} userId={userId} log={groupLogs[0]} />}
           </section>
