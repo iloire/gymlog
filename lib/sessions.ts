@@ -86,17 +86,27 @@ export async function startSession(
   return id
 }
 
+/** The next set to do: the first with nothing logged. */
+export function nextSet(logs: LocalSetLog[]): LocalSetLog | undefined {
+  return logs.find((log) => log.completedAt === null)
+}
+
+/**
+ * Sets are done in order, so only a logged set (to correct it) or the next one
+ * to do can be picked — logging set 3 over an empty 1 and 2 records nothing real.
+ */
+export function canSelectSet(logs: LocalSetLog[], log: LocalSetLog): boolean {
+  return log.completedAt !== null || log.id === nextSet(logs)?.id
+}
+
 /**
  * The set the steppers are editing: the one you tapped, else the first set
  * with nothing logged, else the last set. A selection left over from another
- * exercise is ignored rather than trusted.
+ * exercise, or of a set that cannot be picked yet, is ignored rather than trusted.
  */
 export function activeSet(logs: LocalSetLog[], selectedId: string | null): LocalSetLog | undefined {
-  return (
-    logs.find((log) => log.id === selectedId) ??
-    logs.find((log) => log.completedAt === null) ??
-    logs.at(-1)
-  )
+  const selected = logs.find((log) => log.id === selectedId)
+  return (selected && canSelectSet(logs, selected) ? selected : undefined) ?? nextSet(logs) ?? logs.at(-1)
 }
 
 export async function logSet(

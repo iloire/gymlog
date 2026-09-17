@@ -2,6 +2,7 @@
 
 import type { LocalSetLog } from '@/lib/db/dexie'
 import { formatSet } from '@/lib/format'
+import { canSelectSet } from '@/lib/sessions'
 
 /**
  * A row of squares: filled means done, outlined means still to do. You read
@@ -9,7 +10,8 @@ import { formatSet } from '@/lib/format'
  * glance that tells you how many plates are still on the floor.
  *
  * Tapping a square selects that set, so a mistyped set can be fixed after
- * you have moved on to the next one.
+ * you have moved on to the next one. Sets further ahead than the next one to
+ * do cannot be tapped: they are logged in order.
  */
 export function SetSquares({
   logs,
@@ -33,6 +35,7 @@ export function SetSquares({
             <button
               type="button"
               onClick={() => onSelect(log.id)}
+              disabled={!canSelectSet(logs, log)}
               aria-pressed={active}
               aria-label={
                 done
@@ -44,7 +47,7 @@ export function SetSquares({
                   ? `bg-plate-blue text-white ${active ? 'ring-2 ring-ink ring-offset-2 ring-offset-ground' : ''}`
                   : active
                     ? 'border-2 border-plate-blue-lift text-ink'
-                    : 'border border-line text-ink-dim'
+                    : 'border border-line text-ink-dim disabled:opacity-50'
               }`}
             >
               {done && log.durationSec != null ? (

@@ -7,6 +7,7 @@ import { dateToEpoch } from '@/lib/queries'
 import {
   activeSet,
   addToSession,
+  canSelectSet,
   deleteSession,
   doExerciseToday,
   finishSession,
@@ -433,6 +434,21 @@ describe('activeSet', () => {
     const squat = (await logsFor(id)).filter((log) => log.exerciseId === 'Squat')
 
     expect(activeSet(squat, first!.id)?.id).toBe(first!.id)
+  })
+
+  it('will not skip ahead: a set past the next one to do cannot be picked', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [first, second, third] = await logsFor(id)
+    const squat = [first!, second!, third!]
+
+    expect(canSelectSet(squat, third!)).toBe(false)
+    expect(activeSet(squat, third!.id)?.id).toBe(first!.id)
+
+    await logSet(USER, first!, { weightKg: 60, reps: 5 })
+    const after = (await logsFor(id)).filter((log) => log.exerciseId === 'Squat')
+    expect(canSelectSet(after, after[0]!)).toBe(true)
+    expect(canSelectSet(after, after[1]!)).toBe(true)
+    expect(activeSet(after, third!.id)?.id).toBe(second!.id)
   })
 
   it('ignores a selection left over from another exercise', async () => {

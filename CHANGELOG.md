@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-17 22:36
+
+- **Sets are logged in order.** Any set square could be tapped, so set 3 could be logged with 1 and
+  2 still empty — a record of nothing real. Only a logged set (to correct it) or the next set to do
+  can now be picked; the ones further ahead are dimmed until you reach them.
+
 ## 2026-09-17 22:33
 
 - **Five tabs instead of six.** Workouts, Week and Programmes are one idea — your plan — and now

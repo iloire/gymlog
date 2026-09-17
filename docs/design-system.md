@@ -98,7 +98,8 @@ change. No all-caps labels, no monospace for data.
 - **Set squares carry information.** A row of squares per exercise — filled = done, outlined =
   pending. You read your progress through the workout without parsing text. Tapping a square
   selects that set, ringed when it is already done, so a mistyped set is fixed in place with
-  Update set; a correction starts no rest timer and does not move you to the next exercise.
+  Update set; a correction starts no rest timer and does not move you to the next exercise. Sets
+  are logged in order: only a done set or the next one to do can be tapped, the rest are dimmed.
 - **The rest timer is a rule that drains** across the bottom edge, above the thumb, rather than a
   number in a box. Yellow while running, gone when it ends.
 - **Thumb zone.** Primary actions sit in the bottom third; minimum 56px targets; weight and reps
