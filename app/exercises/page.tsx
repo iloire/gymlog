@@ -3,10 +3,11 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Search } from 'lucide-react'
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useEquipment } from '@/components/equipment-picker'
 import { ExerciseFrames } from '@/components/exercise-frames'
+import type { ExerciseFilter } from '@/components/exercise-filters'
 import {
   ExerciseFilterChips,
   facetOptions,
@@ -21,6 +22,12 @@ import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
 import { exerciseEquipment } from '@/lib/equipment'
 import { favoriteExerciseIds } from '@/lib/favorites'
+
+/**
+ * The grid grows a page at a time. All 873 movements at once is a 23,000px
+ * page of images; a flat cap is worse, because it stops without saying so.
+ */
+const PAGE = 60
 
 export default function ExercisesPage() {
   const userId = useUserId()
@@ -50,6 +57,35 @@ export default function ExercisesPage() {
   )
   const narrowed = isFiltered(filter) || query.trim() !== ''
 
+  const [shown, setShown] = useState(PAGE)
+  const more = useRef<HTMLButtonElement>(null)
+
+  // Narrowing starts the grid again from the first page. Doing it here rather
+  // than off the results means starring an exercise does not scroll you up.
+  const search = (text: string) => {
+    setQuery(text)
+    setShown(PAGE)
+  }
+  const narrow = (next: ExerciseFilter) => {
+    setFilter(next)
+    setShown(PAGE)
+  }
+
+  // The button loads the next page when it comes into view, so scrolling is
+  // enough; tapping it does the same where there is no observer.
+  useEffect(() => {
+    const node = more.current
+    if (!node) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) setShown((n) => n + PAGE)
+      },
+      { rootMargin: '600px' },
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [shown, results.length])
+
   return (
     <>
       <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
@@ -64,7 +100,7 @@ export default function ExercisesPage() {
           <Search size={18} className="text-ink-dim" aria-hidden />
           <input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => search(event.target.value)}
             placeholder="Search"
             aria-label="Search exercises"
             className="w-full bg-transparent outline-none"
@@ -75,7 +111,7 @@ export default function ExercisesPage() {
           muscles={muscles}
           options={options}
           filter={filter}
-          onChange={setFilter}
+          onChange={narrow}
           hasEquipment={equipment !== null}
           className="-mx-5 mt-3 px-5 pb-1"
           panelClassName="mt-3 rounded-md border border-line bg-surface p-4"
@@ -85,7 +121,7 @@ export default function ExercisesPage() {
           <p className="mt-4 flex items-baseline justify-between text-sm text-ink-dim">
             {results.length === 1 ? '1 exercise' : `${results.length} exercises`}
             {isFiltered(filter) && (
-              <button type="button" onClick={() => setFilter(NO_FILTER)} className="text-ink underline">
+              <button type="button" onClick={() => narrow(NO_FILTER)} className="text-ink underline">
                 Clear filters
               </button>
             )}
@@ -101,7 +137,7 @@ export default function ExercisesPage() {
         )}
 
         <ul className="mt-5 grid grid-cols-2 gap-3">
-          {results.slice(0, 200).map((exercise) => (
+          {results.slice(0, shown).map((exercise) => (
             <li key={exercise.id} className="relative">
               {userId && (
                 <FavoriteButton
@@ -122,6 +158,17 @@ export default function ExercisesPage() {
             </li>
           ))}
         </ul>
+
+        {shown < results.length && (
+          <button
+            ref={more}
+            type="button"
+            onClick={() => setShown((n) => n + PAGE)}
+            className="mt-5 flex h-12 w-full items-center justify-center rounded-md border border-line bg-surface text-sm text-ink-dim"
+          >
+            Show more — {shown} of {results.length}
+          </button>
+        )}
       </main>
       <Nav />
     </>
