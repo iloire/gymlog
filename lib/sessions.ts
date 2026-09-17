@@ -219,6 +219,15 @@ export async function finishSession(userId: string, session: LocalSession): Prom
 }
 
 /**
+ * Un-finish a workout: finished by accident, or there is one more exercise in
+ * you. The sets stay as they are — only the session stops counting as done, so
+ * it goes back to being the workout you are training today.
+ */
+export async function reopenSession(userId: string, session: LocalSession): Promise<void> {
+  await writeRow(userId, 'sessions', { ...session, completedAt: null })
+}
+
+/**
  * Moving a session to another date must move its set logs too: `performedAt`
  * is denormalised onto every set so the "last time" query can avoid a join.
  * This is the only place allowed to change it.

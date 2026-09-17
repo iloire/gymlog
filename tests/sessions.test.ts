@@ -12,6 +12,7 @@ import {
   logSet,
   recordBodyWeight,
   removeFromSession,
+  reopenSession,
   rescheduleSession,
   startSession,
 } from '@/lib/sessions'
@@ -185,6 +186,18 @@ describe('logging sets', () => {
     const id = await startSession(USER, 'tpl', null, DATE)
     await finishSession(USER, (await getDb(USER).sessions.get(id))!)
     expect((await getDb(USER).sessions.get(id))?.completedAt).toBeTypeOf('number')
+  })
+
+  it('reopens a finished session, keeping its sets', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [set] = await logsFor(id)
+    await logSet(USER, set!, { weightKg: 60, reps: 5 })
+    await finishSession(USER, (await getDb(USER).sessions.get(id))!)
+
+    await reopenSession(USER, (await getDb(USER).sessions.get(id))!)
+
+    expect((await getDb(USER).sessions.get(id))?.completedAt).toBeNull()
+    expect(await getDb(USER).setLogs.get(set!.id)).toMatchObject({ weightKg: 60, reps: 5 })
   })
 })
 

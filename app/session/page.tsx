@@ -22,6 +22,7 @@ import {
   finishSession,
   logSet,
   removeFromSession,
+  reopenSession,
 } from '@/lib/sessions'
 import { useWakeLock } from '@/lib/use-wake-lock'
 
@@ -432,17 +433,29 @@ function Session() {
             </button>
           ))}
 
-        {allDone && !data.session.completedAt && (
+        {data.session.completedAt ? (
+          // Finished by accident, or one more exercise in you: the workout goes
+          // back to being today's, with every set it already has.
           <button
             type="button"
-            onClick={async () => {
-              await finishSession(userId, data.session)
-              router.push('/')
-            }}
+            onClick={() => void reopenSession(userId, data.session)}
             className="mt-6 mb-8 h-14 w-full rounded-md border border-line text-base font-semibold"
           >
-            Finish workout
+            Reopen workout
           </button>
+        ) : (
+          allDone && (
+            <button
+              type="button"
+              onClick={async () => {
+                await finishSession(userId, data.session)
+                router.push('/')
+              }}
+              className="mt-6 mb-8 h-14 w-full rounded-md border border-line text-base font-semibold"
+            >
+              Finish workout
+            </button>
+          )
         )}
       </main>
 
