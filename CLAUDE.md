@@ -23,7 +23,9 @@ A write goes to Dexie and the outbox in **one transaction** — never one withou
 There are two exceptions, both desk-only and never cached by the service worker:
 
 - `/admin`, a server-rendered view of every account. It reads only through `lib/admin.ts`, which
-  checks `users.role` in the database on every call. Sync must never look at the role.
+  checks `users.role` in the database on every call. Sync must never look at the role. Because the
+  role never reaches the device, Profile asks `/api/admin/me` (`useIsAdmin()`) whether to show the
+  Admin link — the one component fetch in the app, and only ever a hint for that link.
 - `/api/v1` and its token page `/profile/api` — the API a user points an LLM at. Tokens are
   `read` or `write`; reads go through `lib/api.ts`, writes through `lib/api-write.ts`, whose
   `commit()` gives every row `updatedAt = now` and a fresh `rev` in one transaction so phones pull

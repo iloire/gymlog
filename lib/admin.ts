@@ -38,20 +38,31 @@ function q(column: Column) {
 }
 
 /**
- * The caller's user id when they are an admin. Anyone else — signed out, or a
- * regular account — gets a plain 404, so the panel's existence is not
- * advertised.
+ * The caller's user id when they are an admin, else null — the one place the
+ * role is read. `/api/admin/me` answers Profile with it, so the Admin link
+ * shows for admins only.
  */
-export async function requireAdmin(): Promise<string> {
+export async function adminUserId(): Promise<string | null> {
   const userId = await currentUserId()
-  if (!userId) notFound()
+  if (!userId) return null
 
   const [user] = await db
     .select({ role: users.role })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
-  if (user?.role !== 'admin') notFound()
+
+  return user?.role === 'admin' ? userId : null
+}
+
+/**
+ * The caller's user id when they are an admin. Anyone else — signed out, or a
+ * regular account — gets a plain 404, so the panel's existence is not
+ * advertised.
+ */
+export async function requireAdmin(): Promise<string> {
+  const userId = await adminUserId()
+  if (!userId) notFound()
 
   return userId
 }

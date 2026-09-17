@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 
+import { useIsAdmin } from '@/components/admin/use-is-admin'
 import { EquipmentPicker } from '@/components/equipment-picker'
 import { Nav } from '@/components/nav'
 import { SignOutButton } from '@/components/sign-out-button'
@@ -14,6 +15,7 @@ export default function ProfilePage() {
   // name or email to show — the rest of the page works regardless.
   const { data: session } = useSession()
   const user = session?.user
+  const isAdmin = useIsAdmin()
 
   return (
     <>
@@ -69,15 +71,16 @@ export default function ProfilePage() {
         </section>
 
         <footer className="mt-10 border-t border-line pt-5">
-          {/* Shown to everyone: the role is never synced to the device, and /admin
-              404s for anyone who is not an admin. A plain <a>, not <Link>, so the
-              page never prefetches the server-rendered admin panel. */}
-          <a
-            href="/admin"
-            className="mb-3 flex h-12 w-full items-center justify-center rounded-md border border-line text-sm text-ink-dim"
-          >
-            Admin
-          </a>
+          {/* A plain <a>, not <Link>, so the page never prefetches the
+              server-rendered admin panel. */}
+          {isAdmin && (
+            <a
+              href="/admin"
+              className="mb-3 flex h-12 w-full items-center justify-center rounded-md border border-line text-sm text-ink-dim"
+            >
+              Admin
+            </a>
+          )}
           <SignOutButton />
           {publicEnv.commitSha && (
             <p className="mt-4 text-center text-[11px] text-ink-dim">{publicEnv.commitSha}</p>

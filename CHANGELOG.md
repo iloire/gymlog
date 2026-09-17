@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-17 22:50
+
+- **Fix: the Admin button showed for everyone.** Profile showed it to every account and it led to a
+  404 for anyone who is not an admin. Profile now asks the server (`GET /api/admin/me`, the same
+  database check `/admin` uses) and shows the link to admins only. Granting or revoking with
+  `npm run user:role` shows on the next visit to Profile, with no sign-out.
+
 ## 2026-09-17 22:48
 
 - **The rest timer survives leaving the gym screen.** Its end time lived in the session page's

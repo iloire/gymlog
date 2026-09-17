@@ -129,6 +129,12 @@ recent sessions with their sets, bodyweight and own exercises. It is read-only.
   gets a 404.
 - **Sync never reads the role.** An admin's `/api/sync` is filtered on their own `userId` like
   everyone else's, so an admin's phone holds only their own log.
+- **The Admin link on Profile shows for admins only.** The role is not on the device, so Profile
+  asks `GET /api/admin/me` (`useIsAdmin()` in `components/admin/`), which answers
+  `{ "admin": true | false }` from the same database check (`adminUserId()` in `lib/admin.ts`). It
+  is a hint for one link: with no signal the link is simply absent, and `/admin` checks again
+  itself. The role is deliberately *not* carried in the auth JWT — every session read re-signs the
+  cookie, so a refreshed role loses a race with any session fetch already in flight.
 - **No admin in code or seed data.** Grant it from the command line:
   `npm run user:role -- <email> admin` (or `user:role:prod`).
 

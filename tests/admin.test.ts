@@ -15,7 +15,7 @@ vi.mock('@/db', () => ({
 }))
 vi.mock('@/lib/auth', () => ({ currentUserId: async () => state.userId }))
 
-const { adminOverview, adminUserDetail, requireAdmin } = await import('@/lib/admin')
+const { adminOverview, adminUserDetail, adminUserId, requireAdmin } = await import('@/lib/admin')
 
 const today = new Date().toISOString().slice(0, 10)
 const now = Date.now()
@@ -39,6 +39,18 @@ beforeEach(async () => {
 })
 
 afterEach(() => cleanup())
+
+describe('adminUserId', () => {
+  it('is null for a signed-out request and a regular account, the id for an admin', async () => {
+    await expect(adminUserId()).resolves.toBeNull()
+
+    state.userId = 'lifter'
+    await expect(adminUserId()).resolves.toBeNull()
+
+    state.userId = 'boss'
+    await expect(adminUserId()).resolves.toBe('boss')
+  })
+})
 
 describe('requireAdmin', () => {
   it('404s a signed-out request', async () => {
