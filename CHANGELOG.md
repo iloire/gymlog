@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-17 22:31
+
+- **Reopen a workout finished by accident.** *Finish workout* used to hide itself the moment it was
+  tapped; a finished session now offers *Reopen workout* in the same place. It clears the session's
+  completion and touches no set, so the workout comes back to Today exactly as it was.
+- **Delete a logged workout.** *Delete workout*, with an inline confirm, on the session screen. The
+  session and every set in it are soft-deleted in one transaction so the deletion syncs; starting
+  that workout again restores it from its tombstone with fresh sets, while an exercise removed from
+  a live workout still stays removed.
+- **Add exercise moved to Today's session card.** On the one-exercise session screen it read as an
+  action on the exercise in front of you. It now sits beside the session's logged sets and
+  *Continue*, and drops you on the exercise you picked, ready to log it.
+- **Undo this set is gone.** Any set is editable by tapping its square and logging it again, so the
+  second button under *Log set* only repeated the same correction.
+
 ## 2026-09-16 14:15
 
 - **Remove an exercise from a workout.** The session screen has *Remove exercise* under *Add
