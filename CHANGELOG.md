@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-09-17 23:55
+
+- **Export and import your data.** *Profile → Your data* (`/profile/data`) writes the whole account
+  out as one JSON file — every workout, programme, logged session, set and weigh-in — and reads one
+  back. Both run against IndexedDB (`lib/backup.ts`), so they work with no signal, and an import
+  goes to the server through the outbox like any other write. The file leaves out the shared
+  exercise library (every account has it, and writing it back would be `forbidden`) and tombstones,
+  but includes exercises you added yourself. Picking a file shows what is in it before anything is
+  written.
+
+  Your own backup keeps its ids, so a restore is exact and importing it twice changes nothing the
+  second time. A backup from *another* account cannot: those ids belong to someone else on the
+  server, which would reject every row and leave it stranded on the device. Each row gets an id
+  derived from (your account, its old id) — `importedId()` in `lib/id.ts` — with every reference
+  between them remapped to match, still deterministic so a second import lands on the same rows.
+  A weigh-in and an exercise note take their natural-key id instead, because the unique index on
+  (user, day) and (user, exercise) would otherwise refuse them, and an imported exercise whose slug
+  is already here is dropped in favour of the one you have. A row whose parent is missing is left
+  out rather than written as something the server will reject; a missing exercise never drops a row,
+  since the library has not synced yet on a phone you have just restored onto.
+
+- **A sync push now stops at the 2000 rows the server accepts** (`MAX_PUSH`, shared by
+  `lib/sync/client.ts` and `/api/sync`). An import can queue thousands at once, and the whole batch
+  was being sent, refused as a bad request, and sent again forever — sync could never drain.
+
 ## 2026-09-17 23:46
 
 - **A workout now ends on something.** Finishing one used to drop you back on Today with nothing
@@ -35,6 +60,8 @@
   start, and a day that already has a workout on it offers the same thing as a note underneath.
   A workout trained on another day of the week is not missed, and neither is one the programme
   has you doing today anyway: both would open the very same session.
+
+||||||| parent of dd2087b (feat: export and import your data - Profile now has a Your data section leading to /profile/data, which writes the whole account out as one JSON file and reads one back. Both run against IndexedDB (lib/backup.ts), so they work with no signal, and an import reaches the server through the outbox like any other write. An export leaves out the shared exercise library, which every account already has and cannot write back, and tombstones, which can only take data away from the account they land in; the exercises you added yourself are in. A file is parsed field by field, so a column this version does not know cannot travel to the server as a row it silently refuses. A backup of your own account keeps its ids: every row lands back on itself, so a restore is exact and importing twice changes nothing the second time. Another account's ids already belong to someone else on the server, which would reject every row and strand it on the device, so each one is remapped through importedId() in lib/id.ts with every reference between them following, deterministically, and a weigh-in and an exercise note take their natural-key id because the unique index on (user, day) and (user, exercise) would otherwise refuse them. An imported exercise whose slug is already here is dropped in favour of the one you have. A row whose parent is in neither the file nor the account is left out rather than written as something the server rejects, but a missing exercise never drops a row - the library has not synced yet on a phone you have just restored onto, and dropping on that basis would throw away every set. A push now stops at the 2000 rows /api/sync accepts (MAX_PUSH, shared by both sides): an import queues thousands at once, and the whole batch was sent, refused as a bad request and sent again forever, so sync could never drain)
 
 ## 2026-09-17 23:16
 

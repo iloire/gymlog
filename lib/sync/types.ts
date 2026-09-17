@@ -14,6 +14,15 @@ export const SYNC_TABLES = [
 
 export type SyncTable = (typeof SYNC_TABLES)[number]
 
+/**
+ * How many queued rows one push may carry. The server refuses a larger request
+ * outright, so the client has to stop at the same number: an import can put
+ * thousands of rows in the outbox at once, and without this the whole batch is
+ * sent, rejected as a bad request, and sync never recovers. A full batch just
+ * means the next sync carries the rest.
+ */
+export const MAX_PUSH = 2000
+
 /** A row as it travels over the wire — camelCase, JSON-safe. */
 export type SyncRow = Record<string, unknown> & {
   id: string

@@ -51,3 +51,14 @@ export function bodyWeightId(userId: string, measuredOn: string): string {
 export function exerciseNoteId(userId: string, exerciseId: string): string {
   return uuidv5(name('exerciseNote', userId, exerciseId), NAMESPACE)
 }
+
+/**
+ * The id a row from *another account's* backup takes in this one. Deterministic
+ * over (user, original id), so importing the same file twice updates the rows
+ * the first import created instead of duplicating them, and every reference
+ * between the imported rows is remapped the same way. A backup of this account
+ * keeps its ids and needs none of this — see `lib/backup.ts`.
+ */
+export function importedId(userId: string, sourceId: string): string {
+  return uuidv5(name('import', userId, sourceId), NAMESPACE)
+}

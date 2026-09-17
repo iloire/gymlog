@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { destroyDb, getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
 import { clientId, now, sync } from '@/lib/sync/client'
-import { mutationKey, type SyncRequest, type SyncResponse } from '@/lib/sync/types'
+import { MAX_PUSH, mutationKey, type SyncRequest, type SyncResponse } from '@/lib/sync/types'
 
 const USER = 'user-1'
 
@@ -85,6 +85,28 @@ describe('sync — push', () => {
     expect(calls[0]?.mutations.map((m) => m.rowId)).toEqual(['s1', 'l1'])
     expect(calls[0]).toMatchObject({ cursor: 0, globalCursor: 0 })
     expect(calls[0]?.clientId).toMatch(/[0-9a-f-]{36}/)
+  })
+
+  it('never sends more than the server accepts, and drains the rest next time', async () => {
+    // An import can queue thousands of rows at once. The server refuses a
+    // larger request outright, and a push that is always refused never drains.
+    const db = getDb(USER)
+    const rows = Array.from({ length: MAX_PUSH + 10 }, (_, index) => ({
+      id: `m-${index}`,
+      table: 'bodyWeights' as const,
+      rowId: `bw-${index}`,
+      row: { id: `bw-${index}`, updatedAt: 1 },
+      queuedAt: index,
+    }))
+    await db.outbox.bulkPut(rows)
+    const { calls } = server(acceptAll)
+
+    await sync(USER)
+    expect(calls[0]?.mutations).toHaveLength(MAX_PUSH)
+    expect(await db.outbox.count()).toBe(10)
+
+    await sync(USER)
+    expect(await db.outbox.count()).toBe(0)
   })
 
   it('empties the outbox once the server accepts', async () => {

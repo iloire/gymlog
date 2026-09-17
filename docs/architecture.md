@@ -85,6 +85,39 @@ superseded copies were re-sent and rejected on every sync and the "changes waiti
 reached zero. After a sync, an entry is removed only if its `queuedAt` still matches what was sent,
 so an edit made while a request is in flight survives.
 
+## Export and import
+
+`/profile/data` writes the account out as one JSON file and reads one back. Both run entirely
+against Dexie (`lib/backup.ts`): the export is what is on the device, and an import is an ordinary
+batch of local writes whose outbox entries reach the server the same way a logged set does. Neither
+direction talks to `/api/sync` itself, so both work with no signal.
+
+- **What the file holds**: every user-owned row of the nine synced tables, minus tombstones, minus
+  the global exercise library — every account already has it, it is read-only, and writing those
+  rows back would be `forbidden`. Your own exercises are in, since they are the same table with a
+  `userId`. Per-row `userId` and `rev` are stripped: the account is decided on import and the
+  revision by the server.
+- **Your own backup keeps its ids.** Every row lands back on itself, so a restore is exact and
+  importing twice is a no-op.
+- **Another account's backup cannot.** Those ids belong to someone else on the server, which would
+  reject every row as `forbidden` — the rows would sit on the device and never sync. Each row is
+  given `importedId(userId, oldId)` (`lib/id.ts`) and every reference between them is remapped to
+  match; being deterministic, a second import updates the same rows instead of copying the log
+  again. Two rows take their natural-key id instead, because a unique index would otherwise refuse
+  them: a weigh-in is (user, date) and an exercise note is (user, exercise). An imported exercise
+  whose slug is already here is not written at all — references point at the exercise you have.
+- **A missing parent drops the row** rather than writing one the server will reject as `invalid`
+  and that then sits on the device forever. A session's programme and workout are optional, so a
+  missing one is cleared instead. **An exercise never drops a row**: the shared library is not on a
+  device until the first sync finishes, and dropping on that basis would throw away every set on a
+  phone restored before it had synced.
+- **A whole import is one Dexie transaction**, rows and outbox entries together — the invariant
+  `lib/db/write.ts` keeps for a single write. Every row is stamped `updatedAt = now`, so it wins
+  last-write-wins: an import is deliberate, and the file is what you asked for.
+- **A push carries at most `MAX_PUSH` rows** (`lib/sync/types.ts`), the limit the server enforces on
+  the same constant. An import can queue thousands at once, and a batch the server refuses outright
+  would never drain; a full batch simply means the next sync takes the rest.
+
 ## Working offline
 
 Three things have to hold for the app to open in a gym basement, and each was found by actually

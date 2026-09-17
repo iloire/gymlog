@@ -3,6 +3,7 @@
 import { getDb, type GymlogDexie } from '@/lib/db/dexie'
 import { newId } from '@/lib/id'
 import {
+  MAX_PUSH,
   SYNC_TABLES,
   mutationKey,
   type Mutation,
@@ -74,8 +75,9 @@ async function run(userId: string): Promise<SyncResult> {
   }
 
   // One mutation per row by construction (see Mutation.id), oldest first so a
-  // session row is written before the set logs that reference it.
-  const mutations = await db.outbox.orderBy('queuedAt').toArray()
+  // session row is written before the set logs that reference it, and never
+  // more than the server accepts in one request.
+  const mutations = await db.outbox.orderBy('queuedAt').limit(MAX_PUSH).toArray()
 
   const body = {
     cursor: await meta<number>(db, META_CURSOR, 0),

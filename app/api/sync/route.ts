@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { db } from '@/db'
 import { exercises, syncedTables as tables, users } from '@/db/schema'
 import { currentUserId } from '@/lib/auth'
-import { SYNC_TABLES, type RejectedMutation, type SyncRow, type SyncTable } from '@/lib/sync/types'
+import { MAX_PUSH, SYNC_TABLES, type RejectedMutation, type SyncRow, type SyncTable } from '@/lib/sync/types'
 
 /**
  * Parents before children. The outbox holds one entry per row and a re-edit
@@ -29,7 +29,7 @@ const requestSchema = z.object({
   /** Max `updatedAt` of the global exercise library the client already holds. */
   globalCursor: z.number().int().nonnegative().default(0),
   clientId: z.string().min(1),
-  mutations: z.array(mutationSchema).max(2000),
+  mutations: z.array(mutationSchema).max(MAX_PUSH),
 })
 
 export async function POST(request: Request) {

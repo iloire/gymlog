@@ -53,6 +53,19 @@ export default function ProfilePage() {
         </section>
 
         <section className="mt-8">
+          <h2 className="mb-1 text-xl font-semibold">Your data</h2>
+          <p className="mb-4 text-sm text-ink-dim">
+            Take the whole log out as one file, or read one back in.
+          </p>
+          <Link
+            href="/profile/data"
+            className="flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
+          >
+            Export and import
+          </Link>
+        </section>
+
+        <section className="mt-8">
           <h2 className="mb-1 text-xl font-semibold">API access</h2>
           <p className="mb-4 text-sm text-ink-dim">
             Tokens that let ChatGPT, Claude or another tool read your log or edit your workouts.
