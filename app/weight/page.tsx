@@ -1,7 +1,7 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Trash2 } from 'lucide-react'
+import { ChevronLeft, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -41,7 +41,8 @@ export default function WeightPage() {
   return (
     <>
       <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
-        <Link href="/profile" className="text-sm text-ink-dim underline-offset-4 hover:text-ink hover:underline">
+        <Link href="/profile" className="flex items-center gap-1 text-sm text-ink-dim">
+          <ChevronLeft size={18} aria-hidden />
           Profile
         </Link>
         <h1 className="figure mt-2 text-4xl">Weight</h1>
