@@ -25,7 +25,7 @@ export function SetSquares({
   if (logs.length === 0) return null
 
   return (
-    <ol className="mt-6 flex flex-wrap gap-2">
+    <ol className="mt-4 flex flex-wrap gap-2">
       {logs.map((log) => {
         const done = log.completedAt !== null
         const active = log.id === activeId
@@ -42,7 +42,7 @@ export function SetSquares({
                   ? `Set ${log.setIndex}, ${log.durationSec != null ? formatSet(log) : `${log.weightKg ?? '—'} kg × ${log.reps ?? '—'}`}`
                   : `Set ${log.setIndex}`
               }
-              className={`flex h-14 min-w-14 flex-col items-center justify-center rounded-sm px-2 ${
+              className={`flex h-12 min-w-12 flex-col items-center justify-center rounded-sm px-2 ${
                 done
                   ? `bg-plate-blue text-white ${active ? 'ring-2 ring-ink ring-offset-2 ring-offset-ground' : ''}`
                   : active

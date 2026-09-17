@@ -239,32 +239,34 @@ function Session() {
         />
       )}
 
-      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-4 pb-8">
-        {exercise?.images?.length ? (
-          // Full-bleed on a phone; the photo shows the movement you are about to
-          // do, and tapping it opens the cues and instructions without leaving.
-          <button
-            type="button"
-            onClick={() => setViewingExercise(true)}
-            aria-label={`About ${exerciseName}`}
-            className="relative -mx-5 block w-[calc(100%+2.5rem)] text-left sm:mx-0 sm:w-full"
-          >
-            <ExerciseFrames
-              exercise={exercise}
-              className="aspect-[3/2] w-full rounded-none sm:rounded-md"
-            />
-            <span className="absolute inset-0 bg-linear-to-t from-ground via-ground/30 via-25% to-transparent to-50% sm:rounded-md" />
-            <span className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-ground/70 text-ink">
-              <Info size={18} aria-hidden />
-            </span>
-          </button>
-        ) : null}
+      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-3 pb-8">
+        {/* A thumbnail beside the name, not a hero above it: the photo is a
+            reminder of the movement, and at full width it pushed the weight, the
+            reps and the Log button off the first screen. Tapping it still opens
+            the cues and instructions without leaving. */}
+        <div className="flex items-center gap-3">
+          {exercise?.images?.length ? (
+            <button
+              type="button"
+              onClick={() => setViewingExercise(true)}
+              aria-label={`About ${exerciseName}`}
+              className="relative shrink-0"
+            >
+              <ExerciseFrames exercise={exercise} className="aspect-[3/2] w-28" />
+              <span className="absolute right-1 bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-ground/70 text-ink">
+                <Info size={12} aria-hidden />
+              </span>
+            </button>
+          ) : null}
 
-        <h1
-          className={`figure relative text-3xl leading-tight ${exercise?.images?.length ? '-mt-7' : 'mt-2'}`}
-        >
-          {exerciseName}
-        </h1>
+          {/* A long name steps down a size so it stays about as tall as the photo
+              instead of wrapping to five lines on a narrow phone. */}
+          <h1
+            className={`figure min-w-0 text-balance leading-tight ${exerciseName.length > 18 ? 'text-lg' : 'text-2xl'}`}
+          >
+            {exerciseName}
+          </h1>
+        </div>
 
         <p className="mt-2 text-sm text-ink-dim">
           {previous ? (
@@ -301,10 +303,10 @@ function Session() {
         />
 
         {activeSet ? (
-          <section className="mt-8">
+          <section className="mt-4">
             {/* Stacked, not side by side: two steppers across a phone leave ~58px for
                 the number, which truncates 77.5 and anything over 100 kg. */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
               {timed ? (
                 <Stepper
                   label="Time"
@@ -333,7 +335,7 @@ function Session() {
             </div>
 
             {beatsLastTime && (
-              <p className="mt-4 border-l-2 border-plate-red pl-3 text-sm">
+              <p className="mt-3 border-l-2 border-plate-red pl-3 text-sm">
                 Heavier than last time&apos;s top set.
               </p>
             )}
@@ -341,7 +343,7 @@ function Session() {
             <button
               type="button"
               onClick={() => void completeSet()}
-              className="mt-6 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift"
+              className="mt-3 h-14 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift"
             >
               {timed && groupLogs.length === 1
                 ? `${activeSet.completedAt ? 'Update' : 'Log'} ${values.durationSec ? formatMinutes(values.durationSec) : 'time'}`

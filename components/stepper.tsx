@@ -24,22 +24,23 @@ export function Stepper({
   const current = value ?? 0
 
   return (
-    <div className="w-full">
-      <div className="mb-1.5 flex items-baseline gap-1.5">
-        <span className="text-sm text-ink-dim">{label}</span>
-        {unit && <span className="text-xs text-ink-dim">{unit}</span>}
-      </div>
+    // The label rides inside the field, above the number: a row of its own per
+    // stepper was enough to push the Log button below the fold.
+    <div className="flex w-full items-stretch overflow-hidden rounded-md border border-line bg-surface">
+      <button
+        type="button"
+        aria-label={`Decrease ${label}`}
+        onClick={() => onChange(Math.max(min, current - step))}
+        className="flex w-16 shrink-0 items-center justify-center text-ink-dim active:bg-surface-high"
+      >
+        <Minus size={20} aria-hidden />
+      </button>
 
-      <div className="flex items-stretch overflow-hidden rounded-md border border-line bg-surface">
-        <button
-          type="button"
-          aria-label={`Decrease ${label}`}
-          onClick={() => onChange(Math.max(min, current - step))}
-          className="flex w-16 shrink-0 items-center justify-center text-ink-dim active:bg-surface-high"
-        >
-          <Minus size={20} aria-hidden />
-        </button>
-
+      <label className="flex min-w-0 flex-1 flex-col items-center pt-2">
+        <span className="text-xs leading-none text-ink-dim">
+          {label}
+          {unit && ` ${unit}`}
+        </span>
         <input
           aria-label={label}
           inputMode="decimal"
@@ -49,18 +50,18 @@ export function Stepper({
             const next = Number(event.target.value.replace(',', '.'))
             if (Number.isFinite(next)) onChange(next)
           }}
-          className="figure h-16 w-full min-w-0 bg-transparent text-center text-4xl outline-none"
+          className="figure h-11 w-full min-w-0 bg-transparent text-center text-4xl outline-none"
         />
+      </label>
 
-        <button
-          type="button"
-          aria-label={`Increase ${label}`}
-          onClick={() => onChange(current + step)}
-          className="flex w-16 shrink-0 items-center justify-center text-ink-dim active:bg-surface-high"
-        >
-          <Plus size={20} aria-hidden />
-        </button>
-      </div>
+      <button
+        type="button"
+        aria-label={`Increase ${label}`}
+        onClick={() => onChange(current + step)}
+        className="flex w-16 shrink-0 items-center justify-center text-ink-dim active:bg-surface-high"
+      >
+        <Plus size={20} aria-hidden />
+      </button>
     </div>
   )
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-17 22:53
+
+- **Logging a set no longer needs a scroll.** The session screen opened on a full-width photo that
+  took 300px, so weight, reps and *Log set* started below the fold. The photo is now a thumbnail
+  beside the exercise name (still tappable for cues and instructions), a long name steps down a
+  size instead of wrapping, the steppers carry their label inside the field, and the set squares
+  and gaps are tighter. On a 375 × 600 phone the *Log set* button ends at 463px, down from about
+  770; it clears the rest bar even with the longest name in the library at 320 × 568.
+
 ## 2026-09-17 22:50
 
 - **Fix: the Admin button showed for everyone.** Profile showed it to every account and it led to a
@@ -16,6 +25,7 @@
   killing the app. A rest that ran out while the app was closed stays silent, and one whose workout
   was finished or deleted disappears.
 
+||||||| parent of 577f753 (fix: log a set without scrolling - the session screen opened on a full-width 3:2 photo that took 300px, so weight, reps and Log set started below the fold. The photo becomes a tappable thumbnail beside the exercise name, a name over 18 characters steps down a size instead of wrapping past it, Stepper carries its label inside the field rather than on a row above, and the set squares, gaps and Log button are tighter. Log set now ends at 463px on a 375x600 phone, from about 770, and clears the rest bar with the longest library name at 320x568)
 ## 2026-09-17 22:44
 
 - **Delete workout leaves the gym screen.** It sat under *Remove exercise* on the one-exercise

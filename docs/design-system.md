@@ -91,9 +91,12 @@ change. No all-caps labels, no monospace for data.
 ## Structure
 
 - **No card kit.** The session screen is a full-bleed stack: one exercise fills the viewport.
-- **The session opens on the movement.** The exercise's library photos cross-fade full-bleed at
-  the top, fading into the ground with the exercise name set on that edge; tapping it opens cues
-  and instructions in a dialog, never a new page. A thin segment per exercise under the header
+- **Logging fits the first screen.** Everything between opening an exercise and pressing *Log set*
+  — the set squares, weight, reps and the button — sits above the fold on a 320 × 568 phone with the
+  rest bar showing. So the exercise's library photos cross-fade in a thumbnail beside the name, not
+  a full-bleed hero above it; a long name steps down a size rather than wrapping past the photo; and
+  each stepper carries its label inside the field. Tapping the photo opens cues and instructions in
+  a dialog, never a new page. A thin segment per exercise under the header
   fills blue as each one is finished, and Previous / Next name the exercise they go to.
 - **Set squares carry information.** A row of squares per exercise — filled = done, outlined =
   pending. You read your progress through the workout without parsing text. Tapping a square
