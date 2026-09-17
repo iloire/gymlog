@@ -1,20 +1,25 @@
 'use client'
 
-import { CalendarDays, Dumbbell, History, Library, ListChecks, UserRound } from 'lucide-react'
+import { Dumbbell, History, Library, ListChecks, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const items = [
   { href: '/', label: 'Today', icon: Dumbbell },
-  { href: '/workouts', label: 'Workouts', icon: ListChecks },
-  { href: '/program', label: 'Week', icon: CalendarDays },
+  { href: '/workouts', label: 'Plan', icon: ListChecks },
   { href: '/history', label: 'History', icon: History },
   { href: '/exercises', label: 'Exercises', icon: Library },
   { href: '/profile', label: 'Profile', icon: UserRound },
 ]
 
-// Pages with no tab of their own, reached from the tab named here.
-const parents: Record<string, string> = { '/weight': '/profile' }
+// Pages with no tab of their own, reached from the tab named here. Workouts,
+// the week and the premade programmes are one tab; components/plan-tabs.tsx
+// switches between them.
+const parents: Record<string, string> = {
+  '/weight': '/profile',
+  '/program': '/workouts',
+  '/programmes': '/workouts',
+}
 
 export function Nav() {
   const path = usePathname()
@@ -30,7 +35,7 @@ export function Nav() {
               <Link
                 href={href}
                 aria-current={active ? 'page' : undefined}
-                className={`flex h-16 flex-col items-center justify-center gap-1 text-[11px] ${
+                className={`flex h-16 flex-col items-center justify-center gap-1 text-xs ${
                   active ? 'text-ink' : 'text-ink-dim'
                 }`}
               >

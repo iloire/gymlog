@@ -10,6 +10,7 @@ import { EquipmentPicker, useEquipment } from '@/components/equipment-picker'
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { Nav } from '@/components/nav'
+import { PlanTabs } from '@/components/plan-tabs'
 import { useUserId } from '@/components/session-boot'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
 import { equipmentName, presetFor } from '@/lib/equipment'
@@ -92,7 +93,8 @@ function Catalogue({ have, library }: { have: string[] | null; library: Library 
 
   return (
     <>
-      <h1 className="figure mt-3 text-4xl">Programmes</h1>
+      <PlanTabs />
+      <h1 className="figure text-4xl">Programmes</h1>
       <p className="mt-2 text-sm text-ink-dim">
         Ready-made weeks of training. Picking one copies it into your workouts, where you can change
         anything.

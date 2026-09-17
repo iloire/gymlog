@@ -2,7 +2,6 @@
 
 import { useLiveQuery } from 'dexie-react-hooks'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { Nav } from '@/components/nav'
@@ -10,35 +9,22 @@ import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
 import { TrainingCalendar } from '@/components/training-calendar'
 import { streakMessage, weekStreak } from '@/lib/calendar'
-import { getDb } from '@/lib/db/dexie'
 import { formatDay, formatDuration, formatMinutes, kg } from '@/lib/format'
-import { daysAgo, rotation, sessionHistory, trainedOn } from '@/lib/history'
+import { sessionHistory, trainedOn } from '@/lib/history'
 import { today } from '@/lib/queries'
 import type { HistoryEntry } from '@/lib/session-summary'
-import { startSession } from '@/lib/sessions'
 
 export default function HistoryPage() {
   const userId = useUserId()
-  const router = useRouter()
-  const [starting, setStarting] = useState(false)
   const [selected, setSelected] = useState<string | null>(null)
 
   const data = useLiveQuery(async () => {
     if (!userId) return null
-    const history = await sessionHistory(userId)
-    const templates = await getDb(userId).workoutTemplates.toArray()
-    return { history, rotation: rotation(templates, history) }
+    return { history: await sessionHistory(userId) }
   }, [userId])
 
   if (!userId || !data) {
     return <main className="p-6 text-ink-dim">Loading…</main>
-  }
-
-  async function start(templateId: string) {
-    if (!userId || starting) return
-    setStarting(true)
-    const id = await startSession(userId, templateId, null)
-    router.push(`/session?id=${id}`)
   }
 
   const count = data.history.length
@@ -84,36 +70,6 @@ export default function HistoryPage() {
               </ul>
             )}
           </>
-        )}
-
-        {data.rotation.length > 1 && count > 0 && (
-          <section className="mt-7">
-            <h2 className="text-sm text-ink-dim">Longest since you did it</h2>
-            <ul className="mt-2 divide-y divide-line border-y border-line">
-              {data.rotation.map(({ template, lastDone }, index) => (
-                <li key={template.id} className="flex items-center gap-3 py-3">
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px]">{template.name}</span>
-                    <span className="block text-sm text-ink-dim">
-                      {lastDone ? daysAgo(lastDone) : 'Not done yet'}
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => void start(template.id)}
-                    disabled={starting}
-                    className={`h-12 shrink-0 rounded-md px-4 text-sm disabled:opacity-60 ${
-                      index === 0
-                        ? 'bg-plate-blue font-semibold text-white hover:bg-plate-blue-lift'
-                        : 'border border-line'
-                    }`}
-                  >
-                    Start
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
         )}
 
         {count > 0 ? (

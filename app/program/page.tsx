@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import Link from 'next/link'
 
 import { Nav } from '@/components/nav'
+import { PlanTabs } from '@/components/plan-tabs'
 import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
@@ -72,7 +73,8 @@ export default function ProgramPage() {
 
   return (
     <>
-      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
+      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-5 pb-6">
+        <PlanTabs />
         <h1 className="figure text-4xl">Your week</h1>
         <p className="mt-2 text-sm text-ink-dim">
           {data.program
@@ -126,15 +128,6 @@ export default function ProgramPage() {
               )
             })}
           </ul>
-        )}
-
-        {data.templates.length > 0 && (
-          <Link
-            href="/programmes"
-            className="mt-6 flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
-          >
-            Start a premade programme
-          </Link>
         )}
 
         {data.program && (

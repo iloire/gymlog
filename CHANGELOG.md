@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-17 22:33
+
+- **Five tabs instead of six.** Workouts, Week and Programmes are one idea — your plan — and now
+  share a **Plan** tab, with a Workouts · Week · Programmes switch at the top of each screen. The
+  buttons that only linked between them are gone. Tab labels go from 11px to 12px.
+- **History is only history.** The "Longest since you did it" list and its blue Start button sat
+  above your past workouts and pushed them below the fold. Starting a workout belongs to Today and
+  Workouts; past workouts now follow the calendar directly.
+- **Workouts rows look tappable and say more.** Each row has a chevron, the days it is scheduled on,
+  when you last did it, and a Start button — started on its own scheduled day it counts as the
+  programme's session, exactly as from Today.
+
 ## 2026-09-17 22:31
 
 - **Reopen a workout finished by accident.** *Finish workout* used to hide itself the moment it was

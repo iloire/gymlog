@@ -201,11 +201,15 @@ to that repo and not transferable. Swap-in remains possible if Ivan ever buys a 
 |---|---|
 | `/` | **Today** — today's workout from the active program, big Start button; or "rest day" + start anything. Once a set is logged today it becomes today's log, each session tagged with the body parts it worked (`bodyParts()` in `lib/body-parts.ts` folds the library's muscles into Legs, Chest, Back, Shoulders, Arms, Core, Cardio). Shows last-sync time, red banner if the outbox is non-empty or sync is >24h stale ("Ready for the gym" check). |
 | `/session?id=…` | **The gym screen.** One exercise at a time, huge tap targets, set rows pre-created from the prescription and prefilled from last time, ✓ completes a set and auto-starts the rest timer. Cardio (`category = 'cardio'`) logs minutes instead: `set_logs.duration_sec`, prescribed by `template_items.target_duration_sec`. *Add exercise* appends one to the session under way — a warm-up that is not in the workout. Screen wake-lock on. |
-| `/workouts`, `/workouts/[id]` | Template list, each tagged with the body parts it covers, + editor: add exercises, drag to reorder, target sets/reps/rest |
+| `/workouts`, `/workouts/[id]` | Template list — each row shows its scheduled days, when it was last done and the body parts it covers, opens the editor, and has its own Start — + editor: add exercises, drag to reorder, target sets/reps/rest |
 | `/program` | Mon–Sun grid, one workout per day; end a program and start the next stage |
 | `/exercises`, `/exercises/[id]` | Library with a search that matches every word in any order, quick chips (favourites, what your equipment allows, muscle) and a Filters panel (equipment, type, level, compound or isolation, push or pull; several values in a group match any), and a star to favourite a movement — the workout editor's exercise picker uses the same filters (`components/exercise-filters.tsx`); the exercise page's *Do this now* logs it today without touching the programme (`doExerciseToday()`: the session open today, else that day's *Extra* session, which belongs to no workout); detail shows the cross-fade, instructions, your own cues, and your history for that lift |
 | `/history` | Past sessions + per-exercise weight/e1RM progression chart, and the bodyweight chart on the same timeline |
 | `/weight` | Bodyweight log — one tap to enter today's weight, editable history, trend line with a 7-day rolling average (daily weight is noisy; the average is the signal) |
+
+The bottom nav has five tabs: Today, Plan, History, Exercises, Profile. **Plan** is `/workouts`,
+`/program` and `/programmes` — one idea, "what I train and when" — switched between with the
+segmented control at the top of each (`components/plan-tabs.tsx`).
 
 Rest timer counts down from a stored timestamp (survives backgrounding), vibrates and beeps at
 zero. The `frontend-design` skill drives the visual direction — dark, high-contrast,
