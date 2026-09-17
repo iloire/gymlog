@@ -23,14 +23,16 @@ const parents: Record<string, string> = {
   '/programmes': '/workouts',
 }
 
-export function Nav() {
+export function Nav({ children }: { children?: React.ReactNode }) {
   const path = usePathname()
   const pathname = parents[path] ?? path
 
   return (
     // A rest started on the session screen keeps counting above the tabs, so
     // checking an exercise or the week mid-rest does not lose the clock.
+    // `children` is a screen's own bar for the same spot, such as an undo toast.
     <div className="sticky bottom-0 z-10">
+      {children}
       <RestTimer link />
       <nav className="border-t border-line bg-ground/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
         <ul className="mx-auto flex max-w-lg">

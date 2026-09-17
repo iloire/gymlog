@@ -4,7 +4,7 @@ import { destroyDb, getDb } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
 import { templateItems } from '@/lib/queries'
 import { mutationKey } from '@/lib/sync/types'
-import { duplicateWorkout } from '@/lib/workouts'
+import { duplicateWorkout, restoreTemplateItem } from '@/lib/workouts'
 
 const USER = 'user-1'
 
@@ -79,5 +79,42 @@ describe('duplicateWorkout', () => {
     for (const item of await templateItems(USER, copyId)) {
       expect(await outbox.get(mutationKey('templateItems', item.id))).toBeDefined()
     }
+  })
+})
+
+describe('restoreTemplateItem', () => {
+  it('puts a removed exercise back where it was and queues it for sync', async () => {
+    await seedWorkout()
+    await deleteRow(USER, 'templateItems', 'i-bench')
+    await getDb(USER).outbox.clear()
+
+    await restoreTemplateItem(USER, 'i-bench')
+
+    expect((await templateItems(USER, 'push')).map((item) => item.id)).toEqual(['i-bench', 'i-ohp'])
+    expect(await getDb(USER).templateItems.get('i-bench')).toMatchObject({ sets: 5, targetWeightKg: 60 })
+    expect((await getDb(USER).outbox.get(mutationKey('templateItems', 'i-bench')))?.row).toMatchObject({
+      deletedAt: null,
+    })
+  })
+
+  it('goes to the end when an exercise added since has taken its position', async () => {
+    await seedWorkout()
+    await deleteRow(USER, 'templateItems', 'i-ohp')
+    await writeRow(USER, 'templateItems', { id: 'i-rows', templateId: 'push', exerciseId: 'Rows', position: 2 })
+
+    await restoreTemplateItem(USER, 'i-ohp')
+
+    const items = await templateItems(USER, 'push')
+    expect(items.map((item) => item.id)).toEqual(['i-bench', 'i-rows', 'i-ohp'])
+    expect(new Set(items.map((item) => item.position)).size).toBe(3)
+  })
+
+  it('leaves an exercise that was never removed alone', async () => {
+    await seedWorkout()
+    await getDb(USER).outbox.clear()
+
+    await restoreTemplateItem(USER, 'i-bench')
+
+    expect(await getDb(USER).outbox.count()).toBe(0)
   })
 })

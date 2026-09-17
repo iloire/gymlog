@@ -4,19 +4,20 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronDown, ChevronLeft, ChevronUp, Copy, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { ExercisePicker } from '@/components/exercise-picker'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
+import { UndoToast } from '@/components/undo-toast'
 import { CARDIO_ITEM, isCardio } from '@/lib/cardio'
 import { getDb, type LocalTemplateItem } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
 import { newId } from '@/lib/id'
 import { activeProgram, templateItems } from '@/lib/queries'
-import { duplicateWorkout } from '@/lib/workouts'
+import { duplicateWorkout, restoreTemplateItem } from '@/lib/workouts'
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -27,6 +28,9 @@ export default function WorkoutEditorPage() {
   const [picking, setPicking] = useState(false)
   const [viewingExerciseId, setViewingExerciseId] = useState<string | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  // The exercise last removed, while its Undo is still on offer.
+  const [removed, setRemoved] = useState<{ id: string; name: string } | null>(null)
+  const dismissRemoved = useCallback(() => setRemoved(null), [])
 
   const data = useLiveQuery(async () => {
     if (!userId) return null
@@ -126,48 +130,18 @@ export default function WorkoutEditorPage() {
         <ul className="mt-6 space-y-3">
           {items.map((item, index) => (
             <li key={item.id} className="rounded-md border border-line bg-surface p-4">
-              <div className="flex items-start justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => setViewingExerciseId(item.exerciseId)}
-                  className="flex min-w-0 items-center gap-3 text-left"
-                >
-                  <ExerciseFrames
-                    exercise={{ name: item.exerciseName, images: item.exerciseImages }}
-                    className="aspect-[3/2] w-20 shrink-0"
-                    animate={false}
-                  />
-                  <span className="text-[15px]">{item.exerciseName}</span>
-                </button>
-                <div className="flex shrink-0 gap-1 text-ink-dim">
-                  <button
-                    type="button"
-                    aria-label="Move up"
-                    disabled={index === 0}
-                    onClick={() => void move(index, -1)}
-                    className="p-1.5 disabled:opacity-25"
-                  >
-                    <ChevronUp size={18} aria-hidden />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Move down"
-                    disabled={index === items.length - 1}
-                    onClick={() => void move(index, 1)}
-                    className="p-1.5 disabled:opacity-25"
-                  >
-                    <ChevronDown size={18} aria-hidden />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Remove ${item.exerciseName}`}
-                    onClick={() => void deleteRow(userId, 'templateItems', item.id)}
-                    className="p-1.5"
-                  >
-                    <Trash2 size={18} aria-hidden />
-                  </button>
-                </div>
-              </div>
+              <button
+                type="button"
+                onClick={() => setViewingExerciseId(item.exerciseId)}
+                className="flex w-full min-w-0 items-center gap-3 text-left"
+              >
+                <ExerciseFrames
+                  exercise={{ name: item.exerciseName, images: item.exerciseImages }}
+                  className="aspect-[3/2] w-20 shrink-0"
+                  animate={false}
+                />
+                <span className="text-[15px]">{item.exerciseName}</span>
+              </button>
 
               <div className="mt-3 grid grid-cols-3 gap-2">
                 <NumberField
@@ -200,6 +174,42 @@ export default function WorkoutEditorPage() {
                   step={15}
                   onChange={(restSec) => void update(item, { restSec })}
                 />
+              </div>
+
+              {/* 44px targets, and Remove at the far end from the arrows: a thumb
+                  reordering should not be able to take the exercise out. */}
+              <div className="-mx-3 mt-2 -mb-2 flex items-center justify-between text-ink-dim">
+                <div className="flex">
+                  <button
+                    type="button"
+                    aria-label="Move up"
+                    disabled={index === 0}
+                    onClick={() => void move(index, -1)}
+                    className="flex size-11 items-center justify-center disabled:opacity-25"
+                  >
+                    <ChevronUp size={20} aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Move down"
+                    disabled={index === items.length - 1}
+                    onClick={() => void move(index, 1)}
+                    className="flex size-11 items-center justify-center disabled:opacity-25"
+                  >
+                    <ChevronDown size={20} aria-hidden />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  aria-label={`Remove ${item.exerciseName}`}
+                  onClick={async () => {
+                    await deleteRow(userId, 'templateItems', item.id)
+                    setRemoved({ id: item.id, name: item.exerciseName })
+                  }}
+                  className="flex size-11 items-center justify-center"
+                >
+                  <Trash2 size={18} aria-hidden />
+                </button>
               </div>
             </li>
           ))}
@@ -274,7 +284,19 @@ export default function WorkoutEditorPage() {
           </button>
         )}
       </main>
-      <Nav />
+      <Nav>
+        {removed && (
+          <UndoToast
+            key={removed.id}
+            message={`Removed ${removed.name}`}
+            onUndo={() => {
+              void restoreTemplateItem(userId, removed.id)
+              setRemoved(null)
+            }}
+            onDismiss={dismissRemoved}
+          />
+        )}
+      </Nav>
     </>
   )
 }

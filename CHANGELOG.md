@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-17 23:11
+
+- **Workout editor: removing an exercise can be undone.** The trash icon took the exercise out on
+  one tap, with no way back, from a 30px target beside the reorder arrows. It still removes at
+  once, but a *Removed … · Undo* bar (`components/undo-toast.tsx`) now sits above the tabs for six
+  seconds; Undo puts the exercise back with its sets, reps and rest, through
+  `restoreTemplateItem()` in `lib/workouts.ts`. It returns to its old place unless an exercise
+  added since has taken that position, and then it goes last, since two items on one position
+  cannot be reordered. The arrows and the trash are 44px targets on their own row under the
+  fields, arrows on the left and the trash at the far right, which also gives the exercise name
+  the card's full width. `Nav` takes `children` for a bar like this one.
+
 ## 2026-09-17 23:20
 
 - **Fix: a decimal weight can be typed.** Typing 42.5 into the weight field logged 425: the field

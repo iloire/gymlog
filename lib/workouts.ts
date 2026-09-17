@@ -46,3 +46,28 @@ export async function duplicateWorkout(userId: string, templateId: string): Prom
 
   return id
 }
+
+/**
+ * Bring back an exercise taken out of a workout — the editor's Undo.
+ *
+ * It returns to the place it left, unless an exercise added since sits there
+ * now: then it goes to the end, because two items on one position cannot be
+ * reordered (the arrows swap positions, and swapping equals changes nothing).
+ */
+export async function restoreTemplateItem(userId: string, itemId: string): Promise<void> {
+  const db = getDb(userId)
+
+  await db.transaction('rw', [db.templateItems, db.outbox, db.meta], async () => {
+    const item = await db.templateItems.get(itemId)
+    if (!item || item.deletedAt === null) return
+
+    const live = await templateItems(userId, item.templateId)
+    const taken = live.some((other) => other.position === item.position)
+
+    await writeRow(userId, 'templateItems', {
+      id: item.id,
+      position: taken ? (live.at(-1)?.position ?? 0) + 1 : item.position,
+      deletedAt: null,
+    })
+  })
+}
