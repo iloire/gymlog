@@ -104,6 +104,9 @@ change. No all-caps labels, no monospace for data.
   number in a box. Yellow while running, gone when it ends.
 - **Thumb zone.** Primary actions sit in the bottom third; minimum 56px targets; weight and reps
   adjust with −/+ in 2.5 kg and 1 rep steps, because typing with chalk on your hands is miserable.
+- **The gym screen acts on the exercise in front of you.** Anything about the whole workout —
+  adding an exercise, deleting the workout (`components/delete-session.tsx`) — lives where the
+  workout is shown whole: its card on Today, its row in History. Only Finish / Reopen stay.
 - **Sign in** is the one screen with a picture: equipment in one plate colour, no people, with the
   wordmark set large on its lower edge. See `docs/login-images.md`.
 - Motion answers a tap (a set collapsing into a square, the timer draining). Nothing animates on

@@ -19,7 +19,6 @@ import { formatMinutes } from '@/lib/format'
 import { lastPerformance, type LastPerformance } from '@/lib/queries'
 import {
   activeSet as pickActiveSet,
-  deleteSession,
   finishSession,
   logSet,
   removeFromSession,
@@ -54,7 +53,6 @@ function Session() {
   const [viewingExercise, setViewingExercise] = useState(false)
   // The exercise being confirmed for removal, so moving to another one drops the prompt.
   const [removing, setRemoving] = useState<string | null>(null)
-  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   useWakeLock()
 
@@ -241,7 +239,7 @@ function Session() {
         />
       )}
 
-      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-4">
+      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-4 pb-8">
         {exercise?.images?.length ? (
           // Full-bleed on a phone; the photo shows the movement you are about to
           // do, and tapping it opens the cues and instructions without leaving.
@@ -458,50 +456,6 @@ function Session() {
               Finish workout
             </button>
           )
-        )}
-
-        {confirmingDelete ? (
-          <div
-            role="alertdialog"
-            aria-labelledby="delete-session-title"
-            className="mt-3 mb-8 rounded-md border border-plate-red p-4"
-          >
-            <p id="delete-session-title" className="text-[15px]">
-              Delete this {data.session.templateName} workout?
-            </p>
-            <p className="mt-1 text-sm text-ink-dim">
-              Everything logged on {data.session.scheduledFor} goes with it. The workout itself stays
-              in your programme.
-            </p>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                autoFocus
-                onClick={() => setConfirmingDelete(false)}
-                className="h-12 rounded-md border border-line text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  await deleteSession(userId, id)
-                  router.push('/')
-                }}
-                className="h-12 rounded-md bg-plate-red text-sm font-semibold text-white"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setConfirmingDelete(true)}
-            className="mt-3 mb-8 h-12 w-full rounded-md border border-line text-sm text-ink-dim"
-          >
-            Delete workout
-          </button>
         )}
       </main>
 

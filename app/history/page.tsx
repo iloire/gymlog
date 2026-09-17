@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import Link from 'next/link'
 import { useState } from 'react'
 
+import { DeleteSession } from '@/components/delete-session'
 import { Nav } from '@/components/nav'
 import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
@@ -123,12 +124,15 @@ function SessionRow({ entry, open = false }: { entry: HistoryEntry; open?: boole
 
         <div className="pb-4">
           <SessionSets exercises={exercises} />
-          <Link
-            href={`/session?id=${session.id}`}
-            className="mt-4 inline-block text-sm text-ink-dim underline underline-offset-4"
-          >
-            Open to fix a set
-          </Link>
+          <div className="mt-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-3">
+            <Link
+              href={`/session?id=${session.id}`}
+              className="text-sm text-ink-dim underline underline-offset-4"
+            >
+              Open to fix a set
+            </Link>
+            <DeleteSession session={session} />
+          </div>
         </div>
       </details>
     </li>

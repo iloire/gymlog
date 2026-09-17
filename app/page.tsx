@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { BodyPartBadges } from '@/components/body-part-badges'
+import { DeleteSession } from '@/components/delete-session'
 import { ExercisePicker } from '@/components/exercise-picker'
 import { Nav } from '@/components/nav'
 import { SessionSets } from '@/components/session-sets'
@@ -357,6 +358,11 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
           Finished · open to fix a set
         </Link>
       )}
+      {/* The wrong workout started, or one logged twice: deleting it is about the
+          whole workout, so it sits with the workout and not on the gym screen. */}
+      <div className="mt-4 flex justify-end">
+        <DeleteSession session={session} />
+      </div>
     </article>
   )
 }

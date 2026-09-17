@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-17 22:44
+
+- **Delete workout leaves the gym screen.** It sat under *Remove exercise* on the one-exercise
+  session screen — a whole-workout action a thumb-slip away on the screen used mid-set. It now lives
+  where the workout is shown whole: on its card on Today and in its opened row in History, as a
+  quiet link with the same inline confirm. The session screen keeps only what concerns the exercise
+  in front of you, plus Finish / Reopen.
+
 ## 2026-09-17 22:40
 
 - **A new account opens on a welcome, not "Rest day".** With no workouts and nothing logged, Today
