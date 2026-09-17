@@ -103,11 +103,21 @@ change. No all-caps labels, no monospace for data.
   selects that set, ringed when it is already done, so a mistyped set is fixed in place with
   Update set; a correction starts no rest timer and does not move you to the next exercise. Sets
   are logged in order: only a done set or the next one to do can be tapped, the rest are dimmed.
+  A set logged heavier than the best set last time keeps a red edge inside its square. The
+  *Heavier than last time* line under the steppers is a nudge before the lift and goes as soon as
+  one of this exercise's sets banks it; the square is what still says so four exercises later.
+  Both ask `heavierThanLastTime()` (`lib/records.ts`), so they can never disagree.
 - **The rest timer is a rule that drains** across the bottom edge, above the thumb, rather than a
   number in a box. Yellow while running, gone when it ends. Off the session screen it sits above
   the tabs and is a link back to the workout.
 - **Thumb zone.** Primary actions sit in the bottom third; minimum 56px targets; weight and reps
   adjust with −/+ in 2.5 kg and 1 rep steps, because typing with chalk on your hands is miserable.
+- **Finishing a workout pays out.** *Finish workout* hands the screen to the summary
+  (`components/workout-summary.tsx`): the kilos moved set at the largest size on the screen, then
+  every exercise that beat last time with what it added and the set it beat, then the week streak
+  and what was logged. Red is the delta and only the delta — the total stays ink, or three earned
+  red lines drown under one decorative one. What counts as beating last time is decided once, in
+  `lib/records.ts`, and it claims nothing it cannot show a number for.
 - **The gym screen acts on the exercise in front of you.** Anything about the whole workout —
   adding an exercise, deleting the workout (`components/delete-session.tsx`) — lives where the
   workout is shown whole: its card on Today, its row in History. Only Finish / Reopen stay, and

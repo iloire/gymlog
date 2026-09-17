@@ -13,10 +13,12 @@ import { RestTimer } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
 import { SetSquares } from '@/components/set-squares'
 import { Stepper } from '@/components/stepper'
+import { WorkoutSummary } from '@/components/workout-summary'
 import { isCardio } from '@/lib/cardio'
 import { getDb, type LocalSetLog } from '@/lib/db/dexie'
 import { formatMinutes } from '@/lib/format'
 import { lastPerformance, type LastPerformance } from '@/lib/queries'
+import { heavierThanLastTime } from '@/lib/records'
 import { startRest } from '@/lib/rest'
 import {
   activeSet as pickActiveSet,
@@ -53,6 +55,9 @@ function Session() {
   const [viewingExercise, setViewingExercise] = useState(false)
   // The exercise being confirmed for removal, so moving to another one drops the prompt.
   const [removing, setRemoving] = useState<string | null>(null)
+  // Set by finishing the workout here, so the summary is the reward for ending
+  // one rather than something every visit to a past session has to scroll past.
+  const [finished, setFinished] = useState(false)
 
   useWakeLock()
 
@@ -144,6 +149,22 @@ function Session() {
     return <main className="p-6 text-ink-dim">Loading…</main>
   }
 
+  // Finished from this screen: the summary takes it over, with the way back
+  // into the workout on it. Opening an old session still lands on the sets.
+  if (finished) {
+    return (
+      <WorkoutSummary
+        userId={userId}
+        sessionId={id}
+        onDone={() => router.push('/')}
+        onReopen={async () => {
+          await reopenSession(userId, data.session)
+          setFinished(false)
+        }}
+      />
+    )
+  }
+
   // Derived, not synced through an effect: edits belong to one set, and moving
   // to the next set falls straight back to that set's own suggestion.
   const values =
@@ -156,8 +177,15 @@ function Session() {
   // Cardio by the library's category, or by the rows themselves if the exercise is not loaded.
   const timed =
     isCardio(exercise) || groupLogs.some((log) => log.targetDurationSec != null || log.durationSec != null)
-  const beatsLastTime =
-    !timed && previous && values.weightKg !== null && values.weightKg > (previous.topSet.weightKg ?? 0)
+  // What there is to beat: last time's heaviest set, or nothing — a first time,
+  // or a timed exercise, where weight is not the measure.
+  const previousTopKg = !timed && previous ? (previous.topSet.weightKg ?? 0) : null
+  // Once a set of this exercise is logged heavier than last time, its square
+  // keeps the red edge and the line has said all it has to say.
+  const banked = groupLogs.some(
+    (log) => log.completedAt !== null && heavierThanLastTime(log.weightKg, previousTopKg),
+  )
+  const beatsLastTime = !banked && heavierThanLastTime(values.weightKg, previousTopKg)
 
   async function completeSet() {
     if (!activeSet || !userId) return
@@ -296,6 +324,7 @@ function Session() {
         <SetSquares
           logs={groupLogs}
           activeId={activeSet?.id}
+          previousTopKg={previousTopKg}
           onSelect={(logId) => {
             setSelectedId(logId)
             setDraft(null)
@@ -451,7 +480,7 @@ function Session() {
               type="button"
               onClick={async () => {
                 await finishSession(userId, data.session)
-                router.push('/')
+                setFinished(true)
               }}
               className="mt-6 h-14 w-full rounded-md border border-line text-base font-semibold"
             >

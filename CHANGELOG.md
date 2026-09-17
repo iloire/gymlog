@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-09-17 23:46
+
+- **A workout now ends on something.** Finishing one used to drop you back on Today with nothing
+  to show for it. *Finish workout* now hands the screen to a summary
+  (`components/workout-summary.tsx`): the kilos you moved set at the largest size on the screen,
+  the sets and the time it took, then everything that beat last time — `+5 kg`, `+2.5 kg`,
+  `+1 rep`, each with the set that did it and the set it beat — then the week streak and the whole
+  log. Exercises done for the first time are named as the numbers to beat. It reads Dexie like
+  every other screen, so it works in a basement, and *Back to today* or *Reopen workout* are the
+  two ways off it.
+- **What counts as beating last time lives in one file.** `lib/records.ts` compares an exercise
+  against its last outing on four axes — a heavier top set, more reps at that same weight, a
+  longer time, more total work — and says only the biggest one, so the red list stays honest. A
+  lighter day that did more total work still counts; a lighter day that did less says nothing.
+- **A set gone heavier keeps a red edge.** The set square of a set logged above last time's best
+  holds a red edge for the rest of the workout, and the *Heavier than last time* line under the
+  steppers now goes as soon as one of that exercise's sets banks it. The line was a nudge before
+  the lift; the square is what still says so four exercises later. Both ask the same
+  `heavierThanLastTime()`, so they cannot disagree.
+
 ## 2026-09-17 23:32
 
 - **Today says what the workout actually is, and what you missed.** The planned workout listed
