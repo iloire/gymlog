@@ -7,6 +7,7 @@ import { dateToEpoch } from '@/lib/queries'
 import {
   activeSet,
   addToSession,
+  deleteSession,
   doExerciseToday,
   finishSession,
   logSet,
@@ -297,6 +298,39 @@ describe('removeFromSession', () => {
       [null, 3, null, null],
       [null, 3, null, null],
     ])
+  })
+})
+
+describe('deleteSession', () => {
+  it('soft-deletes the session with every set in it, and queues each for sync', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [first] = await logsFor(id)
+    await logSet(USER, first!, { weightKg: 60, reps: 5 })
+
+    await deleteSession(USER, id)
+
+    const session = (await getDb(USER).sessions.get(id))!
+    expect(session.deletedAt).toBeTypeOf('number')
+    expect((await getDb(USER).outbox.get(mutationKey('sessions', id)))?.row.deletedAt).toBe(session.deletedAt)
+    for (const log of await logsFor(id)) {
+      expect(log.deletedAt).toBeTypeOf('number')
+      expect((await getDb(USER).outbox.get(mutationKey('setLogs', log.id)))?.row.deletedAt).toBe(log.deletedAt)
+    }
+  })
+
+  it('comes back as a fresh workout when the same one is started again', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [first] = await logsFor(id)
+    await logSet(USER, first!, { weightKg: 60, reps: 5 })
+    await finishSession(USER, (await getDb(USER).sessions.get(id))!)
+    await deleteSession(USER, id)
+
+    expect(await startSession(USER, 'tpl', null, DATE)).toBe(id)
+
+    expect(await getDb(USER).sessions.get(id)).toMatchObject({ deletedAt: null, completedAt: null })
+    const live = (await logsFor(id)).filter((log) => log.deletedAt === null)
+    expect(live).toHaveLength(5)
+    expect(live.every((log) => log.completedAt === null && log.weightKg === null)).toBe(true)
   })
 })
 

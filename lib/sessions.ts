@@ -29,6 +29,9 @@ export async function startSession(
   const items = await templateItems(userId, templateId)
   const existing = await db.sessions.get(id)
   const startedAt = existing?.startedAt ?? Date.now()
+  // Starting a workout you deleted brings it back rather than leaving an empty
+  // shell: the ids are deterministic, so its rows are these rows.
+  const restarting = existing != null && existing.deletedAt !== null
 
   await writeRow(userId, 'sessions', {
     id,
@@ -38,8 +41,9 @@ export async function startSession(
     templateName: template?.name ?? 'Workout',
     scheduledFor: date,
     startedAt,
-    completedAt: existing?.completedAt ?? null,
+    completedAt: restarting ? null : (existing?.completedAt ?? null),
     notes: existing?.notes ?? null,
+    deletedAt: null,
   })
 
   const performedAt = dateToEpoch(date)
@@ -49,7 +53,11 @@ export async function startSession(
 
     for (let setIndex = 1; setIndex <= item.sets; setIndex += 1) {
       const logId = setLogId(id, item.exerciseId, setIndex)
-      if (await db.setLogs.get(logId)) continue
+      const log = await db.setLogs.get(logId)
+      // A set that is already there is left alone — including one you removed
+      // with the exercise, which re-opening the workout must not bring back.
+      // Only restarting a deleted workout restores its sets.
+      if (log && !(restarting && log.deletedAt !== null)) continue
 
       await writeRow(userId, 'setLogs', {
         id: logId,
@@ -70,6 +78,7 @@ export async function startSession(
         completedAt: null,
         performedAt,
         notes: null,
+        deletedAt: null,
       })
     }
   }
@@ -216,6 +225,23 @@ export async function doExerciseToday(
 
 export async function finishSession(userId: string, session: LocalSession): Promise<void> {
   await writeRow(userId, 'sessions', { ...session, completedAt: Date.now() })
+}
+
+/**
+ * Throw away a whole logged workout — the wrong one started, or the same
+ * session logged twice on two phones. The session and every set in it are
+ * soft-deleted in one transaction, so the deletion syncs and History, the
+ * calendar and "last time" all stop counting it.
+ */
+export async function deleteSession(userId: string, id: string): Promise<void> {
+  const db = getDb(userId)
+  await db.transaction('rw', [db.sessions, db.setLogs, db.outbox, db.meta], async () => {
+    const logs = await db.setLogs.where('sessionId').equals(id).toArray()
+    for (const log of logs) {
+      if (log.deletedAt === null) await deleteRow(userId, 'setLogs', log.id)
+    }
+    await deleteRow(userId, 'sessions', id)
+  })
 }
 
 /**
