@@ -9,6 +9,7 @@ import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { WeightChart } from '@/components/weight-chart'
 import { deleteRow } from '@/lib/db/write'
+import { parseNumber } from '@/lib/format'
 import { bodyWeightSeries, today } from '@/lib/queries'
 import { recordBodyWeight } from '@/lib/sessions'
 import { bodyWeightId } from '@/lib/id'
@@ -31,8 +32,8 @@ export default function WeightPage() {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!userId) return
-    const weight = Number(value.replace(',', '.'))
-    if (!Number.isFinite(weight) || weight <= 0) return
+    const weight = parseNumber(value)
+    if (weight === null || weight <= 0) return
     await recordBodyWeight(userId, weight, date)
     setValue('')
   }

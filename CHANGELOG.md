@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-17 23:20
+
+- **Fix: a decimal weight can be typed.** Typing 42.5 into the weight field logged 425: the field
+  showed the parsed number on every keystroke, so "42." turned straight back into "42" and the
+  point was lost, with a comma keypad too. The field now keeps what you type while it has focus
+  (`parseNumber()` in `lib/format.ts` reads "42.5", "42,5" and a half-typed "42."), selects the
+  number when you tap it so typing replaces it, and an emptied field keeps the last value rather
+  than becoming 0. −/+ are unchanged. The weight log's field uses the same parser.
+
 ## 2026-09-17 23:14
 
 - **Profile no longer promises a weigh-in on Today.** The Bodyweight section said "Today's weight

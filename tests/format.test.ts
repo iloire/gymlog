@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatDuration, formatSet, kg } from '@/lib/format'
+import { formatDuration, formatSet, kg, parseNumber } from '@/lib/format'
 
 describe('kg', () => {
   it('groups thousands and keeps one decimal only when there is one', () => {
@@ -24,5 +24,21 @@ describe('formatSet', () => {
     expect(formatSet({ weightKg: null, reps: null, durationSec: 450 })).toBe('7.5 min')
     expect(formatSet({ weightKg: 80, reps: 5 })).toBe('80×5')
     expect(formatSet({ weightKg: null, reps: 12, durationSec: null })).toBe('12 reps')
+  })
+})
+
+describe('parseNumber', () => {
+  it('reads a decimal typed with a point or a comma, and one still being typed', () => {
+    expect(parseNumber('42.5')).toBe(42.5)
+    expect(parseNumber('42,5')).toBe(42.5)
+    expect(parseNumber('42.')).toBe(42)
+    expect(parseNumber(' 100 ')).toBe(100)
+  })
+
+  it('is null until there is a number', () => {
+    expect(parseNumber('')).toBeNull()
+    expect(parseNumber('.')).toBeNull()
+    expect(parseNumber('-')).toBeNull()
+    expect(parseNumber('4x')).toBeNull()
   })
 })

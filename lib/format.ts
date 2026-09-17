@@ -47,3 +47,14 @@ export function formatSet(set: { weightKg: number | null; reps: number | null; d
   if (set.durationSec != null) return formatMinutes(set.durationSec)
   return set.weightKg ? `${set.weightKg}×${set.reps ?? 0}` : `${set.reps ?? 0} reps`
 }
+
+/**
+ * A number as someone types it: '42.5', '42,5' on a comma keypad, or '42.'
+ * half way there. Null for anything that is not a number yet — '', '.', '-'.
+ */
+export function parseNumber(text: string): number | null {
+  const trimmed = text.trim().replace(',', '.')
+  if (trimmed === '' || trimmed === '.') return null
+  const value = Number(trimmed)
+  return Number.isFinite(value) ? value : null
+}

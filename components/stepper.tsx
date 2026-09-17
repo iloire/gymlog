@@ -1,6 +1,9 @@
 'use client'
 
 import { Minus, Plus } from 'lucide-react'
+import { useState } from 'react'
+
+import { parseNumber } from '@/lib/format'
 
 /**
  * Numbers go in with the thumb, not the keyboard — chalky hands and a phone
@@ -22,6 +25,9 @@ export function Stepper({
   onChange: (next: number) => void
 }) {
   const current = value ?? 0
+  // What is in the field while it has focus. Showing the parsed number instead
+  // turned '42.' straight back into '42', so 42.5 could only ever be typed as 425.
+  const [typing, setTyping] = useState<string | null>(null)
 
   return (
     // The label rides inside the field, above the number: a row of its own per
@@ -44,12 +50,19 @@ export function Stepper({
         <input
           aria-label={label}
           inputMode="decimal"
-          value={value ?? ''}
+          value={typing ?? value ?? ''}
           placeholder="—"
-          onChange={(event) => {
-            const next = Number(event.target.value.replace(',', '.'))
-            if (Number.isFinite(next)) onChange(next)
+          onFocus={(event) => {
+            setTyping(`${value ?? ''}`)
+            // Typing replaces the number rather than adding digits to it.
+            event.target.select()
           }}
+          onChange={(event) => {
+            setTyping(event.target.value)
+            const next = parseNumber(event.target.value)
+            if (next !== null && next >= min) onChange(next)
+          }}
+          onBlur={() => setTyping(null)}
           className="figure h-11 w-full min-w-0 bg-transparent text-center text-4xl outline-none"
         />
       </label>
