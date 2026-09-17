@@ -1,6 +1,12 @@
 'use client'
 
+import { useLiveQuery } from 'dexie-react-hooks'
+import { ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
+
+import { useUserId } from '@/components/session-boot'
+import { clearRest, currentRest } from '@/lib/rest'
 
 /** A short two-tone beep. No audio file to load, and it works offline. */
 function beep() {
@@ -28,62 +34,80 @@ function beep() {
 }
 
 /**
- * Counts down from a timestamp rather than ticking a counter, so backgrounding
- * the phone between sets does not stop or drift the clock.
+ * Counts down from a stored timestamp rather than ticking a counter, so neither
+ * backgrounding the phone nor leaving the session screen stops or drifts the
+ * clock. The rest itself lives in lib/rest.ts; this only draws it, wherever it
+ * is mounted. `link` is for every screen but the session: the bar takes you back.
  */
-export function RestTimer({ endsAt, onDone }: { endsAt: number | null; onDone: () => void }) {
-  const [state, setState] = useState<{ remaining: number; total: number }>({
-    remaining: 0,
-    total: 0,
-  })
+export function RestTimer({ link = false }: { link?: boolean }) {
+  const userId = useUserId()
+  const rest = useLiveQuery(async () => (userId ? currentRest(userId) : null), [userId]) ?? null
+  const endsAt = rest?.endsAt ?? null
+
+  const [remaining, setRemaining] = useState(0)
   const fired = useRef(false)
 
   useEffect(() => {
-    if (!endsAt) return
+    if (!endsAt || !userId) return
 
     fired.current = false
-    const total = Math.max(1, Math.round((endsAt - Date.now()) / 1000))
 
     const tick = () => {
-      const remaining = Math.max(0, Math.round((endsAt - Date.now()) / 1000))
-      setState({ remaining, total })
+      const left = Math.max(0, Math.round((endsAt - Date.now()) / 1000))
+      setRemaining(left)
 
-      if (remaining === 0 && !fired.current) {
+      if (left === 0 && !fired.current) {
         fired.current = true
         beep()
         navigator.vibrate?.([120, 60, 120])
-        onDone()
+        void clearRest(userId)
       }
     }
 
     const timer = window.setInterval(tick, 250)
     tick()
     return () => window.clearInterval(timer)
-  }, [endsAt, onDone])
+  }, [endsAt, userId])
 
-  if (!endsAt || state.remaining === 0) return null
+  if (!rest || remaining === 0) return null
 
-  const minutes = Math.floor(state.remaining / 60)
-  const seconds = `${state.remaining % 60}`.padStart(2, '0')
-  const progress = state.remaining / state.total
+  const minutes = Math.floor(remaining / 60)
+  const seconds = `${remaining % 60}`.padStart(2, '0')
+  const progress = Math.min(1, remaining / rest.totalSec)
 
-  return (
+  const bar = (
     <div className="border-t border-line bg-surface">
       <div
         className="h-1 bg-plate-yellow transition-[width] duration-200 ease-linear"
         style={{ width: `${progress * 100}%` }}
         role="progressbar"
         aria-label="Rest remaining"
-        aria-valuenow={state.remaining}
+        aria-valuenow={remaining}
         aria-valuemin={0}
-        aria-valuemax={state.total}
+        aria-valuemax={rest.totalSec}
       />
-      <div className="flex items-center justify-between px-5 py-3">
-        <span className="text-sm text-ink-dim">Rest</span>
+      <div className="mx-auto flex max-w-lg items-center justify-between px-5 py-3">
+        <span className="flex items-center gap-1 text-sm text-ink-dim">
+          {link ? (
+            <>
+              Rest · back to workout <ChevronRight size={16} aria-hidden />
+            </>
+          ) : (
+            'Rest'
+          )}
+        </span>
         <span className="figure text-2xl text-plate-yellow">
           {minutes}:{seconds}
         </span>
       </div>
     </div>
+  )
+
+  return link ? (
+    <Link href={`/session?id=${rest.sessionId}`} className="block">
+      {bar}
+    </Link>
+  ) : (
+    bar
   )
 }

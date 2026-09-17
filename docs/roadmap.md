@@ -17,8 +17,8 @@ Every item ships with unit tests; CI requires them.
 2. **Don't lose unsynced sets on sign-out** (§2.1) — small, and it prevents data loss.
 3. ~~**Starter beginner programme** (§1.1)~~ ✅ and **automatic progression** (§1.2) — the part of
    the original brief the app does not do yet.
-4. **Exercise instructions offline** (§2.2) and **a rest timer that survives leaving the screen**
-   (§2.3).
+4. **Exercise instructions offline** (§2.2) and ~~**a rest timer that survives leaving the screen**
+   (§2.3)~~ ✅.
 5. ~~**History**~~ ✅ and **strength charts** (§3.1, §3.2).
 6. **Before anyone else signs up** (§5) — password reset, rate limiting, data export.
 
@@ -102,9 +102,10 @@ Move it to `/exercises?id=…` exactly as the session screen was moved (`docs/ar
 
 ### 2.3 A rest timer that survives leaving the screen — S
 
-The timer's end time lives in React state on the session page, so opening an exercise's
+~~The timer's end time lives in React state on the session page, so opening an exercise's
 instructions mid-rest loses it. Store `restEndsAt` in IndexedDB (`meta`) and render the timer bar
-app-wide while it runs. Add **+30 s / skip** buttons.
+app-wide while it runs.~~ ✅ (`lib/rest.ts`; the bar sits above the tabs and links back to the
+workout.) Still to do: **+30 s / skip** buttons.
 
 ### 2.4 "Make available offline" — S
 

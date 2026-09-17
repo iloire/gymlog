@@ -211,8 +211,9 @@ The bottom nav has five tabs: Today, Plan, History, Exercises, Profile. **Plan**
 `/program` and `/programmes` — one idea, "what I train and when" — switched between with the
 segmented control at the top of each (`components/plan-tabs.tsx`).
 
-Rest timer counts down from a stored timestamp (survives backgrounding), vibrates and beeps at
-zero. The `frontend-design` skill drives the visual direction — dark, high-contrast,
+Rest timer counts down from a timestamp stored in IndexedDB `meta` (`lib/rest.ts`) — it survives
+backgrounding, a reload and leaving the screen, where it shows above the tabs — and vibrates and
+beeps at zero. The `frontend-design` skill drives the visual direction — dark, high-contrast,
 thumb-reachable; this gets used one-handed with chalky hands, which is a real design constraint.
 
 ---

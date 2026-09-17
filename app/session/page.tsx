@@ -17,6 +17,7 @@ import { isCardio } from '@/lib/cardio'
 import { getDb, type LocalSetLog } from '@/lib/db/dexie'
 import { formatMinutes } from '@/lib/format'
 import { lastPerformance, type LastPerformance } from '@/lib/queries'
+import { startRest } from '@/lib/rest'
 import {
   activeSet as pickActiveSet,
   finishSession,
@@ -48,7 +49,6 @@ function Session() {
 
   const [chosenPosition, setPosition] = useState<number | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [restEndsAt, setRestEndsAt] = useState<number | null>(null)
   const [draft, setDraft] = useState<({ id: string } & Values) | null>(null)
   const [viewingExercise, setViewingExercise] = useState(false)
   // The exercise being confirmed for removal, so moving to another one drops the prompt.
@@ -167,7 +167,7 @@ function Session() {
 
     // A correction is not a set: no rest, and it leaves you where you are.
     if (activeSet.completedAt) return
-    if (activeSet.restSec) setRestEndsAt(Date.now() + activeSet.restSec * 1000)
+    if (activeSet.restSec) await startRest(userId, activeSet.sessionId, activeSet.restSec)
 
     const remaining = groupLogs.filter(
       (log) => log.completedAt === null && log.id !== activeSet.id,
@@ -460,7 +460,7 @@ function Session() {
       </main>
 
       <div className="sticky bottom-0 pb-[env(safe-area-inset-bottom)]">
-        <RestTimer endsAt={restEndsAt} onDone={() => setRestEndsAt(null)} />
+        <RestTimer />
       </div>
     </div>
   )

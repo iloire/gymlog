@@ -101,7 +101,8 @@ change. No all-caps labels, no monospace for data.
   Update set; a correction starts no rest timer and does not move you to the next exercise. Sets
   are logged in order: only a done set or the next one to do can be tapped, the rest are dimmed.
 - **The rest timer is a rule that drains** across the bottom edge, above the thumb, rather than a
-  number in a box. Yellow while running, gone when it ends.
+  number in a box. Yellow while running, gone when it ends. Off the session screen it sits above
+  the tabs and is a link back to the workout.
 - **Thumb zone.** Primary actions sit in the bottom third; minimum 56px targets; weight and reps
   adjust with −/+ in 2.5 kg and 1 rep steps, because typing with chalk on your hands is miserable.
 - **The gym screen acts on the exercise in front of you.** Anything about the whole workout —

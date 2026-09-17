@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-17 22:48
+
+- **The rest timer survives leaving the gym screen.** Its end time lived in the session page's
+  state, so checking an exercise's instructions or the week mid-rest lost the clock. The rest now
+  lives in IndexedDB (`meta`, `lib/rest.ts`) and the bar counts down above the tabs on every
+  screen, where tapping it takes you back to the workout. It also survives a reload or the phone
+  killing the app. A rest that ran out while the app was closed stays silent, and one whose workout
+  was finished or deleted disappears.
+
 ## 2026-09-17 22:44
 
 - **Delete workout leaves the gym screen.** It sat under *Remove exercise* on the one-exercise
