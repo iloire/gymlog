@@ -9,7 +9,7 @@ import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { WeightChart } from '@/components/weight-chart'
 import { deleteRow } from '@/lib/db/write'
-import { parseNumber } from '@/lib/format'
+import { formatDay, parseNumber } from '@/lib/format'
 import { bodyWeightSeries, today } from '@/lib/queries'
 import { recordBodyWeight } from '@/lib/sessions'
 import { bodyWeightId } from '@/lib/id'
@@ -98,12 +98,12 @@ export default function WeightPage() {
           <ul className="mt-8 divide-y divide-line border-y border-line">
             {[...series].reverse().slice(0, 30).map((entry) => (
               <li key={entry.measuredOn} className="flex items-center justify-between py-3">
-                <span className="text-sm text-ink-dim">{entry.measuredOn}</span>
+                <span className="text-sm text-ink-dim">{formatDay(entry.measuredOn)}</span>
                 <span className="flex items-center gap-4">
                   <span className="figure text-lg">{entry.weightKg.toFixed(1)}</span>
                   <button
                     type="button"
-                    aria-label={`Delete ${entry.measuredOn}`}
+                    aria-label={`Delete ${formatDay(entry.measuredOn)}`}
                     onClick={() =>
                       userId &&
                       void deleteRow(userId, 'bodyWeights', bodyWeightId(userId, entry.measuredOn))

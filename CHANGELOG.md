@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-17 23:16
+
+- **One date format across the app.** Week said "since 2026-09-17" and the weight list and chart
+  printed raw `YYYY-MM-DD`, while History and the admin screens said "17 Sept 2026" — and an
+  exercise's history used the browser's own locale, a third format again. Everything now goes
+  through `formatDay`. `epochToDate` in `lib/queries.ts` turns a `performedAt` timestamp back into
+  the local calendar date it was logged on first, so the day never slides to the one before east
+  of UTC.
+
 ## 2026-09-17 23:11
 
 - **Workout editor: removing an exercise can be undone.** The trash icon took the exercise out on

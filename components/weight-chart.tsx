@@ -1,5 +1,7 @@
 'use client'
 
+import { formatDay } from '@/lib/format'
+
 type Entry = { measuredOn: string; weightKg: number; rolling: number }
 
 /**
@@ -15,6 +17,10 @@ export function WeightChart({ series }: { series: Entry[] }) {
   const height = 34
   // Inset so dots on the first and last day are not clipped by the SVG edge.
   const inset = 1.5
+
+  const dayOf = (entry: Entry | undefined) => (entry ? formatDay(entry.measuredOn) : '')
+  const first = dayOf(series[0])
+  const last = dayOf(series.at(-1))
 
   const values = series.flatMap((entry) => [entry.weightKg, entry.rolling])
   const min = Math.min(...values)
@@ -35,7 +41,7 @@ export function WeightChart({ series }: { series: Entry[] }) {
         preserveAspectRatio="none"
         className="h-36 w-full"
         role="img"
-        aria-label={`Bodyweight from ${series[0]?.measuredOn} to ${series.at(-1)?.measuredOn}, ${min.toFixed(1)} to ${max.toFixed(1)} kg`}
+        aria-label={`Bodyweight from ${first} to ${last}, ${min.toFixed(1)} to ${max.toFixed(1)} kg`}
       >
         {series.map((entry, index) => (
           <circle
@@ -57,11 +63,11 @@ export function WeightChart({ series }: { series: Entry[] }) {
         />
       </svg>
       <figcaption className="mt-1.5 flex justify-between text-xs text-ink-dim">
-        <span>{series[0]?.measuredOn}</span>
+        <span>{first}</span>
         <span>
           {min.toFixed(1)}–{max.toFixed(1)} kg
         </span>
-        <span>{series.at(-1)?.measuredOn}</span>
+        <span>{last}</span>
       </figcaption>
     </figure>
   )

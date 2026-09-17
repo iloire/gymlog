@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatDuration, formatSet, kg, parseNumber } from '@/lib/format'
+import { formatDay, formatDuration, formatSet, kg, parseNumber } from '@/lib/format'
+
+describe('formatDay', () => {
+  it('shows one format for a calendar date and for a timestamp', () => {
+    expect(formatDay('2026-09-17')).toBe('17 Sept 2026')
+    expect(formatDay('2026-01-05')).toBe('5 Jan 2026')
+    expect(formatDay(Date.UTC(2026, 8, 17, 23, 30))).toBe('17 Sept 2026')
+  })
+
+  it('does not shift a calendar date into the day before, whatever the timezone', () => {
+    expect(formatDay('2026-03-01')).toBe('1 Mar 2026')
+  })
+})
 
 describe('kg', () => {
   it('groups thousands and keeps one decimal only when there is one', () => {

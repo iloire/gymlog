@@ -10,6 +10,11 @@ export function today(date = new Date()): string {
   return `${year}-${month}-${day}`
 }
 
+/** The local calendar date a timestamp falls on — the inverse of dateToEpoch. */
+export function epochToDate(epochMs: number): string {
+  return today(new Date(epochMs))
+}
+
 /** 0 = Monday … 6 = Sunday (JS getDay() is Sunday-first). */
 export function dayOfWeek(date = new Date()): number {
   return (date.getDay() + 6) % 7

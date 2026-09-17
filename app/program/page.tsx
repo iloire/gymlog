@@ -8,6 +8,7 @@ import { PlanTabs } from '@/components/plan-tabs'
 import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
+import { formatDay } from '@/lib/format'
 import { newId } from '@/lib/id'
 import { activeProgram, dayOfWeek, today } from '@/lib/queries'
 
@@ -78,7 +79,7 @@ export default function ProgramPage() {
         <h1 className="figure text-4xl">Your week</h1>
         <p className="mt-2 text-sm text-ink-dim">
           {data.program
-            ? `${data.program.name} — ${trainingDays} ${trainingDays === 1 ? 'day' : 'days'} a week, since ${data.program.startedOn}`
+            ? `${data.program.name} — ${trainingDays} ${trainingDays === 1 ? 'day' : 'days'} a week, since ${formatDay(data.program.startedOn)}`
             : 'Put a workout on each day you plan to train. Leave the rest empty.'}
         </p>
 

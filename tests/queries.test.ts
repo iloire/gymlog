@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { destroyDb, getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
-import { bodyWeightSeries, dateToEpoch, dayOfWeek, lastPerformance, today } from '@/lib/queries'
+import { bodyWeightSeries, dateToEpoch, dayOfWeek, epochToDate, lastPerformance, today } from '@/lib/queries'
 
 const USER = 'user-1'
 const SQUAT = 'Barbell_Squat'
@@ -45,6 +45,9 @@ describe('dates', () => {
 
   it('round-trips a date through midnight local time', () => {
     expect(today(new Date(dateToEpoch('2026-09-15')))).toBe('2026-09-15')
+    expect(epochToDate(dateToEpoch('2026-09-15'))).toBe('2026-09-15')
+    // A timestamp late in the day still belongs to that day, not the next one.
+    expect(epochToDate(dateToEpoch('2026-09-15') + 23 * 3_600_000)).toBe('2026-09-15')
   })
 })
 

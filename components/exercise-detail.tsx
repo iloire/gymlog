@@ -7,8 +7,9 @@ import { ExerciseFrames } from '@/components/exercise-frames'
 import { FavoriteButton } from '@/components/favorite-button'
 import { getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
-import { formatSet } from '@/lib/format'
+import { formatDay, formatSet } from '@/lib/format'
 import { exerciseNoteId } from '@/lib/id'
+import { epochToDate } from '@/lib/queries'
 
 /**
  * Everything about one exercise: photos, favourite star, your cues, your
@@ -108,7 +109,7 @@ export function ExerciseDetail({
               <li key={sets[0]?.id} className="py-3">
                 <span className="flex items-baseline justify-between gap-4">
                   <span className="text-sm text-ink-dim">
-                    {new Date(sets[0]?.performedAt ?? 0).toLocaleDateString()}
+                    {formatDay(epochToDate(sets[0]?.performedAt ?? 0))}
                   </span>
                   <span className="figure text-right text-[15px]">{sets.map(formatSet).join('  ')}</span>
                 </span>
