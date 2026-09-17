@@ -1,22 +1,24 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
+import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { BodyPartBadges } from '@/components/body-part-badges'
+import { ExercisePicker } from '@/components/exercise-picker'
 import { Nav } from '@/components/nav'
 import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
 import { SyncBadge } from '@/components/sync-badge'
 import { bodyParts } from '@/lib/body-parts'
-import { getDb } from '@/lib/db/dexie'
+import { getDb, type LocalExercise } from '@/lib/db/dexie'
 import { formatMinutes, kg } from '@/lib/format'
 import { daysAgo, rotation, sessionHistory, trainedOn, type Rotation } from '@/lib/history'
 import type { HistoryEntry } from '@/lib/session-summary'
 import { dayOfWeek, templateForDay, templateItems, today } from '@/lib/queries'
-import { startSession } from '@/lib/sessions'
+import { addToSession, startSession } from '@/lib/sessions'
 
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -237,12 +239,23 @@ function WorkoutList({ templates, onStart }: { templates: Rotation[]; onStart: (
 
 /** One session trained today: what is logged so far, and the way back into it. */
 function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }) {
+  const userId = useUserId()
+  const router = useRouter()
+  const [picking, setPicking] = useState(false)
   const { session, setsDone, setsPlanned, volumeKg, cardioSec, exercises } = entry
   const totals = [
     `${setsDone}/${setsPlanned} sets`,
     volumeKg > 0 ? kg(volumeKg) : null,
     cardioSec > 0 ? `${formatMinutes(cardioSec)} cardio` : null,
   ].filter(Boolean)
+
+  async function addExercise(picked: LocalExercise) {
+    if (!userId) return
+    await addToSession(userId, session, picked)
+    setPicking(false)
+    // Straight to the exercise you just picked, ready to log its first set.
+    router.push(`/session?id=${session.id}&exercise=${encodeURIComponent(picked.id)}`)
+  }
 
   return (
     <article className="py-4">
@@ -255,12 +268,30 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
         <SessionSets exercises={exercises} />
       </div>
       {session.completedAt === null ? (
-        <Link
-          href={`/session?id=${session.id}`}
-          className="mt-4 flex h-14 w-full items-center justify-center rounded-md bg-plate-blue text-base font-semibold text-white transition-colors hover:bg-plate-blue-lift"
-        >
-          Continue {session.templateName}
-        </Link>
+        <>
+          <Link
+            href={`/session?id=${session.id}`}
+            className="mt-4 flex h-14 w-full items-center justify-center rounded-md bg-plate-blue text-base font-semibold text-white transition-colors hover:bg-plate-blue-lift"
+          >
+            Continue {session.templateName}
+          </Link>
+          {/* Adding an exercise is a change to the whole workout, so it lives here
+              beside the workout's own sets rather than on the one-exercise gym screen. */}
+          <button
+            type="button"
+            onClick={() => setPicking(true)}
+            className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-md border border-line text-sm text-ink-dim"
+          >
+            <Plus size={16} aria-hidden />
+            Add exercise
+          </button>
+          {picking && (
+            <ExercisePicker
+              onClose={() => setPicking(false)}
+              onPick={(picked) => void addExercise(picked)}
+            />
+          )}
+        </>
       ) : (
         <Link
           href={`/session?id=${session.id}`}

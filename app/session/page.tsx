@@ -1,7 +1,7 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronLeft, ChevronRight, Info, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
@@ -9,18 +9,16 @@ import { Suspense, useEffect, useState } from 'react'
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseNote } from '@/components/exercise-note'
 import { ExerciseFrames } from '@/components/exercise-frames'
-import { ExercisePicker } from '@/components/exercise-picker'
 import { RestTimer } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
 import { SetSquares } from '@/components/set-squares'
 import { Stepper } from '@/components/stepper'
 import { isCardio } from '@/lib/cardio'
-import { getDb, type LocalExercise, type LocalSetLog } from '@/lib/db/dexie'
+import { getDb, type LocalSetLog } from '@/lib/db/dexie'
 import { formatMinutes } from '@/lib/format'
 import { lastPerformance, type LastPerformance } from '@/lib/queries'
 import {
   activeSet as pickActiveSet,
-  addToSession,
   finishSession,
   logSet,
   removeFromSession,
@@ -52,7 +50,6 @@ function Session() {
   const [restEndsAt, setRestEndsAt] = useState<number | null>(null)
   const [draft, setDraft] = useState<({ id: string } & Values) | null>(null)
   const [viewingExercise, setViewingExercise] = useState(false)
-  const [picking, setPicking] = useState(false)
   // The exercise being confirmed for removal, so moving to another one drops the prompt.
   const [removing, setRemoving] = useState<string | null>(null)
 
@@ -179,15 +176,6 @@ function Session() {
     }
   }
 
-  async function addExercise(picked: LocalExercise) {
-    if (!userId || !data) return
-    const at = await addToSession(userId, data.session, picked)
-    const index = positions.indexOf(at)
-    setPicking(false)
-    // A new exercise goes last, one past the positions read before it was added.
-    goTo(index === -1 ? positions.length : index)
-  }
-
   const previousNote = previous?.sets.find((set) => set.notes)?.notes
 
   const allDone = data.logs.every((log) => log.completedAt !== null)
@@ -240,13 +228,6 @@ function Session() {
             )
           })}
         </ol>
-      )}
-
-      {picking && (
-        <ExercisePicker
-          onClose={() => setPicking(false)}
-          onPick={(picked) => void addExercise(picked)}
-        />
       )}
 
       {viewingExercise && exerciseId && (
@@ -405,21 +386,12 @@ function Session() {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setPicking(true)}
-          className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-md border border-line text-sm text-ink-dim"
-        >
-          <Plus size={16} aria-hidden />
-          Add exercise
-        </button>
-
         {exerciseId &&
           (removing === exerciseId ? (
             <div
               role="alertdialog"
               aria-labelledby="remove-exercise-title"
-              className="mt-3 rounded-md border border-plate-red p-4"
+              className="mt-4 rounded-md border border-plate-red p-4"
             >
               <p id="remove-exercise-title" className="text-[15px]">
                 Remove {exerciseName} from this workout?
@@ -454,7 +426,7 @@ function Session() {
             <button
               type="button"
               onClick={() => setRemoving(exerciseId)}
-              className="mt-3 h-12 w-full rounded-md border border-line text-sm text-ink-dim"
+              className="mt-4 h-12 w-full rounded-md border border-line text-sm text-ink-dim"
             >
               Remove exercise
             </button>
