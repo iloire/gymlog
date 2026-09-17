@@ -1,6 +1,7 @@
 'use client'
 
 import { getDb, type LocalProgram, type LocalSetLog, type LocalTemplateItem } from '@/lib/db/dexie'
+import { estimateWorkoutMs, formatLast, formatTarget, type PlanLine } from '@/lib/plan'
 
 /** Local calendar date, 'YYYY-MM-DD'. Never derive this from a UTC timestamp. */
 export function today(date = new Date()): string {
@@ -35,21 +36,33 @@ export async function activeProgram(userId: string): Promise<LocalProgram | unde
     .sort((a, b) => b.startedOn.localeCompare(a.startedOn))[0]
 }
 
+/** The active programme's whole week: weekday index (0 = Monday) to template id. */
+export type WeekSchedule = { programId: string; days: Map<number, string> }
+
+/**
+ * The active programme as a week. Read once and asked seven times, rather than
+ * seven reads of `programs` — Today draws the strip off this.
+ */
+export async function weekSchedule(userId: string): Promise<WeekSchedule | null> {
+  const program = await activeProgram(userId)
+  if (!program) return null
+
+  const days = await getDb(userId).programDays.where('programId').equals(program.id).toArray()
+
+  return {
+    programId: program.id,
+    days: new Map(days.filter(alive).map((day) => [day.dayOfWeek, day.templateId])),
+  }
+}
+
 /** The template scheduled for a given weekday under the active program, if any. */
 export async function templateForDay(
   userId: string,
   weekday = dayOfWeek(),
 ): Promise<{ templateId: string; programId: string } | null> {
-  const program = await activeProgram(userId)
-  if (!program) return null
-
-  const days = await getDb(userId)
-    .programDays.where('[programId+dayOfWeek]')
-    .equals([program.id, weekday])
-    .toArray()
-
-  const day = days.find(alive)
-  return day ? { templateId: day.templateId, programId: program.id } : null
+  const schedule = await weekSchedule(userId)
+  const templateId = schedule?.days.get(weekday)
+  return schedule && templateId ? { templateId, programId: schedule.programId } : null
 }
 
 export async function templateItems(
@@ -61,6 +74,36 @@ export async function templateItems(
     .equals(templateId)
     .toArray()
   return items.filter(alive).sort((a, b) => a.position - b.position)
+}
+
+/** A planned workout as Today shows it, before a set of it has been logged. */
+export type PlanPreview = { lines: PlanLine[]; estimateMs: number }
+
+/**
+ * What a workout is going to ask of you: each exercise with its sets and reps
+ * and what you lifted there last time, plus how long the whole thing runs.
+ *
+ * One `lastPerformance` scan per exercise, all of it against IndexedDB — this
+ * is read standing in the doorway of a gym with no signal.
+ */
+export async function planPreview(userId: string, templateId: string): Promise<PlanPreview> {
+  const db = getDb(userId)
+  const items = await templateItems(userId, templateId)
+
+  const lines = await Promise.all(
+    items.map(async (item) => {
+      const exercise = await db.exercises.get(item.exerciseId)
+      const last = await lastPerformance(userId, item.exerciseId)
+      return {
+        exerciseId: item.exerciseId,
+        name: exercise?.name ?? 'Exercise',
+        target: formatTarget(item),
+        last: last ? formatLast(last.topSet) : null,
+      }
+    }),
+  )
+
+  return { lines, estimateMs: estimateWorkoutMs(items) }
 }
 
 export type LastPerformance = {

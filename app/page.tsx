@@ -11,19 +11,25 @@ import { DeleteSession } from '@/components/delete-session'
 import { ExercisePicker } from '@/components/exercise-picker'
 import { FinishSession } from '@/components/finish-session'
 import { Nav } from '@/components/nav'
+import { PlanList } from '@/components/plan-list'
 import { SessionSets } from '@/components/session-sets'
 import { useSync, useUserId } from '@/components/session-boot'
 import { SyncBadge } from '@/components/sync-badge'
+import { WeekStrip } from '@/components/week-strip'
 import { bodyParts } from '@/lib/body-parts'
+import { addDays, weekStart } from '@/lib/calendar'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
 import { formatMinutes, kg } from '@/lib/format'
 import { daysAgo, isNewAccount, rotation, sessionHistory, trainedOn, type Rotation } from '@/lib/history'
+import { planSummary } from '@/lib/plan'
 import type { HistoryEntry } from '@/lib/session-summary'
-import { dayOfWeek, templateForDay, templateItems, today } from '@/lib/queries'
+import { dayOfWeek, planPreview, today, weekSchedule, type PlanPreview } from '@/lib/queries'
 import { addToSession, startSession } from '@/lib/sessions'
 import { lastSyncAt } from '@/lib/sync/client'
+import { planWeek, weekdayName, type WeekDay } from '@/lib/week'
 
-const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+/** A workout planned for a day that went by without it. */
+type Missed = { day: WeekDay; templateId: string; programId: string; preview: PlanPreview }
 
 export default function TodayPage() {
   const userId = useUserId()
@@ -34,7 +40,6 @@ export default function TodayPage() {
   const plan = useLiveQuery(async () => {
     if (!userId) return null
     const db = getDb(userId)
-    const scheduled = await templateForDay(userId)
     const date = today()
 
     const history = await sessionHistory(userId)
@@ -45,6 +50,48 @@ export default function TodayPage() {
     // on a second device starts just as empty, until the first pull lands.
     const fresh = isNewAccount(allTemplates, history)
     const synced = (await lastSyncAt(userId)) !== null
+
+    const schedule = await weekSchedule(userId)
+    const scheduledTemplateId = schedule?.days.get(dayOfWeek()) ?? null
+    const scheduled =
+      schedule && scheduledTemplateId
+        ? { templateId: scheduledTemplateId, programId: schedule.programId }
+        : null
+
+    // The week strip, and with it the workout that went by untrained. A
+    // programme day pointing at a deleted workout is not a plan for that day.
+    const live = new Map(
+      allTemplates.filter((template) => template.deletedAt === null).map((template) => [template.id, template]),
+    )
+    const monday = weekStart(date)
+    const sunday = addDays(monday, 6)
+    const week = planWeek({
+      today: date,
+      schedule: new Map(
+        [...(schedule?.days ?? [])]
+          .filter(([, templateId]) => live.has(templateId))
+          .map(([weekday, templateId]) => [weekday, { templateId, name: live.get(templateId)?.name ?? 'Workout' }]),
+      ),
+      trained: history
+        .filter((entry) => entry.session.scheduledFor >= monday && entry.session.scheduledFor <= sunday)
+        .map((entry) => ({
+          date: entry.session.scheduledFor,
+          templateId: entry.session.templateId,
+          name: entry.session.templateName,
+        })),
+    })
+
+    const missedId = week.missed?.templateId
+    const missed: Missed | null =
+      week.missed && missedId && schedule
+        ? {
+            day: week.missed,
+            templateId: missedId,
+            programId: schedule.programId,
+            preview: await planPreview(userId, missedId),
+          }
+        : null
+
     // Once a set is logged today, the screen is today's log rather than a choice of workout.
     const trained = await Promise.all(
       trainedOn(history, date).map(async (entry) => {
@@ -57,27 +104,24 @@ export default function TodayPage() {
     )
 
     if (!scheduled) {
-      return { scheduled: null, templates, trained, session: null, exercises: [] as string[], fresh, synced }
+      return { scheduled: null, preview: null, week: week.days, missed, templates, trained, session: null, fresh, synced }
     }
 
     const template = await db.workoutTemplates.get(scheduled.templateId)
-    const items = await templateItems(userId, scheduled.templateId)
     const session = await db.sessions
       .where('scheduledFor')
       .equals(date)
       .filter((s) => s.templateId === scheduled.templateId && s.deletedAt === null)
       .first()
 
-    const exercises = await Promise.all(
-      items.map(async (item) => (await db.exercises.get(item.exerciseId))?.name ?? 'Exercise'),
-    )
-
     return {
-      scheduled: { ...scheduled, name: template?.name ?? 'Workout', sets: items.length },
+      scheduled: { ...scheduled, name: template?.name ?? 'Workout' },
+      preview: await planPreview(userId, scheduled.templateId),
+      week: week.days,
+      missed,
       templates,
       trained,
       session: session ?? null,
-      exercises,
       fresh,
       synced,
     }
@@ -90,7 +134,7 @@ export default function TodayPage() {
     router.push(`/session?id=${id}`)
   }
 
-  const weekday = WEEKDAYS[dayOfWeek()] ?? ''
+  const weekday = weekdayName(dayOfWeek())
 
   // useLiveQuery yields undefined until IndexedDB answers. Rendering the empty
   // state during that gap tells you it is a rest day when it isn't — on a cold
@@ -130,7 +174,11 @@ export default function TodayPage() {
             <h1 className="figure mt-1 text-4xl leading-[1.05]">Today</h1>
           </header>
 
-          <SyncBadge />
+          <WeekStrip days={plan.week} />
+
+          <div className="mt-6">
+            <SyncBadge />
+          </div>
 
           <section className="mt-6 divide-y divide-line border-y border-line">
             {plan.trained.map(({ entry, parts }) => (
@@ -149,6 +197,14 @@ export default function TodayPage() {
             </button>
           )}
 
+          {plan.missed && (
+            <MissedNote
+              missed={plan.missed}
+              disabled={starting}
+              onStart={() => void start(plan.missed!.templateId, plan.missed!.programId)}
+            />
+          )}
+
           {others.length > 0 && (
             <details className="mt-6">
               <summary className="cursor-pointer text-sm text-ink-dim">Start another workout</summary>
@@ -161,30 +217,36 @@ export default function TodayPage() {
     )
   }
 
+  // Nothing scheduled and nothing trained, but a workout went by untrained
+  // earlier this week: that one takes the screen, in full, ready to start.
+  const catchUp = plan && !plan.scheduled ? plan.missed : null
+
   return (
     <>
       <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
         <header className="mb-6">
           <p className="text-sm text-ink-dim">{weekday}</p>
-          {plan?.scheduled ? (
-            <h1 className="figure mt-1 text-4xl leading-[1.05]">{plan.scheduled.name}</h1>
-          ) : (
-            <h1 className="figure mt-1 text-4xl leading-[1.05]">Rest day</h1>
-          )}
+          <h1 className="figure mt-1 text-4xl leading-[1.05]">
+            {plan?.scheduled?.name ?? catchUp?.day.name ?? 'Rest day'}
+          </h1>
+          {plan?.scheduled && plan.preview ? (
+            <p className="mt-1.5 text-sm text-ink-dim">{planSummary(plan.preview.lines.length, plan.preview.estimateMs)}</p>
+          ) : catchUp ? (
+            <p className="mt-1.5 text-[15px] text-ink-dim">
+              You missed {weekdayName(catchUp.day.weekday)}’s workout — do it today?
+            </p>
+          ) : null}
         </header>
 
-        <SyncBadge />
+        {plan && <WeekStrip days={plan.week} />}
 
-        {plan?.scheduled ? (
+        <div className="mt-6">
+          <SyncBadge />
+        </div>
+
+        {plan?.scheduled && plan.preview ? (
           <section className="mt-6">
-            <ol className="divide-y divide-line border-y border-line">
-              {plan.exercises.map((name, index) => (
-                <li key={`${name}-${index}`} className="flex items-baseline gap-3 py-3">
-                  <span className="figure w-6 text-sm text-ink-dim">{index + 1}</span>
-                  <span className="text-[15px]">{name}</span>
-                </li>
-              ))}
-            </ol>
+            <PlanList lines={plan.preview.lines} />
 
             <button
               type="button"
@@ -194,6 +256,43 @@ export default function TodayPage() {
             >
               {plan.session?.startedAt ? 'Continue workout' : 'Start workout'}
             </button>
+
+            {plan.missed && (
+              <MissedNote
+                missed={plan.missed}
+                disabled={starting}
+                onStart={() => void start(plan.missed!.templateId, plan.missed!.programId)}
+              />
+            )}
+          </section>
+        ) : catchUp ? (
+          <section className="mt-6">
+            <p className="mb-3 text-sm text-ink-dim">{planSummary(catchUp.preview.lines.length, catchUp.preview.estimateMs)}</p>
+            <PlanList lines={catchUp.preview.lines} />
+
+            <button
+              type="button"
+              onClick={() => void start(catchUp.templateId, catchUp.programId)}
+              disabled={starting}
+              className="mt-6 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift disabled:opacity-60"
+            >
+              Start workout
+            </button>
+
+            <p className="mt-6 text-sm text-ink-dim">
+              Nothing was scheduled for {weekday}.{' '}
+              <Link href="/program" className="text-ink underline underline-offset-4">
+                Change your week
+              </Link>
+              .
+            </p>
+
+            {plan?.templates.length ? (
+              <details className="mt-4">
+                <summary className="cursor-pointer text-sm text-ink-dim">Start another workout</summary>
+                <WorkoutList templates={plan.templates} onStart={(id) => void start(id, null)} />
+              </details>
+            ) : null}
           </section>
         ) : (
           <section className="mt-6">
@@ -219,6 +318,29 @@ export default function TodayPage() {
   )
 }
 
+/**
+ * A workout earlier in the week that never happened, offered beside whatever
+ * today already holds. It only appears while that workout has not been trained
+ * on some other day of the week — see `planWeek`.
+ */
+function MissedNote({ missed, disabled, onStart }: { missed: Missed; disabled: boolean; onStart: () => void }) {
+  return (
+    <section className="mt-6 rounded-md border border-line p-4">
+      <p className="text-[15px]">
+        You missed {weekdayName(missed.day.weekday)}’s <span className="font-semibold">{missed.day.name}</span>.
+      </p>
+      <p className="mt-0.5 text-sm text-ink-dim">{planSummary(missed.preview.lines.length, missed.preview.estimateMs)}</p>
+      <button
+        type="button"
+        onClick={onStart}
+        disabled={disabled}
+        className="mt-3 h-12 w-full rounded-md border border-line text-sm font-semibold disabled:opacity-60"
+      >
+        Do it today
+      </button>
+    </section>
+  )
+}
 /**
  * A new account's first screen. Nothing is scheduled because nothing exists
  * yet, so it says what the app is for and offers the two ways to get a plan.

@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-17 23:32
+
+- **Today says what the workout actually is, and what you missed.** The planned workout listed
+  exercise names and nothing else, so the only way to know what you were walking into was to open
+  the workout. Each line now carries its target and your last number — `3×5 · last 60 kg`, a rep
+  range as `3×8–12`, a timed set as `10 min` — under a heading that counts the exercises and
+  estimates the length from sets × rest (`lib/plan.ts`, `planPreview()` in `lib/queries.ts`).
+- **A week strip under the header.** M T W T F S S, each day filled blue for trained, grey for a
+  planned day that went by empty, outlined for one still to come and a dot for a rest day, with
+  today ringed (`components/week-strip.tsx`, `planWeek()` in `lib/week.ts`). It makes a missed day
+  visible instead of silent: a rest day that used to say only "Rest day" now leads with the
+  workout you skipped — "You missed Wednesday's Full body B — do it today?" — in full, ready to
+  start, and a day that already has a workout on it offers the same thing as a note underneath.
+  A workout trained on another day of the week is not missed, and neither is one the programme
+  has you doing today anyway: both would open the very same session.
+
 ## 2026-09-17 23:16
 
 - **One date format across the app.** Week said "since 2026-09-17" and the weight list and chart

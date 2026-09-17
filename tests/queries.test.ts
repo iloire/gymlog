@@ -2,7 +2,16 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { destroyDb, getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
-import { bodyWeightSeries, dateToEpoch, dayOfWeek, epochToDate, lastPerformance, today } from '@/lib/queries'
+import {
+  bodyWeightSeries,
+  dateToEpoch,
+  dayOfWeek,
+  epochToDate,
+  lastPerformance,
+  planPreview,
+  today,
+  weekSchedule,
+} from '@/lib/queries'
 
 const USER = 'user-1'
 const SQUAT = 'Barbell_Squat'
@@ -137,6 +146,83 @@ describe('bodyWeightSeries', () => {
       deletedAt: 1,
     })
     expect(await bodyWeightSeries(USER)).toHaveLength(0)
+  })
+})
+
+describe('weekSchedule', () => {
+  beforeEach(async () => {
+    await destroyDb(USER)
+    await writeRow(USER, 'programs', {
+      id: 'beginner',
+      name: 'Beginner',
+      stage: null,
+      startedOn: '2026-06-01',
+      endedOn: null,
+      notes: null,
+    })
+  })
+
+  it('is null without an active programme', async () => {
+    await destroyDb(USER)
+    expect(await weekSchedule(USER)).toBeNull()
+  })
+
+  it('maps every training weekday to its workout in one read', async () => {
+    await writeRow(USER, 'programDays', { id: 'd-0', programId: 'beginner', dayOfWeek: 0, templateId: 'a' })
+    await writeRow(USER, 'programDays', { id: 'd-2', programId: 'beginner', dayOfWeek: 2, templateId: 'b' })
+    await writeRow(USER, 'programDays', { id: 'd-4', programId: 'beginner', dayOfWeek: 4, templateId: 'a' })
+
+    const schedule = await weekSchedule(USER)
+
+    expect(schedule?.programId).toBe('beginner')
+    expect([...(schedule?.days ?? [])]).toEqual([
+      [0, 'a'],
+      [2, 'b'],
+      [4, 'a'],
+    ])
+  })
+
+  it('leaves out a day taken off the programme', async () => {
+    await writeRow(USER, 'programDays', { id: 'd-2', programId: 'beginner', dayOfWeek: 2, templateId: 'b', deletedAt: 1 })
+    expect((await weekSchedule(USER))?.days.size).toBe(0)
+  })
+})
+
+describe('planPreview', () => {
+  beforeEach(async () => {
+    await destroyDb(USER)
+    await writeRow(USER, 'exercises', { id: SQUAT, userId: null, name: 'Barbell Squat', slug: 'barbell-squat' })
+    await writeRow(USER, 'templateItems', {
+      id: 'ti-1',
+      templateId: 'workout-a',
+      exerciseId: SQUAT,
+      position: 1,
+      sets: 3,
+      targetReps: 5,
+      targetRepsMax: null,
+      targetWeightKg: null,
+      restSec: 120,
+      notes: null,
+    })
+  })
+
+  it('names each exercise, what it asks for, and what you lifted there last', async () => {
+    await loggedSet('s-old', 1, 57.5, 5, dateToEpoch('2026-09-01'))
+    await loggedSet('s-last', 1, 60, 5, dateToEpoch('2026-09-08'))
+
+    const { lines, estimateMs } = await planPreview(USER, 'workout-a')
+
+    expect(lines).toEqual([{ exerciseId: SQUAT, name: 'Barbell Squat', target: '3×5', last: '60 kg' }])
+    expect(estimateMs).toBe((3 * (45 + 120) - 120) * 1000)
+  })
+
+  it('has no last for an exercise never done', async () => {
+    expect((await planPreview(USER, 'workout-a')).lines[0]?.last).toBeNull()
+  })
+
+  it('leaves out an exercise removed from the workout', async () => {
+    await writeRow(USER, 'templateItems', { id: 'ti-1', deletedAt: 1 })
+    expect(await planPreview(USER, 'workout-a')).toEqual({ lines: [], estimateMs: 0 })
   })
 })
 
