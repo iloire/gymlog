@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { BodyPartBadges } from '@/components/body-part-badges'
 import { DeleteSession } from '@/components/delete-session'
 import { ExercisePicker } from '@/components/exercise-picker'
+import { FinishSession } from '@/components/finish-session'
 import { Nav } from '@/components/nav'
 import { SessionSets } from '@/components/session-sets'
 import { useSync, useUserId } from '@/components/session-boot'
@@ -343,6 +344,11 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
             <Plus size={16} aria-hidden />
             Add exercise
           </button>
+          {/* Ending it is about the whole workout too, and the gym screen only offers
+              Finish once every set is logged — this is the way out of one cut short. */}
+          <div className="mt-3">
+            <FinishSession session={session} setsLeft={setsPlanned - setsDone} />
+          </div>
           {picking && (
             <ExercisePicker
               onClose={() => setPicking(false)}

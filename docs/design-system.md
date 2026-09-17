@@ -110,7 +110,9 @@ change. No all-caps labels, no monospace for data.
   adjust with −/+ in 2.5 kg and 1 rep steps, because typing with chalk on your hands is miserable.
 - **The gym screen acts on the exercise in front of you.** Anything about the whole workout —
   adding an exercise, deleting the workout (`components/delete-session.tsx`) — lives where the
-  workout is shown whole: its card on Today, its row in History. Only Finish / Reopen stay.
+  workout is shown whole: its card on Today, its row in History. Only Finish / Reopen stay, and
+  Finish only once every set is logged; ending a workout cut short
+  (`components/finish-session.tsx`) is on Today and History too, behind a confirm.
 - **Sign in** is the one screen with a picture: equipment in one plate colour, no people, with the
   wordmark set large on its lower edge. See `docs/login-images.md`.
 - Motion answers a tap (a set collapsing into a square, the timer draining). Nothing animates on

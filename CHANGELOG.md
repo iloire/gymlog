@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-17 23:10
+
+- **Finish a workout you cut short.** *Finish workout* only appeared on the gym screen once every
+  set was logged, so skipping the last exercise left the workout open for good. Its card on Today
+  now has *Finish workout*, which asks first when sets are left ("Finish with 4 sets not done?")
+  and keeps what you logged; *Reopen* undoes it. A workout left open on an earlier day has the
+  same button in its opened row in History.
+
 ## 2026-09-17 22:53
 
 - **Logging a set no longer needs a scroll.** The session screen opened on a full-width photo that

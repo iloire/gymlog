@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 import { DeleteSession } from '@/components/delete-session'
+import { FinishSession } from '@/components/finish-session'
 import { Nav } from '@/components/nav'
 import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
@@ -124,6 +125,13 @@ function SessionRow({ entry, open = false }: { entry: HistoryEntry; open?: boole
 
         <div className="pb-4">
           <SessionSets exercises={exercises} />
+          {/* A workout left open on an earlier day is no longer on Today, so this is
+              the one place left to end it. */}
+          {session.completedAt === null && (
+            <div className="mt-4">
+              <FinishSession session={session} setsLeft={setsPlanned - setsDone} />
+            </div>
+          )}
           <div className="mt-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-3">
             <Link
               href={`/session?id=${session.id}`}
