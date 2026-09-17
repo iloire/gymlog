@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-17 23:14
+
+- **Profile no longer promises a weigh-in on Today.** The Bodyweight section said "Today's weight
+  is asked for on Today", which Today has never done. The paragraph is gone; the section is its
+  heading and the *Weight log* button.
+
 ## 2026-09-17 23:10
 
 - **Finish a workout you cut short.** *Finish workout* only appeared on the gym screen once every
