@@ -1,3 +1,4 @@
+import { ChevronLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -28,7 +29,8 @@ export default async function ApiAccessPage() {
   return (
     <>
       <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
-        <a href="/profile" className="text-sm text-ink-dim underline-offset-4 hover:text-ink hover:underline">
+        <a href="/profile" className="flex items-center gap-1 text-sm text-ink-dim">
+          <ChevronLeft size={18} aria-hidden />
           Profile
         </a>
         <h1 className="figure mt-2 text-4xl">API access</h1>

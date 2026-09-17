@@ -1,3 +1,4 @@
+import { ChevronLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
@@ -34,7 +35,8 @@ export default async function AdminUserPage({ params }: PageProps<'/admin/users/
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-5 pt-8 pb-16">
-      <Link href="/admin" className="text-sm text-ink-dim underline-offset-4 hover:text-ink hover:underline">
+      <Link href="/admin" className="flex items-center gap-1 text-sm text-ink-dim">
+        <ChevronLeft size={18} aria-hidden />
         All accounts
       </Link>
 

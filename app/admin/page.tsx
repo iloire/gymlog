@@ -1,3 +1,4 @@
+import { ChevronLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
@@ -21,7 +22,8 @@ export default async function AdminPage() {
     <main className="mx-auto w-full max-w-5xl flex-1 px-5 pt-8 pb-16">
       <header className="flex items-baseline justify-between gap-4">
         <h1 className="figure text-4xl">Admin</h1>
-        <Link href="/" className="text-sm text-ink-dim underline-offset-4 hover:text-ink hover:underline">
+        <Link href="/" className="flex items-center gap-1 text-sm text-ink-dim">
+          <ChevronLeft size={18} aria-hidden />
           Back to the app
         </Link>
       </header>
