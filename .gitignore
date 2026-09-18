@@ -52,3 +52,6 @@ local.db-*
 # Agent worktrees and per-machine Claude settings
 .claude/worktrees/
 .claude/settings.local.json
+
+# Task lock: an agent working in the shared checkout (scripts/task-lock.sh)
+.task.lock

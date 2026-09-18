@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 07:30
+
+- **Task lock for parallel agents.** Several agents work in this checkout at once and each only
+  found out at commit time. A git-ignored `.task.lock` at the repo root now says a task is under
+  way: `scripts/task-lock.sh claim "<task>"` takes it, `status` shows who holds it and whether the
+  tree is dirty, `release` drops it after the push. An agent that finds it held starts in a
+  worktree instead. The flow is in CLAUDE.md, "Parallel work".
+
 ## 2026-09-18 07:16
 
 - **Skip a set.** A set you were not going to do stayed pending until Finish asked about it.

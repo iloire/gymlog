@@ -46,6 +46,31 @@ One user today, other people tomorrow, and no migration in between.
   leak one person's log into another's.
 - No hardcoded account, no `ADMIN_PASSWORD`, no personal names in code or seed data.
 
+## Parallel work
+
+Several agents usually work on this repo at once, in this same checkout. A git-ignored lock file,
+`.task.lock` at the repo root, says whether someone already is. **Check it before you touch a
+file**, as the first step of every task:
+
+```bash
+scripts/task-lock.sh status                       # free, or who holds it and since when
+scripts/task-lock.sh claim "feat: skip a set"     # take it: you work in this checkout
+scripts/task-lock.sh release                      # after your commit is pushed
+```
+
+- **Lock free**: claim it with a one-line description of your task and work here, in the shared
+  checkout. Release it right after the push, not before. If you stop early or hand back, release
+  it too, and say so.
+- **Lock held**: someone is mid-task here. Do not claim, do not edit, do not stash or revert their
+  files. Start yours in a worktree instead: the `EnterWorktree` tool, or
+  `git worktree add .claude/worktrees/<slug> -b <slug>`. The worktree needs no lock; it is yours
+  alone. Land it on `main` with `git fetch`, a rebase, a fast-forward push, then
+  `git worktree remove`. `.claude/worktrees/` is ignored by git, tsc, eslint and vitest.
+- **A lock with a clean tree, older than four hours**, is a leftover from a session that died.
+  `status` says so. Release it and claim your own.
+- The lock does not replace the rules in the global CLAUDE.md: stage by path, one commit per task,
+  fetch and rebase before committing. It only decides *where* you work.
+
 ## Conventions
 
 - **IDs are minted on the client** (`lib/id.ts`). UUIDv7 by default; deterministic UUIDv5 for rows
