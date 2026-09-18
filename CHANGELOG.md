@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-18 07:38
+
+- **The exercise name stays on one line.** Hyperextensions (Back Extensions) wrapped under the
+  photo and pushed the squares, the steppers and Log set down a line for that one exercise. A long
+  name still steps down a size, and now ends in an ellipsis instead of wrapping; the full name is
+  a tap away on the photo and in the ⋮ menu's label.
+
 ## 2026-09-18 07:34
 
 - **No Previous / Next row on the session screen.** The header already moves between exercises:
