@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-18 00:45
+
+- **Profile is a list of rows again.** The four style tiles and the equipment chips sat inline
+  and took the whole first screen, so Bodyweight, Your data and API access were below the fold.
+  Appearance and Equipment now open their own pages (`/profile/appearance`,
+  `/profile/equipment`) from a row on Profile, the way Bodyweight and Your data already did.
+
 ## 2026-09-18 00:40
 
 - **Every screen loads the same way.** Today drew its header with a pulsing bar where the

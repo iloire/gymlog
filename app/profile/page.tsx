@@ -4,10 +4,8 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 
 import { useIsAdmin } from '@/components/admin/use-is-admin'
-import { EquipmentPicker } from '@/components/equipment-picker'
 import { Nav } from '@/components/nav'
 import { SignOutButton } from '@/components/sign-out-button'
-import { ThemePicker } from '@/components/theme-picker'
 import { publicEnv } from '@/lib/env.public'
 
 export default function ProfilePage() {
@@ -40,8 +38,14 @@ export default function ProfilePage() {
         </section>
 
         <section className="mt-8">
-          <h2 className="mb-4 text-xl font-semibold">Appearance</h2>
-          <ThemePicker />
+          <h2 className="mb-1 text-xl font-semibold">Appearance</h2>
+          <p className="mb-4 text-sm text-ink-dim">Style and light or dark, saved on this device.</p>
+          <Link
+            href="/profile/appearance"
+            className="flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
+          >
+            Style and theme
+          </Link>
         </section>
 
         <section className="mt-8">
@@ -49,7 +53,12 @@ export default function ProfilePage() {
           <p className="mb-4 text-sm text-ink-dim">
             What your gym has, so premade programmes swap in exercises you can do.
           </p>
-          <EquipmentPicker />
+          <Link
+            href="/profile/equipment"
+            className="flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
+          >
+            What your gym has
+          </Link>
         </section>
 
         <section className="mt-8">
