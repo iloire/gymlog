@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-18 02:15
+
+- **Last time is a row of squares, not a sentence.** "Last time 75×10, 75×10, 75×8" made you parse
+  text and count. The session screen now draws last time's sets as a dimmed, dashed row above
+  today's squares, aligned by set number, so "set 3 was 8 reps" is read down a column, and the
+  red edge on a square below explains itself. The row is labelled with how long ago it was.
+
 ## 2026-09-18 02:05
 
 - **Rest takes the screen.** While the rest runs, the block where the steppers were becomes the

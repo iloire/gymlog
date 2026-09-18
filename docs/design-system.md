@@ -99,7 +99,9 @@ change. No all-caps labels, no monospace for data.
   a dialog, never a new page. A thin segment per exercise under the header
   fills blue as each one is finished, and Previous / Next name the exercise they go to.
 - **Set squares carry information.** A row of squares per exercise — filled = done, outlined =
-  pending. You read your progress through the workout without parsing text. Tapping a square
+  pending. You read your progress through the workout without parsing text. Above it, last
+  time's sets as a dashed, dimmed row aligned by set number, so the comparison is read down a
+  column rather than out of a sentence, and a red edge below explains itself. Tapping a square
   selects that set, ringed when it is already done, so a mistyped set is fixed in place with
   Update set; a correction starts no rest timer and does not move you to the next exercise. Sets
   are logged in order: only a done set or the next one to do can be tapped, the rest are dimmed.

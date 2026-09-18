@@ -20,7 +20,8 @@ import { WorkoutSummary } from '@/components/workout-summary'
 import { isCardio } from '@/lib/cardio'
 import { getDb, type LocalSetLog } from '@/lib/db/dexie'
 import { formatMinutes } from '@/lib/format'
-import { lastPerformance, type LastPerformance } from '@/lib/queries'
+import { daysAgo } from '@/lib/history'
+import { epochToDate, lastPerformance, type LastPerformance } from '@/lib/queries'
 import { heavierThanLastTime } from '@/lib/records'
 import { startRest } from '@/lib/rest'
 import {
@@ -339,35 +340,15 @@ function Session() {
           />
         )}
 
-        <p className="mt-2 text-sm text-ink-dim">
-          {previous ? (
-            <>
-              Last time{' '}
-              {previous.sets.map((set, index) => (
-                <span key={set.setIndex} className="figure text-ink">
-                  {index > 0 && <span className="text-ink-dim">, </span>}
-                  {set.durationSec != null ? (
-                    formatMinutes(set.durationSec)
-                  ) : (
-                    <>
-                      {set.weightKg ?? '—'}
-                      <span className="text-ink-dim">×</span>
-                      {set.reps ?? '—'}
-                    </>
-                  )}
-                </span>
-              ))}
-            </>
-          ) : (
-            'First time logging this one.'
-          )}
-        </p>
+        {!previous && <p className="mt-2 text-sm text-ink-dim">First time logging this one.</p>}
         {previousNote && <p className="mt-1 text-sm italic text-ink-dim">“{previousNote}”</p>}
 
         <SetSquares
           logs={groupLogs}
           activeId={activeSet?.id}
           previousTopKg={previousTopKg}
+          previous={previous?.sets ?? null}
+          previousLabel={previous ? `Last time · ${daysAgo(epochToDate(previous.performedAt))}` : 'Last time'}
           onSelect={(logId) => {
             setSelectedId(logId)
             setDraft(null)
