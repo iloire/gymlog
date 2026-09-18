@@ -17,6 +17,7 @@ import { SessionSets } from '@/components/session-sets'
 import { useSync, useUserId } from '@/components/session-boot'
 import { SyncBadge } from '@/components/sync-badge'
 import { WeekStrip } from '@/components/week-strip'
+import { WeighIn } from '@/components/weigh-in'
 import { bodyParts } from '@/lib/body-parts'
 import { addDays, weekStart } from '@/lib/calendar'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
@@ -175,6 +176,7 @@ export default function TodayPage() {
           <WeekStrip days={plan.week} />
 
           <SyncBadge />
+          <WeighIn />
 
           <section className="mt-6 divide-y divide-line border-y border-line">
             {plan.trained.map(({ entry, parts }) => (
@@ -237,6 +239,7 @@ export default function TodayPage() {
         {plan && <WeekStrip days={plan.week} />}
 
         <SyncBadge />
+        <WeighIn />
 
         {plan?.scheduled && plan.preview ? (
           <section className="mt-6">

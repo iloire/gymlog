@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-18 03:32
+
+- **Weigh in from Today.** The weight log moved from a tab to Profile → Weight log, two taps
+  deep, and a morning habit does not survive that. Today now carries one field and a Save
+  button under the week strip until today's reading is in (`components/weigh-in.tsx`); the
+  field opens on the last reading. The full log and chart are still under Profile.
+
 ## 2026-09-18 03:25
 
 - **The open workout follows you to every tab.** Like a player's now-playing bar: "Full Body A
