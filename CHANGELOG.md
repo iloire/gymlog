@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-18 09:26
+
+- **Today after a workout is just today's workout.** Finishing Upper B on a day the programme
+  said Lower B left the screen with every set of Upper B, a Continue Lower B button for a
+  workout opened but never logged, and a card for Monday's missed Upper A with its own Do it
+  today: three calls to action for someone who had just trained. Once a set is logged today the
+  planned and missed workouts fold under "Start another workout", marked Planned for Friday and
+  Missed on Monday and listed first, and a finished session shows its name, totals and body
+  parts with the sets behind Show the sets.
+
 ## 2026-09-18 09:15
 
 - **The sync badge says when the server refused the push.** A failed push left the badge on

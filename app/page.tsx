@@ -35,6 +35,13 @@ import { planWeek, weekdayName, type WeekDay } from '@/lib/week'
 /** A workout planned for a day that went by without it. */
 type Missed = { day: WeekDay; templateId: string; programId: string; preview: PlanPreview }
 
+/**
+ * A workout offered from the list, with why it is there when the programme has
+ * a say: the one planned for today, or the one missed earlier in the week.
+ * `rank` orders those two ahead of the rotation.
+ */
+type Offer = Rotation & { programId: string | null; hint: string | null; rank: number }
+
 export default function TodayPage() {
   const userId = useUserId()
   const { status } = useSync()
@@ -160,12 +167,24 @@ export default function TodayPage() {
   if (plan?.fresh) return <Welcome />
 
   if (plan?.trained.length) {
-    const scheduled = plan.scheduled
-    const scheduledDone = plan.trained.some(({ entry }) => entry.session.templateId === scheduled?.templateId)
-    // Starting a workout already trained today would only re-open it; its Continue is above.
-    const others = plan.templates.filter(
-      ({ template }) => !plan.trained.some(({ entry }) => entry.session.templateId === template.id),
-    )
+    const { scheduled, missed } = plan
+    // Today's training is above, done or under way. The workout the programme
+    // had planned for today and the one missed earlier in the week are still a
+    // tap away, but folded in with the rest and only marked as such: a second
+    // workout pushed at someone who has just finished one is noise. A workout
+    // already trained today is not offered — starting it would only re-open it.
+    const trainedIds = new Set(plan.trained.map(({ entry }) => entry.session.templateId))
+    const others: Offer[] = plan.templates
+      .filter(({ template }) => !trainedIds.has(template.id))
+      .map((row) => {
+        const id = row.template.id
+        if (scheduled && id === scheduled.templateId)
+          return { ...row, programId: scheduled.programId, hint: `Planned for ${weekday}`, rank: 0 }
+        if (missed && id === missed.templateId)
+          return { ...row, programId: missed.programId, hint: `Missed on ${weekdayName(missed.day.weekday)}`, rank: 1 }
+        return { ...row, programId: null, hint: null, rank: 2 }
+      })
+      .sort((a, b) => a.rank - b.rank)
 
     return (
       <>
@@ -186,29 +205,10 @@ export default function TodayPage() {
             ))}
           </section>
 
-          {scheduled && !scheduledDone && (
-            <button
-              type="button"
-              onClick={() => void start(scheduled.templateId, scheduled.programId)}
-              disabled={starting}
-              className="mt-6 h-14 w-full rounded-md border border-line text-base font-semibold disabled:opacity-60"
-            >
-              {plan.session?.startedAt ? 'Continue' : 'Start'} {scheduled.name}
-            </button>
-          )}
-
-          {plan.missed && (
-            <MissedNote
-              missed={plan.missed}
-              disabled={starting}
-              onStart={() => void start(plan.missed!.templateId, plan.missed!.programId)}
-            />
-          )}
-
           {others.length > 0 && (
             <details className="mt-6">
               <summary className="cursor-pointer text-sm text-ink-dim">Start another workout</summary>
-              <WorkoutList templates={others} onStart={(id) => void start(id, null)} />
+              <WorkoutList templates={others} onStart={(id, programId) => void start(id, programId)} />
             </details>
           )}
         </main>
@@ -393,20 +393,26 @@ function SetupChoices() {
   )
 }
 
-function WorkoutList({ templates, onStart }: { templates: Rotation[]; onStart: (templateId: string) => void }) {
+function WorkoutList({
+  templates,
+  onStart,
+}: {
+  templates: (Rotation & Partial<Pick<Offer, 'programId' | 'hint'>>)[]
+  onStart: (templateId: string, programId: string | null) => void
+}) {
   return (
     <ul className="mt-5 divide-y divide-line border-y border-line">
-      {templates.map(({ template, lastDone }) => (
+      {templates.map(({ template, lastDone, programId, hint }) => (
         <li key={template.id}>
           <button
             type="button"
-            onClick={() => onStart(template.id)}
+            onClick={() => onStart(template.id, programId ?? null)}
             className="flex w-full items-center justify-between gap-3 py-4 text-left"
           >
             <span className="min-w-0">
               <span className="block text-[15px]">{template.name}</span>
               <span className="block text-sm text-ink-dim">
-                {lastDone ? `Last done ${daysAgo(lastDone)}` : 'Not done yet'}
+                {[hint, lastDone ? `Last done ${daysAgo(lastDone)}` : 'Not done yet'].filter(Boolean).join(' · ')}
               </span>
             </span>
             <span className="shrink-0 text-sm text-ink-dim">Start</span>
@@ -445,11 +451,11 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
         <span className="shrink-0 text-sm text-ink-dim">{totals.join(' · ')}</span>
       </div>
       <BodyPartBadges parts={parts} className="mt-2" />
-      <div className="mt-3">
-        <SessionSets exercises={exercises} />
-      </div>
       {session.completedAt === null ? (
         <>
+          <div className="mt-3">
+            <SessionSets exercises={exercises} />
+          </div>
           <Link
             href={`/session?id=${session.id}`}
             className="mt-4 flex h-14 w-full items-center justify-center rounded-md bg-plate-blue text-base font-semibold text-white transition-colors hover:bg-plate-blue-lift"
@@ -479,12 +485,22 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
           )}
         </>
       ) : (
-        <Link
-          href={`/session?id=${session.id}`}
-          className="mt-3 inline-block text-sm text-ink-dim underline underline-offset-4"
-        >
-          Finished · open to fix a set
-        </Link>
+        <>
+          {/* Done is done: the totals say enough, and every set is a tap away for
+              the glance back — or for spotting the one that needs fixing. */}
+          <details className="mt-3">
+            <summary className="cursor-pointer text-sm text-ink-dim">Show the sets</summary>
+            <div className="mt-3">
+              <SessionSets exercises={exercises} />
+            </div>
+          </details>
+          <Link
+            href={`/session?id=${session.id}`}
+            className="mt-3 inline-block text-sm text-ink-dim underline underline-offset-4"
+          >
+            Finished · open to fix a set
+          </Link>
+        </>
       )}
       {/* The wrong workout started, or one logged twice: deleting it is about the
           whole workout, so it sits with the workout and not on the gym screen. */}
