@@ -191,8 +191,8 @@ export default function WorkoutEditorPage() {
               >
                 <ExerciseFrames
                   exercise={{ name: item.exerciseName, images: item.exerciseImages }}
-                  className="aspect-[3/2] w-14 shrink-0"
-                  animate={false}
+                  className="w-14 shrink-0 md:w-64"
+                  pair
                 />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[15px]">{item.exerciseName}</span>

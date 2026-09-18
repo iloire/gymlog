@@ -316,8 +316,8 @@ function ProgrammeDetail({
                   >
                     <ExerciseFrames
                       exercise={{ name, images: exercise?.images ?? null }}
-                      className="aspect-[3/2] w-16 shrink-0"
-                      animate={false}
+                      className="w-16 shrink-0 md:w-64"
+                      pair
                     />
                     <span className="min-w-0 flex-1">
                       <span className="block text-[15px]">{name}</span>

@@ -179,7 +179,7 @@ export default function ExercisesPage() {
                 <span className="figure">{section.exercises.length}</span>
               </h2>
             )}
-            <ul className="grid grid-cols-2 gap-3">
+            <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
               {section.exercises.map((exercise) => (
                 <li key={exercise.id} className="relative">
                   {userId && (

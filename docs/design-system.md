@@ -95,6 +95,10 @@ change. No all-caps labels, no monospace for data.
   a phone, 56rem from 48rem viewports so a workout on a desk is a page rather than a strip down
   the middle. Sheets and dialogs keep their own `max-w-lg`: they are centred over the page, not
   part of it. Nothing sets a column width inline.
+- **Both frames on a desk.** A list row's thumbnail (`ExerciseFrames` with `pair`) is the start
+  position on a phone and, from the medium breakpoint, the start and end positions side by side at
+  four times the width: the movement reads from the row without a tap. Sheets keep the single
+  frame. The library grid goes from two tiles across to four for the same reason.
 - **No card kit.** The session screen is a full-bleed stack: one exercise fills the viewport.
 - **Logging fits the first screen.** Everything between opening an exercise and pressing *Log set*
   — the set squares, weight, reps and the button — sits above the fold on a 320 × 568 phone with the

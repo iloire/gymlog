@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-18 09:40
+
+- **Thumbnails you can see on a desk.** A workout's rows kept the phone's 56px thumbnail in the
+  wider column, so the photo was a smudge next to a name with nothing to its right. From the
+  medium breakpoint a row shows both library photos, start and end position, side by side at
+  four times the width (`ExerciseFrames` with `pair`), in the workout editor and the premade
+  programme rows. The exercise library goes from two tiles across to four instead of blowing each
+  photo up to a square the size of a hand. Phones are unchanged.
+
 ## 2026-09-18 09:10
 
 - **One page width, wider on a desk.** Every screen hardcoded the same phone column, so on a
