@@ -1,6 +1,7 @@
 import { SlidersHorizontal, Star } from 'lucide-react'
 import { useState } from 'react'
 
+import { BODY_PARTS, bodyPartsOf } from '@/lib/body-parts'
 import type { LocalExercise } from '@/lib/db/dexie'
 import { equipmentName, exerciseEquipment, missingEquipment } from '@/lib/equipment'
 import { type ExerciseRank, NO_RANK } from '@/lib/queries'
@@ -30,14 +31,15 @@ const FACETS = [
 type FacetKey = (typeof FACETS)[number]['key']
 
 export type ExerciseFilter = {
-  muscle: string | null
+  /** One of BODY_PARTS — Legs, Chest, Back… — or null for every part. */
+  part: string | null
   favoritesOnly: boolean
   /** Only exercises the equipment chosen on this device allows. */
   myEquipment: boolean
 } & Record<FacetKey, string[]>
 
 export const NO_FILTER: ExerciseFilter = {
-  muscle: null,
+  part: null,
   favoritesOnly: false,
   myEquipment: false,
   equipment: [],
@@ -61,8 +63,7 @@ export function filterExercises(
   have: ReadonlySet<string> | null = null,
   rank: ExerciseRank = NO_RANK,
 ): LocalExercise[] {
-  const tier = (exercise: LocalExercise) =>
-    favorites.has(exercise.id) ? 0 : rank.programme.has(exercise.id) ? 1 : rank.lastDone.has(exercise.id) ? 2 : 3
+  const tier = (exercise: LocalExercise) => rankTier(exercise, favorites, rank)
   const recency = (exercise: LocalExercise) => rank.lastDone.get(exercise.id) ?? 0
 
   // Every word must appear, in any order: "incline press" finds "Barbell Incline Bench Press".
@@ -71,7 +72,7 @@ export function filterExercises(
     .filter((exercise) => exercise.deletedAt === null)
     .filter((exercise) => !filter.favoritesOnly || favorites.has(exercise.id))
     .filter((exercise) => !filter.myEquipment || !have || missingEquipment(exercise, have).length === 0)
-    .filter((exercise) => !filter.muscle || (exercise.primaryMuscles ?? []).includes(filter.muscle))
+    .filter((exercise) => !filter.part || bodyPartsOf(exercise).includes(filter.part))
     .filter((exercise) =>
       FACETS.every(({ key, value }) => {
         const wanted = filter[key]
@@ -89,12 +90,19 @@ export function filterExercises(
     })
 }
 
-export function primaryMuscles(exercises: LocalExercise[]): string[] {
-  const set = new Set<string>()
-  for (const exercise of exercises) {
-    for (const name of exercise.primaryMuscles ?? []) set.add(name)
-  }
-  return [...set].sort()
+/**
+ * Where an exercise ranks: 0 a favourite, 1 in a workout the programme
+ * schedules, 2 logged before, 3 the rest of the library. The Exercises page
+ * draws the first three as "yours" and files the rest under body parts.
+ */
+export function rankTier(exercise: LocalExercise, favorites: ReadonlySet<string>, rank: ExerciseRank): 0 | 1 | 2 | 3 {
+  return favorites.has(exercise.id) ? 0 : rank.programme.has(exercise.id) ? 1 : rank.lastDone.has(exercise.id) ? 2 : 3
+}
+
+/** The body parts the library covers, in their fixed order — nobody at a gym thinks in adductors. */
+export function bodyPartOptions(exercises: LocalExercise[]): string[] {
+  const present = new Set(exercises.filter((exercise) => exercise.deletedAt === null).flatMap(bodyPartsOf))
+  return BODY_PARTS.filter((part) => present.has(part))
 }
 
 function valueName(facet: (typeof FACETS)[number], value: string): string {
@@ -128,7 +136,7 @@ export function panelFilterCount(filter: ExerciseFilter): number {
 
 export function isFiltered(filter: ExerciseFilter): boolean {
   return (
-    filter.muscle !== null || filter.favoritesOnly || filter.myEquipment || panelFilterCount(filter) > 0
+    filter.part !== null || filter.favoritesOnly || filter.myEquipment || panelFilterCount(filter) > 0
   )
 }
 
@@ -138,11 +146,11 @@ const chip = (active: boolean) =>
   }`
 
 /**
- * A row of quick chips — the panel toggle, favourites, your equipment, muscles —
+ * A row of quick chips — the panel toggle, favourites, your equipment, body parts —
  * and, when open, a panel of every other facet.
  */
 export function ExerciseFilterChips({
-  muscles,
+  parts,
   options,
   filter,
   onChange,
@@ -150,7 +158,7 @@ export function ExerciseFilterChips({
   className = '',
   panelClassName = '',
 }: {
-  muscles: string[]
+  parts: string[]
   options: FacetOptions
   filter: ExerciseFilter
   onChange: (next: ExerciseFilter) => void
@@ -208,13 +216,13 @@ export function ExerciseFilterChips({
             My equipment
           </button>
         )}
-        {muscles.map((name) => (
+        {parts.map((name) => (
           <button
             key={name}
             type="button"
-            aria-pressed={filter.muscle === name}
-            onClick={() => onChange({ ...filter, muscle: name === filter.muscle ? null : name })}
-            className={chip(filter.muscle === name)}
+            aria-pressed={filter.part === name}
+            onClick={() => onChange({ ...filter, part: name === filter.part ? null : name })}
+            className={chip(filter.part === name)}
           >
             {name}
           </button>

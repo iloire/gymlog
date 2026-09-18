@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { facetOptions, filterExercises, NO_FILTER } from '@/components/exercise-filters'
+import { bodyPartOptions, facetOptions, filterExercises, NO_FILTER } from '@/components/exercise-filters'
 import type { LocalExercise } from '@/lib/db/dexie'
 import { NO_RANK } from '@/lib/queries'
 
@@ -47,8 +47,9 @@ describe('filterExercises', () => {
     expect(names({ equipment: ['bodyweight'] })).toEqual(['Chest Stretch', 'Pushups'])
   })
 
-  it('combines panel groups with the muscle chip and search', () => {
-    expect(names({ muscle: 'chest', category: ['strength'] }, 'press')).toEqual(['Barbell Bench Press'])
+  it('combines panel groups with the body part chip and search', () => {
+    expect(names({ part: 'Chest', category: ['strength'] }, 'press')).toEqual(['Barbell Bench Press'])
+    expect(names({ part: 'Back' })).toEqual(['Barbell Row'])
     expect(names({ level: ['expert'] })).toEqual(['Barbell Row'])
   })
 
@@ -64,6 +65,17 @@ describe('filterExercises', () => {
       'Pushups',
     ])
     expect(names({ myEquipment: true }, '', null)).toHaveLength(5)
+  })
+})
+
+describe('bodyPartOptions', () => {
+  it('offers the body parts in the library, in the fixed order', () => {
+    expect(bodyPartOptions(library)).toEqual(['Chest', 'Back'])
+    expect(bodyPartOptions([...library, exercise('Squat', { primaryMuscles: ['quadriceps'] })])).toEqual([
+      'Legs',
+      'Chest',
+      'Back',
+    ])
   })
 })
 

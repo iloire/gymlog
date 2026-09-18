@@ -24,6 +24,20 @@ const BODY_PART: Record<string, string> = {
   abdominals: 'Core',
 }
 
+/** Every body part, in the order the library's chips and headers show them. */
+export const BODY_PARTS = ['Legs', 'Chest', 'Back', 'Shoulders', 'Arms', 'Core', 'Cardio'] as const
+
+/**
+ * The body parts one exercise works, by its primary muscles — its first
+ * muscle first, so the part it files under is the one it is mostly about.
+ * Cardio is its own part. An untagged exercise belongs to none.
+ */
+export function bodyPartsOf(exercise: Pick<LocalExercise, 'category' | 'primaryMuscles'>): string[] {
+  if (exercise.category === 'cardio') return ['Cardio']
+  const parts = (exercise.primaryMuscles ?? []).map((muscle) => BODY_PART[muscle]).filter((part) => part !== undefined)
+  return [...new Set(parts)]
+}
+
 /** The broad body part a library muscle belongs to, or undefined for one it does not know. */
 export function bodyPartOf(muscle: string): string | undefined {
   return BODY_PART[muscle]

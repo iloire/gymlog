@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 04:40
+
+- **The library filters by body part, not anatomy.** The chip row opened with Abdominals,
+  Abductors, Adductors. The chips are now Legs, Chest, Back, Shoulders, Arms, Core, Cardio
+  (`BODY_PARTS` in `lib/body-parts.ts`), in the Exercises page and the picker alike, and with
+  nothing searched or filtered the grid is sections: *Yours* (favourites, your programme, what
+  you have logged) first, then the rest of the library under the body part each is mostly about.
+
 ## 2026-09-18 04:25
 
 - **The workout editor is one line per exercise.** Each exercise was a card with three

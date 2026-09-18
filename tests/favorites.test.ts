@@ -67,13 +67,13 @@ describe('filterExercises', () => {
   const favorites = new Set(['Squat', 'Curl'])
   const names = (list: LocalExercise[]) => list.map((e) => e.id)
 
-  it('narrows to favourites, combined with muscle and search', () => {
+  it('narrows to favourites, combined with a body part and search', () => {
     expect(names(filterExercises(library, { ...NO_FILTER, favoritesOnly: true }, '', favorites))).toEqual([
       'Curl',
       'Squat',
     ])
     expect(
-      names(filterExercises(library, { ...NO_FILTER, muscle: 'quadriceps', favoritesOnly: true }, '', favorites)),
+      names(filterExercises(library, { ...NO_FILTER, part: 'Legs', favoritesOnly: true }, '', favorites)),
     ).toEqual(['Squat'])
     expect(names(filterExercises(library, { ...NO_FILTER, favoritesOnly: true }, 'cu', favorites))).toEqual([
       'Curl',

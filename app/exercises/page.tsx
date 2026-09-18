@@ -9,17 +9,19 @@ import { useEquipment } from '@/components/equipment-picker'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import type { ExerciseFilter } from '@/components/exercise-filters'
 import {
+  bodyPartOptions,
   ExerciseFilterChips,
   facetOptions,
   filterExercises,
   isFiltered,
   NO_FILTER,
-  primaryMuscles,
+  rankTier,
 } from '@/components/exercise-filters'
 import { FavoriteButton } from '@/components/favorite-button'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
-import { getDb } from '@/lib/db/dexie'
+import { BODY_PARTS, bodyPartsOf } from '@/lib/body-parts'
+import { getDb, type LocalExercise } from '@/lib/db/dexie'
 import { exerciseEquipment } from '@/lib/equipment'
 import { favoriteExerciseIds } from '@/lib/favorites'
 import { exerciseRank, NO_RANK } from '@/lib/queries'
@@ -50,7 +52,7 @@ export default function ExercisesPage() {
 
   const rank = useLiveQuery(async () => (userId ? exerciseRank(userId) : NO_RANK), [userId], NO_RANK)
 
-  const muscles = useMemo(() => primaryMuscles(exercises), [exercises])
+  const parts = useMemo(() => bodyPartOptions(exercises), [exercises])
   const options = useMemo(() => facetOptions(exercises), [exercises])
   const have = useMemo(() => (equipment ? new Set(equipment) : null), [equipment])
 
@@ -62,6 +64,36 @@ export default function ExercisesPage() {
 
   const [shown, setShown] = useState(PAGE)
   const more = useRef<HTMLButtonElement>(null)
+
+  // Unnarrowed, the grid is sections: your exercises first, then the rest of
+  // the library under the body part each is mostly about. Narrowed, one grid.
+  const sections = useMemo(() => {
+    if (narrowed) return [{ title: null, exercises: results }]
+    const yours = results.filter((exercise) => rankTier(exercise, favorites, rank) < 3)
+    const groups = new Map<string, LocalExercise[]>()
+    for (const exercise of results) {
+      if (rankTier(exercise, favorites, rank) < 3) continue
+      const part = bodyPartsOf(exercise)[0] ?? 'Other'
+      groups.set(part, [...(groups.get(part) ?? []), exercise])
+    }
+    const ordered: string[] = [...BODY_PARTS, 'Other']
+    return [
+      ...(yours.length ? [{ title: 'Yours', exercises: yours }] : []),
+      ...ordered.flatMap((part) => (groups.has(part) ? [{ title: part, exercises: groups.get(part)! }] : [])),
+    ]
+  }, [narrowed, results, favorites, rank])
+
+  // The pages count across sections, so "Show more" grows the grid as before.
+  const shownSections = useMemo(() => {
+    let left = shown
+    return sections.flatMap((section) => {
+      if (left <= 0) return []
+      const exercises = section.exercises.slice(0, left)
+      left -= exercises.length
+      return [{ ...section, exercises }]
+    })
+  }, [sections, shown])
+
 
   // Narrowing starts the grid again from the first page. Doing it here rather
   // than off the results means starring an exercise does not scroll you up.
@@ -111,7 +143,7 @@ export default function ExercisesPage() {
         </div>
 
         <ExerciseFilterChips
-          muscles={muscles}
+          parts={parts}
           options={options}
           filter={filter}
           onChange={narrow}
@@ -139,28 +171,38 @@ export default function ExercisesPage() {
           </p>
         )}
 
-        <ul className="mt-5 grid grid-cols-2 gap-3">
-          {results.slice(0, shown).map((exercise) => (
-            <li key={exercise.id} className="relative">
-              {userId && (
-                <FavoriteButton
-                  userId={userId}
-                  exerciseId={exercise.id}
-                  exerciseName={exercise.name}
-                  favorite={favorites.has(exercise.id)}
-                  className="absolute top-1.5 right-1.5 z-10 rounded-full bg-ground/70 p-2 text-ink backdrop-blur-sm"
-                />
-              )}
-              <Link href={`/exercises/${exercise.id}`} className="block">
-                <ExerciseFrames exercise={exercise} className="aspect-square w-full" />
-                <span className="mt-2 block text-sm leading-snug">{exercise.name}</span>
-                <span className="block text-xs capitalize text-ink-dim">
-                  {exerciseEquipment(exercise)}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {shownSections.map((section) => (
+          <section key={section.title ?? 'all'} className="mt-5">
+            {section.title && (
+              <h2 className="mb-3 flex items-baseline gap-2 text-sm text-ink-dim">
+                <span className="text-ink">{section.title}</span>
+                <span className="figure">{section.exercises.length}</span>
+              </h2>
+            )}
+            <ul className="grid grid-cols-2 gap-3">
+              {section.exercises.map((exercise) => (
+                <li key={exercise.id} className="relative">
+                  {userId && (
+                    <FavoriteButton
+                      userId={userId}
+                      exerciseId={exercise.id}
+                      exerciseName={exercise.name}
+                      favorite={favorites.has(exercise.id)}
+                      className="absolute top-1.5 right-1.5 z-10 rounded-full bg-ground/70 p-2 text-ink backdrop-blur-sm"
+                    />
+                  )}
+                  <Link href={`/exercises/${exercise.id}`} className="block">
+                    <ExerciseFrames exercise={exercise} className="aspect-square w-full" />
+                    <span className="mt-2 block text-sm leading-snug">{exercise.name}</span>
+                    <span className="block text-xs capitalize text-ink-dim">
+                      {exerciseEquipment(exercise)}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
 
         {shown < results.length && (
           <button

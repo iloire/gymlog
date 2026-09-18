@@ -11,7 +11,7 @@ import {
   facetOptions,
   filterExercises,
   NO_FILTER,
-  primaryMuscles,
+  bodyPartOptions,
 } from '@/components/exercise-filters'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
@@ -45,7 +45,7 @@ export function ExercisePicker({
 
   const rank = useLiveQuery(async () => (userId ? exerciseRank(userId) : NO_RANK), [userId], NO_RANK)
 
-  const muscles = useMemo(() => primaryMuscles(exercises), [exercises])
+  const parts = useMemo(() => bodyPartOptions(exercises), [exercises])
   const options = useMemo(() => facetOptions(exercises), [exercises])
   const have = useMemo(() => (equipment ? new Set(equipment) : null), [equipment])
 
@@ -74,7 +74,7 @@ export function ExercisePicker({
       </header>
 
       <ExerciseFilterChips
-        muscles={muscles}
+        parts={parts}
         options={options}
         filter={filter}
         onChange={setFilter}
