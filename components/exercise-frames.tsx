@@ -32,7 +32,7 @@ export function ExerciseFrames({
         src={`/${start}`}
         alt={exercise.name}
         loading="lazy"
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover object-[50%_40%]"
       />
       {end && animate && (
         // eslint-disable-next-line @next/next/no-img-element -- as above
@@ -41,7 +41,7 @@ export function ExerciseFrames({
           alt=""
           aria-hidden
           loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover motion-safe:animate-[exercise-fade_1.6s_ease-in-out_infinite]"
+          className="absolute inset-0 h-full w-full object-cover object-[50%_40%] motion-safe:animate-[exercise-fade_1.6s_ease-in-out_infinite]"
         />
       )}
     </div>

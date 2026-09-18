@@ -409,32 +409,31 @@ function Session() {
           if (dx > 0 && position > 0) goTo(position - 1)
         }}
       >
-        {/* A thumbnail beside the name, not a hero above it: the photo is a
-            reminder of the movement, and at full width it pushed the weight, the
-            reps and the Log button off the first screen. Tapping it still opens
-            the cues and instructions without leaving. Its width follows the
-            screen height, so a short phone keeps the compact thumbnail that lets
-            Log set fit above the fold and a tall one shows the movement larger;
-            the width cap keeps room beside it for a long name on a narrow phone. */}
-        <div className="flex items-center gap-3">
-          {exercise?.images?.length ? (
-            <button
-              type="button"
-              onClick={() => setViewingExercise(true)}
-              aria-label={`About ${exerciseName}`}
-              className="relative shrink-0"
-            >
-              <ExerciseFrames exercise={exercise} className="aspect-[3/2] w-[clamp(7rem,min(26dvh,45vw),13rem)]" />
-              <span className="absolute right-1 bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-ground/70 text-ink">
-                <Info size={12} aria-hidden />
-              </span>
-            </button>
-          ) : null}
+        {/* The photo runs the full width, cropped wide: a landscape strip of the
+            movement reads far bigger than a thumbnail beside the name, and costs
+            about the same height. Its height follows the screen, so a short phone
+            gets a letterbox that keeps Log set above the fold and a tall one shows
+            the frame nearer whole; the width never gives, only the crop. Tapping
+            it opens the cues and instructions without leaving. */}
+        {exercise?.images?.length ? (
+          <button
+            type="button"
+            onClick={() => setViewingExercise(true)}
+            aria-label={`About ${exerciseName}`}
+            className="relative block w-full"
+          >
+            <ExerciseFrames exercise={exercise} className="h-[clamp(6rem,24dvh,15rem)] w-full" />
+            <span className="absolute right-1.5 bottom-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-ground/70 text-ink">
+              <Info size={13} aria-hidden />
+            </span>
+          </button>
+        ) : null}
 
-          {/* A long name steps down a size so it stays about as tall as the photo
-              instead of wrapping to five lines on a narrow phone. */}
+        <div className="mt-3 flex items-start gap-3">
+          {/* A long name steps down a size so it holds to two lines on a narrow
+              phone instead of stacking a third under the photo. */}
           <h1
-            className={`figure min-w-0 flex-1 text-balance leading-tight ${exerciseName.length > 18 ? 'text-lg' : 'text-2xl'}`}
+            className={`figure min-w-0 flex-1 text-balance leading-tight ${exerciseName.length > 26 ? 'text-xl' : 'text-2xl'}`}
           >
             {exerciseName}
           </h1>
@@ -708,10 +707,8 @@ function SessionLoading() {
         <Placeholder className="h-4 w-24" />
       </header>
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-3 pb-8">
-        <div className="flex items-center gap-3">
-          <Placeholder className="aspect-[3/2] w-[clamp(7rem,min(26dvh,45vw),13rem)] shrink-0" />
-          <Placeholder className="h-8 flex-1" />
-        </div>
+        <Placeholder className="h-[clamp(6rem,24dvh,15rem)] w-full" />
+        <Placeholder className="mt-3 h-8 w-3/4" />
       </main>
     </div>
   )

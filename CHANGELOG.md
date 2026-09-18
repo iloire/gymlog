@@ -8,6 +8,15 @@
   tree is dirty, `release` drops it after the push. An agent that finds it held starts in a
   worktree instead. The flow is in CLAUDE.md, "Parallel work".
 
+## 2026-09-18 07:25
+
+- **The exercise photo runs the full width.** It was a thumbnail beside the name, capped at
+  under half the screen's width, with the other half holding the name and the rest of the row
+  empty. It is now a strip across the whole width, cropped wide, with the name and the ⋮ menu
+  under it: the same height shows the movement about twice the size. The height follows the
+  screen, so a short phone gets a letterbox and a tall one nearer the whole frame, the crop
+  biased a little above centre to keep heads in.
+
 ## 2026-09-18 07:16
 
 - **Skip a set.** A set you were not going to do stayed pending until Finish asked about it.
@@ -16,6 +25,7 @@
   (`restoreSet()` in `lib/sessions.ts`). Skipped sets stay skipped when the workout is opened
   again, like a removed exercise.
 
+||||||| parent of 529126f (feat: run the exercise photo across the full width, cropped wide - the photo was a thumbnail beside the name, capped under half the screen's width, and the other half of the row was the name and empty space; the picture is the reminder of the movement and it was the smallest thing on the screen. It is now a strip across the whole width with the name and the ⋮ menu under it, the height a share of the screen (clamp(6rem, 24dvh, 15rem)) so a short phone gets a letterbox and a tall one nearer the whole frame, and the width never gives, only the crop, which sits a little above centre so heads stay in (object-position in components/exercise-frames.tsx). A long name steps down a size at 26 characters rather than 18, since it has the whole width now. The loading skeleton follows the same shape)
 ## 2026-09-18 07:15
 
 - **One more set mid-workout.** The template said three and there was nothing to tap for a
