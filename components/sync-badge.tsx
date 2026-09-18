@@ -7,18 +7,11 @@ import { getDb } from '@/lib/db/dexie'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-function ago(timestamp: number): string {
-  const minutes = Math.round((Date.now() - timestamp) / 60_000)
-  if (minutes < 1) return 'just now'
-  if (minutes < 60) return `${minutes} min ago`
-  const hours = Math.round(minutes / 60)
-  if (hours < 24) return `${hours} h ago`
-  return `${Math.round(hours / 24)} d ago`
-}
-
 /**
  * The "ready for the gym" check: is everything I have logged actually on the
- * server, and how stale is my copy of the plan?
+ * server, and how stale is my copy of the plan? Shows nothing when all is
+ * well — a "Synced just now" line on every load is a row of reassurance
+ * nobody reads — and a yellow bar only when something needs doing.
  */
 export function SyncBadge() {
   const { userId, status, lastSyncAt, syncNow } = useSync()
@@ -29,18 +22,15 @@ export function SyncBadge() {
     async () => ({
       pending: userId ? await getDb(userId).outbox.count() : 0,
       stale: !lastSyncAt || Date.now() - lastSyncAt > DAY_MS,
-      label: lastSyncAt ? ago(lastSyncAt) : null,
     }),
     [userId, lastSyncAt],
   )
 
   if (!userId || !state) return null
 
-  const { pending, stale, label } = state
+  const { pending, stale } = state
 
-  if (pending === 0 && !stale && status !== 'offline') {
-    return <p className="text-xs text-ink-dim">Synced {label}</p>
-  }
+  if (pending === 0 && !stale && status !== 'offline') return null
 
   const message =
     pending > 0
@@ -53,7 +43,7 @@ export function SyncBadge() {
     <button
       type="button"
       onClick={() => void syncNow()}
-      className="flex w-full items-center justify-between gap-3 border-l-2 border-plate-yellow bg-surface px-4 py-3 text-left text-sm"
+      className="mt-6 flex w-full items-center justify-between gap-3 border-l-2 border-plate-yellow bg-surface px-4 py-3 text-left text-sm"
     >
       <span>{message}</span>
       <span className="shrink-0 text-ink-dim">

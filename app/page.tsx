@@ -176,9 +176,7 @@ export default function TodayPage() {
 
           <WeekStrip days={plan.week} />
 
-          <div className="mt-6">
-            <SyncBadge />
-          </div>
+          <SyncBadge />
 
           <section className="mt-6 divide-y divide-line border-y border-line">
             {plan.trained.map(({ entry, parts }) => (
@@ -240,9 +238,7 @@ export default function TodayPage() {
 
         {plan && <WeekStrip days={plan.week} />}
 
-        <div className="mt-6">
-          <SyncBadge />
-        </div>
+        <SyncBadge />
 
         {plan?.scheduled && plan.preview ? (
           <section className="mt-6">

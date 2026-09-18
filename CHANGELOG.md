@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-18 00:30
+
+- **"Synced just now" is gone from Today.** It took a row on every load to say nothing was
+  wrong. The sync line now shows nothing when all is well; the yellow bar still appears when
+  changes are waiting, the phone is offline or the copy of the plan is over a day old
+  (`components/sync-badge.tsx`).
+
 ## 2026-09-18 00:26
 
 - **Remove exercise moves behind a ⋮ beside the exercise name.** It was a full-width button
