@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-18 09:15
+
+- **Change an exercise's rest from the rest screen.** The moment you know 90 s is not enough for
+  a lift is while you are waiting through it, and the only way to make it 120 s for good was the
+  editor after the workout. The rest takeover now shows the exercise's rest between sets with −
+  and + in 15 s steps, under Next and above +30 s and Skip. A tap writes the new rest to every
+  set of the exercise in this session, to the workout's template item so the next session starts
+  from it and the other phone hears of it, and to the clock under way by the difference: 90 s to
+  120 s puts 30 s back on the rest you are in, and shortening it past the time already spent ends
+  the rest quietly, like Skip. A workout started with Do this now has no template item, so only
+  today's sets change. `changeRest()` in `lib/rest.ts`, with tests.
+
 ## 2026-09-18 09:40
 
 - **Thumbnails you can see on a desk.** A workout's rows kept the phone's 56px thumbnail in the

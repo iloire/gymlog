@@ -1,12 +1,12 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Minus, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
 import { useUserId } from '@/components/session-boot'
-import { clearRest, currentRest, extendRest, EXTEND_SEC, type Rest } from '@/lib/rest'
+import { clearRest, currentRest, extendRest, EXTEND_SEC, REST_STEP_SEC, type Rest } from '@/lib/rest'
 
 /** A short two-tone beep. No audio file to load, and it works offline. */
 function beep() {
@@ -156,15 +156,25 @@ export function RestTimer({ link = false }: { link?: boolean }) {
  * time, then at what the next set asks; so while the rest runs, the block
  * where the steppers were becomes the clock, set huge and draining, with the
  * next set under it and Skip where Log set was. At zero the steppers return.
+ *
+ * `restSec` is what the exercise rests between sets, with − and + beside it:
+ * the moment you know 90 s is not enough for this lift is while you are
+ * waiting through it, so the rest is changed here for good, not once with
+ * +30 s. Left out for an exercise that has no rest.
  */
 export function RestTakeover({
   rest,
   remaining,
   next,
+  restSec,
+  onRestSec,
   children,
 }: RestState & {
   /** What comes after the rest — 'Set 3 · 77.5 kg × 10'. */
   next: React.ReactNode
+  /** The exercise's rest between sets, and where a change goes. */
+  restSec?: number | null
+  onRestSec?: (restSec: number) => void
   /** About the set just done — how it felt — between the clock and what is next. */
   children?: React.ReactNode
 }) {
@@ -195,6 +205,37 @@ export function RestTakeover({
 
       <p className="mt-5 text-sm text-ink-dim">Next</p>
       <p className="mt-0.5 text-[17px]">{next}</p>
+
+      {restSec != null && onRestSec && (
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <span className="text-sm text-ink-dim">
+            Rest between sets
+            <span className="block text-xs">Kept for this exercise</span>
+          </span>
+          <div className="flex items-stretch overflow-hidden rounded-md border border-line">
+            <button
+              type="button"
+              aria-label="Less rest between sets"
+              disabled={restSec < REST_STEP_SEC}
+              onClick={() => onRestSec(restSec - REST_STEP_SEC)}
+              className="flex w-12 touch-manipulation items-center justify-center text-ink-dim active:bg-surface-high disabled:opacity-40"
+            >
+              <Minus size={18} aria-hidden />
+            </button>
+            <span className="figure flex min-w-16 items-center justify-center text-lg" aria-live="polite">
+              {restSec} s
+            </span>
+            <button
+              type="button"
+              aria-label="More rest between sets"
+              onClick={() => onRestSec(restSec + REST_STEP_SEC)}
+              className="flex w-12 touch-manipulation items-center justify-center text-ink-dim active:bg-surface-high"
+            >
+              <Plus size={18} aria-hidden />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="mt-5 grid grid-cols-2 gap-3">
         <button

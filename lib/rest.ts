@@ -1,6 +1,7 @@
 'use client'
 
-import { getDb } from '@/lib/db/dexie'
+import { getDb, type LocalSetLog } from '@/lib/db/dexie'
+import { writeRow } from '@/lib/db/write'
 
 const META_REST = 'rest'
 
@@ -9,6 +10,9 @@ export type Rest = { sessionId: string; endsAt: number; totalSec: number }
 
 /** What the +30 s button on the bar adds. */
 export const EXTEND_SEC = 30
+
+/** What one tap on the rest-per-set control adds or takes: the editor's step. */
+export const REST_STEP_SEC = 15
 
 /**
  * The rest between sets lives in `meta`, not in the session screen's state, so
@@ -81,4 +85,59 @@ export async function currentRest(userId: string, now = Date.now()): Promise<Res
   const session = await db.sessions.get(rest.sessionId)
   if (!session || session.deletedAt !== null || session.completedAt !== null) return null
   return rest
+}
+
+/**
+ * Change how long an exercise rests between sets, from the rest screen, so a
+ * rest that turns out too short or too long is fixed where you notice it
+ * rather than in the editor after the workout. The new rest lands on every set
+ * of the exercise in this session (a set added later copies the last set's),
+ * on the workout's template item so the next session starts from it, and on
+ * the clock under way by the difference: 90 s to 120 s puts 30 s back on the
+ * rest you are in. A workout started without a template — Do this now — has
+ * no item to keep it on, and only today's sets change.
+ */
+export async function changeRest(
+  userId: string,
+  log: LocalSetLog,
+  restSec: number,
+  now = Date.now(),
+): Promise<void> {
+  const db = getDb(userId)
+  const previous = log.restSec ?? 0
+
+  const sets = await db.setLogs
+    .where('sessionId')
+    .equals(log.sessionId)
+    .filter((row) => row.exerciseId === log.exerciseId && row.deletedAt === null)
+    .toArray()
+  for (const row of sets) {
+    if (row.restSec !== restSec) await writeRow(userId, 'setLogs', { id: row.id, restSec })
+  }
+
+  const session = await db.sessions.get(log.sessionId)
+  if (session?.templateId) {
+    const items = await db.templateItems
+      .where('templateId')
+      .equals(session.templateId)
+      .filter((item) => item.exerciseId === log.exerciseId && item.deletedAt === null)
+      .toArray()
+    for (const item of items) {
+      if (item.restSec !== restSec) await writeRow(userId, 'templateItems', { id: item.id, restSec })
+    }
+  }
+
+  const rest = await currentRest(userId, now)
+  if (!rest || rest.sessionId !== log.sessionId) return
+  const delta = restSec - previous
+  const endsAt = rest.endsAt + delta * 1000
+  // Shortened to less than has already passed: the rest is over, quietly, like Skip.
+  if (endsAt <= now) {
+    await clearRest(userId)
+    return
+  }
+  await db.meta.put({
+    key: META_REST,
+    value: { ...rest, endsAt, totalSec: Math.max(1, rest.totalSec + delta) } satisfies Rest,
+  })
 }

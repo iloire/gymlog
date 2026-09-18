@@ -29,7 +29,7 @@ import { daysAgo } from '@/lib/history'
 import { suggestNext } from '@/lib/progression'
 import { epochToDate, recentPerformances, type LastPerformance } from '@/lib/queries'
 import { heavierThanLastTime } from '@/lib/records'
-import { startRest } from '@/lib/rest'
+import { changeRest, startRest } from '@/lib/rest'
 import {
   activeSet as pickActiveSet,
   addSet,
@@ -502,6 +502,8 @@ function Session() {
           <RestTakeover
             rest={rest}
             remaining={remaining}
+            restSec={activeSet.restSec}
+            onRestSec={(restSec) => void changeRest(userId, activeSet, restSec)}
             next={
               <>
                 Set {activeSet.setIndex} · <span className="figure">{nextSet}</span>
