@@ -168,19 +168,29 @@ The original brief: a list of past sessions (date, workout, duration, volume), e
 **Edit** mode for correcting a mistyped set. Rescheduling a session must go through
 `rescheduleSession()` so `performedAt` stays consistent.
 
-### 3.2 Strength charts — M
+### ~~3.2 Strength charts — M~~ ✅
+
+**Shipped 2026-09-18:** top set and e1RM per session, on the Progress tab for the lifts you do
+most and on every exercise's page (`strengthSeries()` in `lib/progress.ts`). Bodyweight overlay
+still open.
 
 Per exercise: top-set weight and estimated 1RM over time, the same inline-SVG approach as the
 bodyweight chart. `lastPerformance()` already computes Epley e1RM. Optionally overlay bodyweight to
 show relative strength.
 
-### 3.3 Personal records — S
+### ~~3.3 Personal records — S~~ ✅
+
+**Shipped 2026-09-18:** the heaviest set and best e1RM per lift, on Progress
+(`personalRecords()`). Marking a record in red as it happens on the gym screen is still open.
 
 Detect and mark a heaviest weight, best e1RM, or most reps at a weight — using the plate red
 reserved for "you beat last time". Today the gym screen only compares against the *previous*
 session's top set.
 
-### 3.4 Weekly summary — S
+### ~~3.4 Weekly summary — S~~ ✅
+
+**Shipped 2026-09-18:** days done over planned and kilos moved this week, at the top of Progress
+(`weekProgress()`).
 
 Sessions done versus planned this week, total volume, and a gentle streak — encouraging, never
 guilt-tripping. The admin panel's 12-week training strip (`lib/admin.ts`) is a ready starting

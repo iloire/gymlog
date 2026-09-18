@@ -6,10 +6,12 @@ import type { ReactNode } from 'react'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { FavoriteButton } from '@/components/favorite-button'
 import { Placeholder } from '@/components/loading'
+import { StrengthChart } from '@/components/strength-chart'
 import { getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
 import { formatDay, formatSet } from '@/lib/format'
 import { exerciseNoteId } from '@/lib/id'
+import { strengthSeries } from '@/lib/progress'
 import { epochToDate } from '@/lib/queries'
 
 /**
@@ -63,12 +65,12 @@ export function ExerciseDetail({
       .map((sets) => sets.sort((a, b) => a.setIndex - b.setIndex))
       .slice(0, 12)
 
-    return { exercise, note: note ?? null, history }
+    return { exercise, note: note ?? null, history, series: strengthSeries(logs) }
   }, [userId, exerciseId])
 
   if (!data) return <ExerciseDetailLoading />
 
-  const { exercise, note, history } = data
+  const { exercise, note, history, series } = data
 
   return (
     <>
@@ -113,6 +115,7 @@ export function ExerciseDetail({
       {history.length > 0 && (
         <section className="mt-7">
           <h2 className="mb-2 text-sm text-ink-dim">Your history</h2>
+          <StrengthChart series={series} className="mb-4" />
           <ul className="divide-y divide-line border-y border-line">
             {history.map((sets) => (
               <li key={sets[0]?.id} className="py-3">

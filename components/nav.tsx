@@ -1,6 +1,6 @@
 'use client'
 
-import { Dumbbell, History, Library, ListChecks, UserRound } from 'lucide-react'
+import { Dumbbell, Library, ListChecks, TrendingUp, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -10,7 +10,7 @@ import { RestBar, useRest } from '@/components/rest-timer'
 const items = [
   { href: '/', label: 'Today', icon: Dumbbell },
   { href: '/workouts', label: 'Plan', icon: ListChecks },
-  { href: '/history', label: 'History', icon: History },
+  { href: '/history', label: 'Progress', icon: TrendingUp },
   { href: '/exercises', label: 'Exercises', icon: Library },
   { href: '/profile', label: 'Profile', icon: UserRound },
 ]

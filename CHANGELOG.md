@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 04:55
+
+- **History is Progress.** The tab is now Progress and opens on the story rather than the log:
+  this week's days trained over planned and kilos moved, the lifts you do most with their top
+  set and estimated one-rep max over time (`components/strength-chart.tsx`), the records
+  behind them, then the streak, the calendar and the past sessions as before. Every exercise's
+  page draws the same chart above its history. Pure reductions in `lib/progress.ts`, with tests.
+
 ## 2026-09-18 04:40
 
 - **The library filters by body part, not anatomy.** The chip row opened with Abdominals,
