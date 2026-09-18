@@ -16,7 +16,6 @@
   tree is dirty, `release` drops it after the push. An agent that finds it held starts in a
   worktree instead. The flow is in CLAUDE.md, "Parallel work".
 
-||||||| parent of d655fff (feat: size the exercise photo from the height the controls leave - a share of the viewport is never right on both a short phone and a tall one: 24dvh was a 203px photo on a 390×844 with slack still pooling above Next, and a 136px one on a 320×568 that pushed Log set below the fold. The photo is now the one flex child of the screen that grows (flex-1 between min-h-20 and max-h-60): the name, the squares, the steppers, Log set and the Prev and Next row take what they need and the photo gets the rest, so the tall phone shows a 223px frame with Log set above the fold and the short one a 5rem letterbox with Log set back on the first screen. No viewport arithmetic to keep right as the controls change. A div does the sizing with the button absolute over it, since a percentage height inside a flexed button resolves to nothing. The crop sits at 35% from the top rather than 40%, because the letterbox cut heads. The loading skeleton reserves the controls' height so the placeholder lands where the photo will)
 ## 2026-09-18 07:27
 
 - **The photo takes the height the controls leave.** Its height was a share of the screen, which
@@ -43,7 +42,6 @@
   (`restoreSet()` in `lib/sessions.ts`). Skipped sets stay skipped when the workout is opened
   again, like a removed exercise.
 
-||||||| parent of 529126f (feat: run the exercise photo across the full width, cropped wide - the photo was a thumbnail beside the name, capped under half the screen's width, and the other half of the row was the name and empty space; the picture is the reminder of the movement and it was the smallest thing on the screen. It is now a strip across the whole width with the name and the ⋮ menu under it, the height a share of the screen (clamp(6rem, 24dvh, 15rem)) so a short phone gets a letterbox and a tall one nearer the whole frame, and the width never gives, only the crop, which sits a little above centre so heads stay in (object-position in components/exercise-frames.tsx). A long name steps down a size at 26 characters rather than 18, since it has the whole width now. The loading skeleton follows the same shape)
 ## 2026-09-18 07:15
 
 - **One more set mid-workout.** The template said three and there was nothing to tap for a
@@ -314,7 +312,6 @@
   A workout trained on another day of the week is not missed, and neither is one the programme
   has you doing today anyway: both would open the very same session.
 
-||||||| parent of dd2087b (feat: export and import your data - Profile now has a Your data section leading to /profile/data, which writes the whole account out as one JSON file and reads one back. Both run against IndexedDB (lib/backup.ts), so they work with no signal, and an import reaches the server through the outbox like any other write. An export leaves out the shared exercise library, which every account already has and cannot write back, and tombstones, which can only take data away from the account they land in; the exercises you added yourself are in. A file is parsed field by field, so a column this version does not know cannot travel to the server as a row it silently refuses. A backup of your own account keeps its ids: every row lands back on itself, so a restore is exact and importing twice changes nothing the second time. Another account's ids already belong to someone else on the server, which would reject every row and strand it on the device, so each one is remapped through importedId() in lib/id.ts with every reference between them following, deterministically, and a weigh-in and an exercise note take their natural-key id because the unique index on (user, day) and (user, exercise) would otherwise refuse them. An imported exercise whose slug is already here is dropped in favour of the one you have. A row whose parent is in neither the file nor the account is left out rather than written as something the server rejects, but a missing exercise never drops a row - the library has not synced yet on a phone you have just restored onto, and dropping on that basis would throw away every set. A push now stops at the 2000 rows /api/sync accepts (MAX_PUSH, shared by both sides): an import queues thousands at once, and the whole batch was sent, refused as a bad request and sent again forever, so sync could never drain)
 
 ## 2026-09-17 23:16
 
@@ -385,7 +382,6 @@
   killing the app. A rest that ran out while the app was closed stays silent, and one whose workout
   was finished or deleted disappears.
 
-||||||| parent of 577f753 (fix: log a set without scrolling - the session screen opened on a full-width 3:2 photo that took 300px, so weight, reps and Log set started below the fold. The photo becomes a tappable thumbnail beside the exercise name, a name over 18 characters steps down a size instead of wrapping past it, Stepper carries its label inside the field rather than on a row above, and the set squares, gaps and Log button are tighter. Log set now ends at 463px on a 375x600 phone, from about 770, and clears the rest bar with the longest library name at 320x568)
 ## 2026-09-17 22:44
 
 - **Delete workout leaves the gym screen.** It sat under *Remove exercise* on the one-exercise
