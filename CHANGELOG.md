@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 03:12
+
+- **The last set ends the workout.** After the last set there is no rest, but Finish sat as an
+  outlined button under Next at the bottom of the screen. Once every set is logged and none is
+  picked to fix, the Log button's place goes to a full-width Finish workout, with the effort
+  chips for the set just done above it, so the summary is the next tap. Tapping a square still
+  opens it to fix; Reopen stays at the bottom of a finished workout.
+
 ## 2026-09-18 03:05
 
 - **Swipe between exercises; the workout's name opens the whole of it.** The session screen had

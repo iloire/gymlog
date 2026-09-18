@@ -134,8 +134,8 @@ change. No all-caps labels, no monospace for data.
   `lib/records.ts`, and it claims nothing it cannot show a number for.
 - **The gym screen acts on the exercise in front of you.** Anything about the whole workout —
   adding an exercise, deleting the workout (`components/delete-session.tsx`) — lives where the
-  workout is shown whole: its card on Today, its row in History. Only Finish / Reopen stay, and
-  Finish only once every set is logged; ending a workout cut short
+  workout is shown whole: its card on Today, its row in History. Only Finish / Reopen stay: Finish takes
+  the Log button's place once every set is logged, so the summary is the next tap; ending a workout cut short
   (`components/finish-session.tsx`) is on Today and History too, behind a confirm. What acts on
   the exercise but is never wanted mid-set — Remove exercise, and Swap exercise when it lands — is
   behind a ⋮ beside the name (`components/overflow-menu.tsx`), two taps and a modal confirm away,

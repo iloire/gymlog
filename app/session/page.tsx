@@ -277,6 +277,8 @@ function Session() {
 
   const allDone = data.logs.every((log) => log.completedAt !== null)
   const lastLogged = data.logs.find((log) => log.id === lastLoggedId && log.completedAt !== null) ?? null
+  // Nothing left to log and nothing picked to fix: Finish takes the Log button's place.
+  const finishing = allDone && data.session.completedAt === null && selectedId === null
   const exerciseName = groupLogs[0]?.exerciseName ?? 'Workout'
   const nameAt = (index: number) =>
     data.logs.find((log) => log.position === positions[index])?.exerciseName
@@ -435,6 +437,23 @@ function Session() {
           >
             {lastLogged && <EffortChips userId={userId} log={lastLogged} className="mt-5" />}
           </RestTakeover>
+        ) : activeSet && finishing ? (
+          // The last set is logged and there is no rest to start: the Log
+          // button's place goes to Finish, so the summary is the next tap.
+          <section className="mt-4">
+            <p className="text-[15px] text-ink-dim">Every set logged. Tap a square to fix one.</p>
+            {lastLogged && <EffortChips userId={userId} log={lastLogged} className="mt-4" />}
+            <button
+              type="button"
+              onClick={async () => {
+                await finishSession(userId, data.session)
+                setFinished(true)
+              }}
+              className="mt-4 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift"
+            >
+              Finish workout
+            </button>
+          </section>
         ) : activeSet ? (
           <section className="mt-4">
             {/* Stacked, not side by side: two steppers across a phone leave ~58px for
@@ -557,7 +576,7 @@ function Session() {
             )}
           </div>
 
-          {data.session.completedAt ? (
+          {data.session.completedAt && (
             // Finished by accident, or one more exercise in you: the workout goes
             // back to being today's, with every set it already has.
             <button
@@ -567,19 +586,6 @@ function Session() {
             >
               Reopen workout
             </button>
-          ) : (
-            allDone && (
-              <button
-                type="button"
-                onClick={async () => {
-                  await finishSession(userId, data.session)
-                  setFinished(true)
-                }}
-                className="mt-6 h-14 w-full rounded-md border border-line text-base font-semibold"
-              >
-                Finish workout
-              </button>
-            )
           )}
         </div>
       </main>
