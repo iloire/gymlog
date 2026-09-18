@@ -271,7 +271,10 @@ function Session() {
         {/* A thumbnail beside the name, not a hero above it: the photo is a
             reminder of the movement, and at full width it pushed the weight, the
             reps and the Log button off the first screen. Tapping it still opens
-            the cues and instructions without leaving. */}
+            the cues and instructions without leaving. Its width follows the
+            screen height, so a short phone keeps the compact thumbnail that lets
+            Log set fit above the fold, and a tall one spends its spare height on
+            the photo rather than on empty space under Remove exercise. */}
         <div className="flex items-center gap-3">
           {exercise?.images?.length ? (
             <button
@@ -280,7 +283,7 @@ function Session() {
               aria-label={`About ${exerciseName}`}
               className="relative shrink-0"
             >
-              <ExerciseFrames exercise={exercise} className="aspect-[3/2] w-28" />
+              <ExerciseFrames exercise={exercise} className="aspect-[3/2] w-[clamp(7rem,22dvh,11rem)]" />
               <span className="absolute right-1 bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-ground/70 text-ink">
                 <Info size={12} aria-hidden />
               </span>
