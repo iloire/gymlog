@@ -14,7 +14,16 @@ import { writeRow } from '@/lib/db/write'
  * already has and syncs, so a note needs no table of its own. Only `notes` is
  * written, so it never touches the weight and reps logged on that set.
  */
-export function ExerciseNote({ userId, log }: { userId: string; log: LocalSetLog }) {
+export function ExerciseNote({
+  userId,
+  log,
+  exerciseName,
+}: {
+  userId: string
+  log: LocalSetLog
+  /** Named when the note is not on the exercise at the top of the screen. */
+  exerciseName?: string
+}) {
   const [editing, setEditing] = useState(false)
 
   if (editing) {
@@ -23,8 +32,8 @@ export function ExerciseNote({ userId, log }: { userId: string; log: LocalSetLog
         autoFocus
         rows={2}
         defaultValue={log.notes ?? ''}
-        placeholder="How it went, how close to your limit…"
-        aria-label="Note on this exercise"
+        placeholder={exerciseName ? `${exerciseName}: how it went…` : 'How it went, how close to your limit…'}
+        aria-label={exerciseName ? `Note on ${exerciseName}` : 'Note on this exercise'}
         onBlur={async (event) => {
           const notes = event.target.value.trim() || null
           if (notes !== log.notes) await writeRow(userId, 'setLogs', { id: log.id, notes })
@@ -42,7 +51,16 @@ export function ExerciseNote({ userId, log }: { userId: string; log: LocalSetLog
       className="mt-5 flex max-w-full items-start gap-1.5 text-left text-sm text-ink-dim"
     >
       <PencilLine size={14} className="mt-0.5 shrink-0" aria-hidden />
-      {log.notes ? <span className="italic">{log.notes}</span> : 'Add a note'}
+      {log.notes ? (
+        <span className="italic">
+          {exerciseName && <span className="not-italic">{exerciseName}: </span>}
+          {log.notes}
+        </span>
+      ) : exerciseName ? (
+        `Add a note on ${exerciseName}`
+      ) : (
+        'Add a note'
+      )}
     </button>
   )
 }

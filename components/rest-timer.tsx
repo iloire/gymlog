@@ -166,12 +166,19 @@ export function RestTakeover({
   rest,
   remaining,
   next,
+  after,
   restSec,
   onRestSec,
   children,
 }: RestState & {
   /** What comes after the rest — 'Set 3 · 77.5 kg × 10'. */
   next: React.ReactNode
+  /**
+   * The exercise the rest follows when it is not the one on screen: the last
+   * set of an exercise moves the screen on while its rest runs, and the clock,
+   * the chips and the rest control are still about that exercise.
+   */
+  after?: string
   /** The exercise's rest between sets, and where a change goes. */
   restSec?: number | null
   onRestSec?: (restSec: number) => void
@@ -185,7 +192,7 @@ export function RestTakeover({
 
   return (
     <section className="mt-4" aria-label="Rest">
-      <p className="text-sm text-ink-dim">Rest</p>
+      <p className="text-sm text-ink-dim">{after ? `Rest after ${after}` : 'Rest'}</p>
       <p
         className="figure mt-1 text-[5.5rem] leading-none text-plate-yellow"
         role="timer"
@@ -210,7 +217,7 @@ export function RestTakeover({
         <div className="mt-4 flex items-center justify-between gap-3">
           <span className="text-sm text-ink-dim">
             Rest between sets
-            <span className="block text-xs">Kept for this exercise</span>
+            <span className="block text-xs">{after ? `Kept for ${after}` : 'Kept for this exercise'}</span>
           </span>
           <div className="flex items-stretch overflow-hidden rounded-md border border-line">
             <button

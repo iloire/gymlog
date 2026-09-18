@@ -306,6 +306,15 @@ function Session() {
 
   const allDone = data.logs.every((log) => log.completedAt !== null)
   const lastLogged = data.logs.find((log) => log.id === lastLoggedId && log.completedAt !== null) ?? null
+  // The last set of an exercise moves the screen on to the next one while its
+  // rest still runs, so the clock, the chips, the rest control and the note
+  // under it are about the exercise just done, not the one now at the top;
+  // each says so by name. Null while the rest is this exercise's own.
+  const carried = takeover && lastLogged && lastLogged.exerciseId !== exerciseId ? lastLogged : null
+  const restLog = carried ?? activeSet
+  const noteLog = carried
+    ? (data.logs.find((log) => log.position === carried.position) ?? carried)
+    : groupLogs[0]
   // Nothing left to log and nothing picked to fix: Finish takes the Log button's place.
   const finishing = allDone && data.session.completedAt === null && selectedId === null
   const exerciseName = groupLogs[0]?.exerciseName ?? 'Workout'
@@ -472,15 +481,18 @@ function Session() {
           <RestTakeover
             rest={rest}
             remaining={remaining}
-            restSec={activeSet.restSec}
-            onRestSec={(restSec) => void changeRest(userId, activeSet, restSec)}
+            after={carried?.exerciseName}
+            restSec={restLog?.restSec}
+            onRestSec={(restSec) => void changeRest(userId, restLog ?? activeSet, restSec)}
             next={
               <>
-                Set {activeSet.setIndex} · <span className="figure">{nextSet}</span>
+                {carried && `${exerciseName} · `}Set {activeSet.setIndex} · <span className="figure">{nextSet}</span>
               </>
             }
           >
-            {lastLogged && <EffortChips userId={userId} log={lastLogged} className="mt-5" />}
+            {lastLogged && (
+              <EffortChips userId={userId} log={lastLogged} exerciseName={carried?.exerciseName} className="mt-5" />
+            )}
           </RestTakeover>
         ) : activeSet && finishing ? (
           // The last set is logged and there is no rest to start: the Log
@@ -613,7 +625,7 @@ function Session() {
             when there is time to write how the set went, and the note was only
             offered once the clock had gone. It stays mounted across the switch, so
             a note begun mid-rest survives the rest ending under it. */}
-        {groupLogs[0] && <ExerciseNote key={groupLogs[0].id} userId={userId} log={groupLogs[0]} />}
+        {noteLog && <ExerciseNote key={noteLog.id} userId={userId} log={noteLog} exerciseName={carried?.exerciseName} />}
 
         {/* The way between exercises is the swipe and the sheet behind the
             workout's name in the header; no Previous / Next row, so the height

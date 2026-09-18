@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-18 09:45
+
+- **A rest carried into the next exercise says whose it is.** The last set of an exercise moves
+  the screen on to the next one while its rest still runs, so the clock, Set 3 felt, the rest
+  control and Add a note sat under the next exercise's name and photo with nothing to say they
+  were about the one just done. Now the clock reads Rest after Bent Over Row, the chips say Bent
+  Over Row set 3 felt, the rest control is that exercise's and says Kept for Bent Over Row, Next
+  names the exercise coming up, and the note is Add a note on Bent Over Row and lands on it. A
+  rest between sets of the same exercise reads as before.
+
 ## 2026-09-18 09:41
 
 - **The next set opens on the reps you just did.** The weight already carried over from the set

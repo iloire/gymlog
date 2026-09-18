@@ -18,12 +18,25 @@ export type Effort = (typeof EFFORTS)[number]['value']
  * the chosen chip again clears it. Only `effort` is written, so the weight and
  * reps logged on the set are never touched.
  */
-export function EffortChips({ userId, log, className = '' }: { userId: string; log: LocalSetLog; className?: string }) {
+export function EffortChips({
+  userId,
+  log,
+  exerciseName,
+  className = '',
+}: {
+  userId: string
+  log: LocalSetLog
+  /** Named when the set is not the exercise on screen — the last set of the one before. */
+  exerciseName?: string
+  className?: string
+}) {
   const current = log.effort ?? null
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <span className="text-sm text-ink-dim">Set {log.setIndex} felt</span>
+    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
+      <span className="text-sm text-ink-dim">
+        {exerciseName ? `${exerciseName} set ${log.setIndex} felt` : `Set ${log.setIndex} felt`}
+      </span>
       <ul className="flex gap-2" aria-label={`How set ${log.setIndex} felt`}>
         {EFFORTS.map(({ value, label }) => {
           const active = current === value
