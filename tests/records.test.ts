@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { LocalSetLog } from '@/lib/db/dexie'
-import { compareExercise, heavierThanLastTime, recordHeadline, type Previous } from '@/lib/records'
+import { bestSet, compareExercise, heavierThanLastTime, recordHeadline, type Previous } from '@/lib/records'
 import type { HistoryExercise } from '@/lib/session-summary'
 
 let next = 0
@@ -145,6 +145,24 @@ describe('compareExercise', () => {
 
     expect(record.best?.weightKg).toBe(85)
     expect(record.weightUpKg).toBe(5)
+  })
+})
+
+describe('bestSet', () => {
+  it('takes the heaviest working set, ties to more reps, and skips warm-ups', () => {
+    const sets = [set({ weightKg: 80, reps: 5 }), set({ weightKg: 85, reps: 3 }), set({ weightKg: 85, reps: 4 })]
+    expect(bestSet([...sets, set({ weightKg: 100, reps: 10, isWarmup: true })])).toBe(sets[2])
+  })
+
+  it('takes the most reps of a bodyweight exercise and the longest of a timed one', () => {
+    expect(bestSet([set({ weightKg: null, reps: 8 }), set({ weightKg: null, reps: 12 })])).toMatchObject({ reps: 12 })
+    expect(
+      bestSet([set({ weightKg: null, reps: null, durationSec: 600 }), set({ weightKg: null, reps: null, durationSec: 900 })]),
+    ).toMatchObject({ durationSec: 900 })
+  })
+
+  it('is null when every set was a warm-up', () => {
+    expect(bestSet([set({ isWarmup: true })])).toBeNull()
   })
 })
 

@@ -18,7 +18,7 @@ import { getDb } from '@/lib/db/dexie'
 import { formatDay, formatDuration, formatMinutes } from '@/lib/format'
 import { sessionHistory, trainedOn } from '@/lib/history'
 import { personalRecords, strengthSeries, weekProgress, type PersonalRecord } from '@/lib/progress'
-import { today, weekSchedule } from '@/lib/queries'
+import { epochToDate, today, weekSchedule } from '@/lib/queries'
 import { displayWeight, formatWeight } from '@/lib/units'
 import type { HistoryEntry } from '@/lib/session-summary'
 import { planWeek } from '@/lib/week'
@@ -219,7 +219,7 @@ function RecordRow({ record }: { record: PersonalRecord }) {
         <Link href={`/exercises/${record.exerciseId}`} className="block truncate text-[15px]">
           {record.name}
         </Link>
-        <span className="block text-sm text-ink-dim">{formatDay(record.performedAt)}</span>
+        <span className="block text-sm text-ink-dim">{formatDay(epochToDate(record.performedAt))}</span>
       </span>
       <span className="shrink-0 text-right">
         <span className="figure block text-[15px]">

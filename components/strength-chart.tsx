@@ -3,6 +3,7 @@
 import { useUnit } from '@/components/use-unit'
 import { formatDay } from '@/lib/format'
 import type { StrengthPoint } from '@/lib/progress'
+import { epochToDate } from '@/lib/queries'
 import { displayWeight } from '@/lib/units'
 
 /**
@@ -17,6 +18,9 @@ export function StrengthChart({ series, className = '' }: { series: StrengthPoin
   const inset = 1.5
 
   if (series.length < 2) return null
+
+  // performedAt is local midnight; formatDay on a raw epoch reads it in UTC and lands a day early east of Greenwich.
+  const day = (epochMs: number) => formatDay(epochToDate(epochMs))
 
   const first = series[0]!
   const last = series.at(-1)!
@@ -39,7 +43,7 @@ export function StrengthChart({ series, className = '' }: { series: StrengthPoin
         preserveAspectRatio="none"
         className="h-28 w-full"
         role="img"
-        aria-label={`Top set from ${firstTop} ${unit} on ${formatDay(first.performedAt)} to ${lastTop} ${unit} on ${formatDay(last.performedAt)}`}
+        aria-label={`Top set from ${firstTop} ${unit} on ${day(first.performedAt)} to ${lastTop} ${unit} on ${day(last.performedAt)}`}
       >
         <path
           d={path((point) => point.e1rmKg)}
@@ -65,12 +69,12 @@ export function StrengthChart({ series, className = '' }: { series: StrengthPoin
         ))}
       </svg>
       <figcaption className="mt-1.5 flex justify-between text-xs text-ink-dim">
-        <span>{formatDay(first.performedAt)}</span>
+        <span>{day(first.performedAt)}</span>
         <span>
           <span className="figure text-ink">{firstTop}</span> → <span className="figure text-ink">{lastTop}</span> {unit} top set ·
           e1RM <span className="figure">{Math.round(displayWeight(last.e1rmKg, unit))}</span>
         </span>
-        <span>{formatDay(last.performedAt)}</span>
+        <span>{day(last.performedAt)}</span>
       </figcaption>
     </figure>
   )

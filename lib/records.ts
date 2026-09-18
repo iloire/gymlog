@@ -40,8 +40,13 @@ function volume(sets: LocalSetLog[]): number {
   return sets.filter(working).reduce((total, set) => total + (set.weightKg ?? 0) * (set.reps ?? 0), 0)
 }
 
-/** The heaviest working set, or the longest when the exercise is timed. Ties go to more reps. */
-function best(sets: LocalSetLog[]): LocalSetLog | null {
+/**
+ * The heaviest working set, or the longest when the exercise is timed. Ties go
+ * to more reps, so a bodyweight exercise's best is its most reps. The workout
+ * summary measures this against last time; the exercise page prints it as
+ * "last time" and "best".
+ */
+export function bestSet(sets: LocalSetLog[]): LocalSetLog | null {
   const candidates = sets.filter(working)
   return (
     candidates.reduce<LocalSetLog | null>((top, set) => {
@@ -69,7 +74,7 @@ const up = (now: number | null | undefined, then: number | null | undefined): nu
  * `recordHeadline` — the comparison itself stays arithmetic.
  */
 export function compareExercise(exercise: HistoryExercise, previous: Previous | null): ExerciseRecord {
-  const mine = best(exercise.sets)
+  const mine = bestSet(exercise.sets)
   const shared = {
     exerciseId: exercise.exerciseId,
     name: exercise.name,
