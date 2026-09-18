@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-18 00:21
+
+- **The rest bar has +30 s and Skip, and the last set starts none.** The timer ran on after the
+  final set of the workout with nothing to rest for and no way to stop it. `startRest()`
+  (`lib/rest.ts`) now looks at what is left in the session and starts nothing once every set is
+  logged — *Finish workout* is what the screen shows at that point — and the bar itself carries
+  *+30 s* and *Skip* beside the clock, on every screen it appears on. Thirty seconds more also
+  widens what the bar counts as full, so it keeps draining rather than sitting past its edge; a
+  skip clears the rest without the beep. Off the session screen the label, now *Back to workout*,
+  is the link; the buttons sit beside it.
+
 ## 2026-09-17 23:55
 
 - **Export and import your data.** *Profile → Your data* (`/profile/data`) writes the whole account

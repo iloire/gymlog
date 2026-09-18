@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
 import { useUserId } from '@/components/session-boot'
-import { clearRest, currentRest } from '@/lib/rest'
+import { clearRest, currentRest, extendRest, EXTEND_SEC } from '@/lib/rest'
 
 /** A short two-tone beep. No audio file to load, and it works offline. */
 function beep() {
@@ -37,7 +37,8 @@ function beep() {
  * Counts down from a stored timestamp rather than ticking a counter, so neither
  * backgrounding the phone nor leaving the session screen stops or drifts the
  * clock. The rest itself lives in lib/rest.ts; this only draws it, wherever it
- * is mounted. `link` is for every screen but the session: the bar takes you back.
+ * is mounted, with +30 s and Skip on the bar where the thumb already is. `link`
+ * is for every screen but the session: the label takes you back to the workout.
  */
 export function RestTimer({ link = false }: { link?: boolean }) {
   const userId = useUserId()
@@ -69,13 +70,22 @@ export function RestTimer({ link = false }: { link?: boolean }) {
     return () => window.clearInterval(timer)
   }, [endsAt, userId])
 
-  if (!rest || remaining === 0) return null
+  if (!rest || remaining === 0 || !userId) return null
 
   const minutes = Math.floor(remaining / 60)
   const seconds = `${remaining % 60}`.padStart(2, '0')
   const progress = Math.min(1, remaining / rest.totalSec)
 
-  const bar = (
+  const label = link ? (
+    <>
+      Back to workout <ChevronRight size={16} aria-hidden />
+    </>
+  ) : (
+    'Rest'
+  )
+  const labelClass = 'flex min-h-14 items-center gap-1 pl-5 text-sm text-ink-dim'
+
+  return (
     <div className="border-t border-line bg-surface">
       <div
         className="h-1 bg-plate-yellow transition-[width] duration-200 ease-linear"
@@ -86,28 +96,34 @@ export function RestTimer({ link = false }: { link?: boolean }) {
         aria-valuemin={0}
         aria-valuemax={rest.totalSec}
       />
-      <div className="mx-auto flex max-w-lg items-center justify-between px-5 py-3">
-        <span className="flex items-center gap-1 text-sm text-ink-dim">
-          {link ? (
-            <>
-              Rest · back to workout <ChevronRight size={16} aria-hidden />
-            </>
-          ) : (
-            'Rest'
-          )}
-        </span>
-        <span className="figure text-2xl text-plate-yellow">
-          {minutes}:{seconds}
-        </span>
+      <div className="mx-auto flex max-w-lg items-stretch justify-between">
+        {link ? (
+          <Link href={`/session?id=${rest.sessionId}`} className={labelClass}>
+            {label}
+          </Link>
+        ) : (
+          <span className={labelClass}>{label}</span>
+        )}
+        <div className="flex items-stretch">
+          <button
+            type="button"
+            onClick={() => void extendRest(userId)}
+            className="figure px-3 text-sm text-ink-dim"
+          >
+            +{EXTEND_SEC} s
+          </button>
+          <button
+            type="button"
+            onClick={() => void clearRest(userId)}
+            className="px-3 text-sm text-ink-dim"
+          >
+            Skip
+          </button>
+          <span className="figure flex items-center pr-5 pl-1 text-2xl text-plate-yellow">
+            {minutes}:{seconds}
+          </span>
+        </div>
       </div>
     </div>
-  )
-
-  return link ? (
-    <Link href={`/session?id=${rest.sessionId}`} className="block">
-      {bar}
-    </Link>
-  ) : (
-    bar
   )
 }

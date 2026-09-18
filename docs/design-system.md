@@ -108,8 +108,11 @@ change. No all-caps labels, no monospace for data.
   one of this exercise's sets banks it; the square is what still says so four exercises later.
   Both ask `heavierThanLastTime()` (`lib/records.ts`), so they can never disagree.
 - **The rest timer is a rule that drains** across the bottom edge, above the thumb, rather than a
-  number in a box. Yellow while running, gone when it ends. Off the session screen it sits above
-  the tabs and is a link back to the workout.
+  number in a box. Yellow while running, gone when it ends. *+30 s* and *Skip* sit on the bar
+  beside the clock, because that is where the thumb already is. Off the session screen it sits
+  above the tabs and its label is a link back to the workout. The last set of the workout starts
+  no rest: there is nothing to rest for, and *Finish workout* is what the screen offers instead
+  (`startRest()` in `lib/rest.ts` decides, so no screen can get it wrong).
 - **Thumb zone.** Primary actions sit in the bottom third; minimum 56px targets; weight and reps
   adjust with −/+ in 2.5 kg and 1 rep steps, because typing with chalk on your hands is miserable.
 - **Finishing a workout pays out.** *Finish workout* hands the screen to the summary

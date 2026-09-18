@@ -105,7 +105,8 @@ Move it to `/exercises?id=…` exactly as the session screen was moved (`docs/ar
 ~~The timer's end time lives in React state on the session page, so opening an exercise's
 instructions mid-rest loses it. Store `restEndsAt` in IndexedDB (`meta`) and render the timer bar
 app-wide while it runs.~~ ✅ (`lib/rest.ts`; the bar sits above the tabs and links back to the
-workout.) Still to do: **+30 s / skip** buttons.
+workout.) ~~Still to do: **+30 s / skip** buttons.~~ ✅ (on the bar itself; and the last set of the
+workout starts no rest — there is nothing to rest for, Finish is what the screen offers.)
 
 ### 2.4 "Make available offline" — S
 
