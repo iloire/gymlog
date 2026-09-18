@@ -80,7 +80,7 @@ describe('filterExercises', () => {
     ])
   })
 
-  it('shows everything when favourites are not filtered', () => {
-    expect(names(filterExercises(library, NO_FILTER, '', favorites))).toEqual(['Curl', 'Leg Press', 'Squat'])
+  it('shows everything when favourites are not filtered, favourites first', () => {
+    expect(names(filterExercises(library, NO_FILTER, '', favorites))).toEqual(['Curl', 'Squat', 'Leg Press'])
   })
 })

@@ -7,6 +7,7 @@ import {
   dateToEpoch,
   dayOfWeek,
   epochToDate,
+  exerciseRank,
   lastPerformance,
   planPreview,
   today,
@@ -236,5 +237,45 @@ describe('getDb isolation', () => {
     // A shared phone must never show one account's log to another.
     expect(await getDb('user-b').bodyWeights.count()).toBe(0)
     expect(await getDb('user-a').bodyWeights.count()).toBe(1)
+  })
+})
+
+describe('exerciseRank', () => {
+  beforeEach(async () => {
+    await destroyDb(USER)
+  })
+
+  it('collects the exercises on the programme and when each exercise was last done', async () => {
+    await writeRow(USER, 'programs', { id: 'p', name: 'P', stage: null, startedOn: '2026-09-01', endedOn: null, notes: null })
+    await writeRow(USER, 'programDays', { id: 'd-0', programId: 'p', dayOfWeek: 0, templateId: 'a' })
+    await writeRow(USER, 'programDays', { id: 'd-2', programId: 'p', dayOfWeek: 2, templateId: 'b' })
+    await writeRow(USER, 'templateItems', { id: 'ti-1', templateId: 'a', exerciseId: SQUAT, position: 1 })
+    await writeRow(USER, 'templateItems', { id: 'ti-2', templateId: 'b', exerciseId: 'Bench', position: 1 })
+    await writeRow(USER, 'templateItems', { id: 'ti-3', templateId: 'b', exerciseId: 'Gone', position: 2, deletedAt: 1 })
+    // A workout that is not on the programme does not count.
+    await writeRow(USER, 'templateItems', { id: 'ti-4', templateId: 'c', exerciseId: 'Curl', position: 1 })
+
+    const older = dateToEpoch('2026-09-01')
+    const newer = dateToEpoch('2026-09-08')
+    await loggedSet('s-old', 1, 60, 8, older)
+    await loggedSet('s-new', 1, 65, 8, newer)
+    await loggedSet('s-new', 2, 20, 10, newer + 1, { isWarmup: true })
+    await loggedSet('s-new', 3, 70, 1, newer + 2, { completedAt: null })
+    await loggedSet('s-new', 4, 70, 1, newer + 3, { exerciseId: 'Curl', deletedAt: 1 })
+    await loggedSet('s-new', 5, 0, 0, newer, { exerciseId: 'Row', weightKg: null, reps: null, durationSec: 300 })
+
+    const rank = await exerciseRank(USER)
+
+    expect(rank.programme).toEqual(new Set([SQUAT, 'Bench']))
+    expect([...rank.lastDone]).toEqual([
+      [SQUAT, newer],
+      ['Row', newer],
+    ])
+  })
+
+  it('is empty without a programme or a log', async () => {
+    const rank = await exerciseRank(USER)
+    expect(rank.programme.size).toBe(0)
+    expect(rank.lastDone.size).toBe(0)
   })
 })

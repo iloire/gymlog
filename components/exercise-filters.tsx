@@ -3,6 +3,7 @@ import { useState } from 'react'
 
 import type { LocalExercise } from '@/lib/db/dexie'
 import { equipmentName, exerciseEquipment, missingEquipment } from '@/lib/equipment'
+import { type ExerciseRank, NO_RANK } from '@/lib/queries'
 
 /**
  * One facet of the library a filter panel group narrows on. Several values in
@@ -46,14 +47,24 @@ export const NO_FILTER: ExerciseFilter = {
   force: [],
 }
 
-/** Shared by the Exercises page and the picker, so both filter the same way. */
+/**
+ * Shared by the Exercises page and the picker, so both filter and order the
+ * same way. Favourites come first, then what the programme has you doing, then
+ * what you have logged (most recent first), then the rest of the library
+ * alphabetically — 873 movements from 3/4 Sit-Up is no way to open a library.
+ */
 export function filterExercises(
   exercises: LocalExercise[],
   filter: ExerciseFilter,
   query: string,
-  favorites: Set<string>,
+  favorites: ReadonlySet<string>,
   have: ReadonlySet<string> | null = null,
+  rank: ExerciseRank = NO_RANK,
 ): LocalExercise[] {
+  const tier = (exercise: LocalExercise) =>
+    favorites.has(exercise.id) ? 0 : rank.programme.has(exercise.id) ? 1 : rank.lastDone.has(exercise.id) ? 2 : 3
+  const recency = (exercise: LocalExercise) => rank.lastDone.get(exercise.id) ?? 0
+
   // Every word must appear, in any order: "incline press" finds "Barbell Incline Bench Press".
   const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
   return exercises
@@ -71,7 +82,11 @@ export function filterExercises(
       const name = exercise.name.toLowerCase()
       return words.every((word) => name.includes(word))
     })
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => {
+      if (tier(a) !== tier(b)) return tier(a) - tier(b)
+      if (tier(a) === 2 && recency(a) !== recency(b)) return recency(b) - recency(a)
+      return a.name.localeCompare(b.name)
+    })
 }
 
 export function primaryMuscles(exercises: LocalExercise[]): string[] {

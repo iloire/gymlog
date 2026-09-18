@@ -22,6 +22,7 @@ import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
 import { exerciseEquipment } from '@/lib/equipment'
 import { favoriteExerciseIds } from '@/lib/favorites'
+import { exerciseRank, NO_RANK } from '@/lib/queries'
 
 /**
  * The grid grows a page at a time. All 873 movements at once is a 23,000px
@@ -47,13 +48,15 @@ export default function ExercisesPage() {
     new Set<string>(),
   )
 
+  const rank = useLiveQuery(async () => (userId ? exerciseRank(userId) : NO_RANK), [userId], NO_RANK)
+
   const muscles = useMemo(() => primaryMuscles(exercises), [exercises])
   const options = useMemo(() => facetOptions(exercises), [exercises])
   const have = useMemo(() => (equipment ? new Set(equipment) : null), [equipment])
 
   const results = useMemo(
-    () => filterExercises(exercises, filter, query, favorites, have),
-    [exercises, filter, query, favorites, have],
+    () => filterExercises(exercises, filter, query, favorites, have, rank),
+    [exercises, filter, query, favorites, have, rank],
   )
   const narrowed = isFiltered(filter) || query.trim() !== ''
 

@@ -106,6 +106,47 @@ export async function planPreview(userId: string, templateId: string): Promise<P
   return { lines, estimateMs: estimateWorkoutMs(items) }
 }
 
+/**
+ * What puts an exercise near the top of the library: it is in a workout the
+ * active programme schedules, or it has been logged, and when. Favourites are
+ * the third signal and come from `favoriteExerciseIds`.
+ */
+export type ExerciseRank = {
+  /** Exercise ids in a workout scheduled under the active programme. */
+  programme: ReadonlySet<string>
+  /** When each exercise was last logged, epoch ms — only exercises ever done. */
+  lastDone: ReadonlyMap<string, number>
+}
+
+export const NO_RANK: ExerciseRank = { programme: new Set(), lastDone: new Map() }
+
+/**
+ * One read of the schedule, its workouts and every set log: 873 movements is
+ * too many to open alphabetically, so the library puts what you actually lift
+ * first. A set counts once it is completed — a warm-up or a set never finished
+ * does not make an exercise "recently done".
+ */
+export async function exerciseRank(userId: string): Promise<ExerciseRank> {
+  const schedule = await weekSchedule(userId)
+  const templateIds = new Set(schedule?.days.values() ?? [])
+  const items = await Promise.all([...templateIds].map((id) => templateItems(userId, id)))
+  const programme = new Set(items.flat().map((item) => item.exerciseId))
+
+  const lastDone = new Map<string, number>()
+  await getDb(userId)
+    .setLogs.filter(
+      (log) =>
+        alive(log) && log.completedAt !== null && !log.isWarmup && (log.reps !== null || log.durationSec != null),
+    )
+    .each((log) => {
+      if (log.performedAt > (lastDone.get(log.exerciseId) ?? -Infinity)) {
+        lastDone.set(log.exerciseId, log.performedAt)
+      }
+    })
+
+  return { programme, lastDone }
+}
+
 export type LastPerformance = {
   performedAt: number
   sets: LocalSetLog[]

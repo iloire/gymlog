@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 00:34
+
+- **The library opens with your exercises, not 3/4 Sit-Up.** Favourites come first, then the
+  exercises in the workouts your programme schedules, then anything you have logged with the most
+  recent first, then the other movements by name. The picker in the workout editor uses the same
+  order (`exerciseRank()` in `lib/queries.ts`, `filterExercises` in
+  `components/exercise-filters.tsx`).
+
 ## 2026-09-18 00:30
 
 - **"Synced just now" is gone from Today.** It took a row on every load to say nothing was

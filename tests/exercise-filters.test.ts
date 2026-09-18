@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { facetOptions, filterExercises, NO_FILTER } from '@/components/exercise-filters'
 import type { LocalExercise } from '@/lib/db/dexie'
+import { NO_RANK } from '@/lib/queries'
 
 const exercise = (name: string, fields: Partial<LocalExercise>) =>
   ({
@@ -80,5 +81,51 @@ describe('facetOptions', () => {
     ])
     expect(options.mechanic).toEqual(['compound', 'isolation'])
     expect(options.force).toEqual(['pull', 'push', 'static'])
+  })
+})
+
+describe('library order', () => {
+  const order = (favorites: string[], programme: string[], lastDone: [string, number][], query = '') =>
+    filterExercises(
+      library,
+      NO_FILTER,
+      query,
+      new Set(favorites),
+      null,
+      { programme: new Set(programme), lastDone: new Map(lastDone) },
+    ).map((e) => e.id)
+
+  it('opens alphabetically with nothing to go on', () => {
+    expect(filterExercises(library, NO_FILTER, '', new Set(), null, NO_RANK).map((e) => e.name)).toEqual([
+      'Barbell Bench Press',
+      'Barbell Row',
+      'Chest Stretch',
+      'Dumbbell Flyes',
+      'Pushups',
+    ])
+  })
+
+  it('puts favourites, then the programme, then what was done recently before the rest', () => {
+    expect(
+      order(['Pushups'], ['Dumbbell_Flyes', 'Pushups'], [
+        ['Barbell_Row', 100],
+        ['Chest_Stretch', 300],
+        ['Pushups', 200],
+      ]),
+    ).toEqual(['Pushups', 'Dumbbell_Flyes', 'Chest_Stretch', 'Barbell_Row', 'Barbell_Bench_Press'])
+  })
+
+  it('orders recently done by most recent, everything else by name', () => {
+    expect(order([], ['Dumbbell_Flyes', 'Barbell_Row'], [['Barbell_Bench_Press', 1], ['Pushups', 2]])).toEqual([
+      'Barbell_Row',
+      'Dumbbell_Flyes',
+      'Pushups',
+      'Barbell_Bench_Press',
+      'Chest_Stretch',
+    ])
+  })
+
+  it('keeps the order under a search', () => {
+    expect(order([], [], [['Barbell_Row', 1]], 'barbell')).toEqual(['Barbell_Row', 'Barbell_Bench_Press'])
   })
 })
