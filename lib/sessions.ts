@@ -116,6 +116,27 @@ export function nextSet(logs: LocalSetLog[]): LocalSetLog | undefined {
   return logs.find((log) => log.completedAt === null)
 }
 
+export type OpenWorkout = {
+  /** The next set to do, and how many sets its exercise has; null once every set is logged. */
+  next: { exerciseName: string; setIndex: number; sets: number } | null
+}
+
+/**
+ * What the now-playing bar says of a workout under way, from its live set rows
+ * in workout order — or null when it is not worth showing. A workout opened
+ * and left with nothing logged is not under way: Today and Plan both treat it
+ * as never touched, and the bar must not be the one screen that disagrees.
+ * The exercise's set count is its highest set number, not its live rows, so
+ * skipping sets 1 and 2 still reads "set 3 of 3" rather than "set 3 of 1".
+ */
+export function openWorkout(logs: LocalSetLog[]): OpenWorkout | null {
+  if (!logs.some((log) => log.completedAt !== null)) return null
+  const next = nextSet(logs)
+  if (!next) return { next: null }
+  const sets = Math.max(...logs.filter((log) => log.exerciseId === next.exerciseId).map((log) => log.setIndex))
+  return { next: { exerciseName: next.exerciseName, setIndex: next.setIndex, sets } }
+}
+
 /**
  * Sets are done in order, so only a logged set (to correct it) or the next one
  * to do can be picked — logging set 3 over an empty 1 and 2 records nothing real.

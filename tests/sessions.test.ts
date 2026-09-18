@@ -19,6 +19,7 @@ import {
   reopenSession,
   rescheduleSession,
   restoreSet,
+  openWorkout,
   resumePosition,
   skipSet,
   startSession,
@@ -615,5 +616,41 @@ describe('resumePosition', () => {
 
   it('stays on the last exercise done when every set is logged', () => {
     expect(resumePosition(workout({ '1-1': 1, '1-2': 2, '2-1': 3, '2-2': 4, '3-1': 5, '3-2': 6 }))).toBe(2)
+  })
+})
+
+describe('openWorkout', () => {
+  // Two exercises, three sets each; `done` maps a set id to when it was logged, `skipped` lists deleted ids.
+  const workout = (done: Record<string, number>, skipped: string[] = []) =>
+    [1, 2].flatMap((position) =>
+      [1, 2, 3].map((setIndex) => {
+        const id = `${position}-${setIndex}`
+        return {
+          id, userId: USER, sessionId: 's', exerciseId: `ex${position}`, exerciseName: `Exercise ${position}`,
+          position, setIndex, targetReps: 5, targetRepsMax: null, targetWeightKg: null, restSec: 90,
+          weightKg: null, reps: null, isWarmup: false, completedAt: done[id] ?? null, performedAt: 1,
+          notes: null, createdAt: 1, updatedAt: 1, deletedAt: skipped.includes(id) ? 1 : null,
+        }
+      }).filter((log) => log.deletedAt === null),
+    )
+
+  it('is nothing while no set is logged, however many rows the workout has', () => {
+    expect(openWorkout(workout({}))).toBeNull()
+    expect(openWorkout([])).toBeNull()
+  })
+
+  it('names the next set once one is logged', () => {
+    expect(openWorkout(workout({ '1-1': 10 }))?.next).toEqual({ exerciseName: 'Exercise 1', setIndex: 2, sets: 3 })
+  })
+
+  it('counts skipped sets in the total, so the set number never exceeds it', () => {
+    expect(openWorkout(workout({ '2-1': 10 }, ['1-1', '1-2']))?.next).toEqual({
+      exerciseName: 'Exercise 1', setIndex: 3, sets: 3,
+    })
+  })
+
+  it('has no next set once every set is logged', () => {
+    const done = Object.fromEntries(workout({}).map((log, index) => [log.id, index + 1]))
+    expect(openWorkout(workout(done))).toEqual({ next: null })
   })
 })

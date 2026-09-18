@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
 import { today } from '@/lib/queries'
-import { nextSet } from '@/lib/sessions'
+import { openWorkout } from '@/lib/sessions'
 
 /**
  * The workout under way, on every tab: "Full Body A · Squat, set 2 of 3" and
@@ -21,23 +21,19 @@ export function OpenWorkoutBar() {
   const open = useLiveQuery(async () => {
     if (!userId) return null
     const db = getDb(userId)
-    const session = (await db.sessions.where('scheduledFor').equals(today()).toArray())
+    // Newest first; a workout opened and left with nothing logged does not hide
+    // one started earlier that has.
+    const sessions = (await db.sessions.where('scheduledFor').equals(today()).toArray())
       .filter((row) => row.deletedAt === null && row.completedAt === null && row.startedAt !== null)
-      .sort((a, b) => (b.startedAt ?? 0) - (a.startedAt ?? 0))[0]
-    if (!session) return null
-
-    const logs = (await db.setLogs.where('sessionId').equals(session.id).toArray())
-      .filter((log) => log.deletedAt === null)
-      .sort((a, b) => a.position - b.position || a.setIndex - b.setIndex)
-    if (logs.length === 0) return null
-
-    const next = nextSet(logs)
-    const ofExercise = next ? logs.filter((log) => log.exerciseId === next.exerciseId).length : 0
-    return {
-      sessionId: session.id,
-      name: session.templateName,
-      next: next ? { exerciseName: next.exerciseName, setIndex: next.setIndex, sets: ofExercise } : null,
+      .sort((a, b) => (b.startedAt ?? 0) - (a.startedAt ?? 0))
+    for (const session of sessions) {
+      const logs = (await db.setLogs.where('sessionId').equals(session.id).toArray())
+        .filter((log) => log.deletedAt === null)
+        .sort((a, b) => a.position - b.position || a.setIndex - b.setIndex)
+      const open = openWorkout(logs)
+      if (open) return { sessionId: session.id, name: session.templateName, next: open.next }
     }
+    return null
   }, [userId])
 
   if (!open) return null
