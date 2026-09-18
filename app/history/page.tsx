@@ -12,12 +12,14 @@ import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
 import { StrengthChart } from '@/components/strength-chart'
 import { TrainingCalendar } from '@/components/training-calendar'
+import { useUnit } from '@/components/use-unit'
 import { addDays, streakMessage, weekStart, weekStreak } from '@/lib/calendar'
 import { getDb } from '@/lib/db/dexie'
-import { formatDay, formatDuration, formatMinutes, kg } from '@/lib/format'
+import { formatDay, formatDuration, formatMinutes } from '@/lib/format'
 import { sessionHistory, trainedOn } from '@/lib/history'
 import { personalRecords, strengthSeries, weekProgress, type PersonalRecord } from '@/lib/progress'
 import { today, weekSchedule } from '@/lib/queries'
+import { displayWeight, formatWeight } from '@/lib/units'
 import type { HistoryEntry } from '@/lib/session-summary'
 import { planWeek } from '@/lib/week'
 
@@ -32,6 +34,7 @@ const LIFTS = 4
  */
 export default function ProgressPage() {
   const userId = useUserId()
+  const unit = useUnit()
   const [selected, setSelected] = useState<string | null>(null)
   const [lift, setLift] = useState<string | null>(null)
 
@@ -105,8 +108,10 @@ export default function ProgressPage() {
               </div>
               <div className="rounded-md border border-line p-4">
                 <p className="text-sm text-ink-dim">Moved</p>
-                <p className="figure mt-1 text-3xl leading-none">{Math.round(week.volumeKg).toLocaleString('en-GB')}</p>
-                <p className="mt-1 text-xs text-ink-dim">kg this week</p>
+                <p className="figure mt-1 text-3xl leading-none">
+                  {Math.round(displayWeight(week.volumeKg, unit)).toLocaleString('en-GB')}
+                </p>
+                <p className="mt-1 text-xs text-ink-dim">{unit} this week</p>
               </div>
             </section>
 
@@ -207,6 +212,7 @@ export default function ProgressPage() {
 
 /** The heaviest set of one lift, and the estimated max it implies. */
 function RecordRow({ record }: { record: PersonalRecord }) {
+  const unit = useUnit()
   return (
     <li className="flex items-baseline justify-between gap-3 py-3">
       <span className="min-w-0">
@@ -217,15 +223,18 @@ function RecordRow({ record }: { record: PersonalRecord }) {
       </span>
       <span className="shrink-0 text-right">
         <span className="figure block text-[15px]">
-          {record.weightKg}×{record.reps}
+          {displayWeight(record.weightKg, unit)}×{record.reps}
         </span>
-        <span className="figure block text-sm text-ink-dim">e1RM {Math.round(record.bestE1rmKg)} kg</span>
+        <span className="figure block text-sm text-ink-dim">
+          e1RM {Math.round(displayWeight(record.bestE1rmKg, unit))} {unit}
+        </span>
       </span>
     </li>
   )
 }
 
 function SessionRow({ entry, open = false }: { entry: HistoryEntry; open?: boolean }) {
+  const unit = useUnit()
   const { session, setsDone, setsPlanned, volumeKg, cardioSec, durationMs, exercises } = entry
 
   return (
@@ -242,7 +251,7 @@ function SessionRow({ entry, open = false }: { entry: HistoryEntry; open?: boole
           <span className="shrink-0 text-right">
             <span className="figure block text-[15px]">
               {/* A cardio-only session has no volume; its minutes say what was done. */}
-              {volumeKg > 0 ? kg(volumeKg) : cardioSec > 0 ? formatMinutes(cardioSec) : '—'}
+              {volumeKg > 0 ? formatWeight(volumeKg, unit) : cardioSec > 0 ? formatMinutes(cardioSec) : '—'}
             </span>
             <span className="block text-sm text-ink-dim">
               {setsDone}/{setsPlanned} sets

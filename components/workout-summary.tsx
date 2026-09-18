@@ -4,11 +4,13 @@ import { useLiveQuery } from 'dexie-react-hooks'
 
 import { Loading, Placeholder } from '@/components/loading'
 import { SessionSets } from '@/components/session-sets'
+import { useUnit } from '@/components/use-unit'
 import { streakMessage, weekStreak } from '@/lib/calendar'
-import { formatDay, formatDuration, formatMinutes, formatSet, kg } from '@/lib/format'
+import { formatDay, formatDuration, formatMinutes, formatSet } from '@/lib/format'
 import { sessionHistory } from '@/lib/history'
 import { lastPerformance, today } from '@/lib/queries'
 import { compareExercise, recordHeadline, type ExerciseRecord } from '@/lib/records'
+import { formatWeight, type Unit } from '@/lib/units'
 
 /**
  * The screen a workout ends on.
@@ -32,6 +34,7 @@ export function WorkoutSummary({
   onDone: () => void
   onReopen: () => void
 }) {
+  const unit = useUnit()
   const data = useLiveQuery(async () => {
     const history = await sessionHistory(userId)
     const entry = history.find((row) => row.session.id === sessionId)
@@ -91,7 +94,7 @@ export function WorkoutSummary({
   const cardioOnly = volumeKg === 0 && cardioSec > 0
   const volumeUpKg = previousVolumeKg !== null && volumeKg > previousVolumeKg ? volumeKg - previousVolumeKg : null
 
-  const beaten = records.filter((record) => recordHeadline(record) !== null)
+  const beaten = records.filter((record) => recordHeadline(record, unit) !== null)
   const firsts = records.filter((record) => record.first)
 
   return (
@@ -105,14 +108,14 @@ export function WorkoutSummary({
           in ink, because red on this screen marks what was *added* to last
           time and nothing else. A red total would drown the three lines below
           that actually earned it. */}
-      <p className="figure mt-2 text-6xl leading-none">{cardioOnly ? formatMinutes(cardioSec) : kg(volumeKg)}</p>
+      <p className="figure mt-2 text-6xl leading-none">{cardioOnly ? formatMinutes(cardioSec) : formatWeight(volumeKg, unit)}</p>
       <p className="mt-2 text-[15px] text-ink-dim">
         {cardioOnly ? 'logged' : 'moved'} over {setsDone} {setsDone === 1 ? 'set' : 'sets'}
         {durationMs !== null && durationMs >= 60_000 && <> in {formatDuration(durationMs)}</>}
       </p>
       {volumeUpKg !== null && (
         <p className="figure mt-1 text-[15px] text-plate-red">
-          +{kg(volumeUpKg)} on last {session.templateName}
+          +{formatWeight(volumeUpKg, unit)} on last {session.templateName}
         </p>
       )}
 
@@ -124,8 +127,8 @@ export function WorkoutSummary({
               <li key={record.exerciseId} className="flex items-baseline justify-between gap-3 py-3">
                 <span className="min-w-0 truncate text-[15px]">{record.name}</span>
                 <span className="shrink-0 text-right">
-                  <span className="figure block text-[15px] text-plate-red">{recordHeadline(record)}</span>
-                  <span className="figure block text-sm text-ink-dim">{comparison(record)}</span>
+                  <span className="figure block text-[15px] text-plate-red">{recordHeadline(record, unit)}</span>
+                  <span className="figure block text-sm text-ink-dim">{comparison(record, unit)}</span>
                 </span>
               </li>
             ))}
@@ -162,10 +165,10 @@ export function WorkoutSummary({
 }
 
 /** '82.5×5 from 80×5' — the set that beat it, and the set it beat. */
-function comparison(record: ExerciseRecord): string {
+function comparison(record: ExerciseRecord, unit: Unit): string {
   if (!record.best) return ''
-  const now = formatSet(record.best)
-  return record.previousBest ? `${now} from ${formatSet(record.previousBest)}` : now
+  const now = formatSet(record.best, unit)
+  return record.previousBest ? `${now} from ${formatSet(record.previousBest, unit)}` : now
 }
 
 function Buttons({ onDone, onReopen }: { onDone: () => void; onReopen: () => void }) {

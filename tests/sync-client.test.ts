@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { destroyDb, getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
-import { clearRejections, clientId, now, rejections, sync } from '@/lib/sync/client'
+import { clearRejections, clientId, now, readUnit, rejections, setUnit, sync } from '@/lib/sync/client'
 import { MAX_PUSH, mutationKey, type SyncRequest, type SyncResponse } from '@/lib/sync/types'
 
 const USER = 'user-1'
 
 function response(overrides: Partial<SyncResponse> = {}): SyncResponse {
-  return { cursor: 0, serverTime: Date.now(), changes: {}, applied: [], rejected: [], ...overrides }
+  return { cursor: 0, serverTime: Date.now(), unit: 'kg', changes: {}, applied: [], rejected: [], ...overrides }
 }
 
 /** Stub fetch; `reply` builds the server response from the parsed request. */
@@ -253,6 +253,53 @@ describe('sync — pull', () => {
     const saved = await writeRow(USER, 'bodyWeights', { id: 'bw', measuredOn: '2026-09-15', weightKg: 80 })
 
     expect(Number(saved.updatedAt)).toBeGreaterThan(Date.now() + skew - 1000)
+  })
+})
+
+describe('sync — display unit', () => {
+  it('is kilograms until the server or the user says otherwise', async () => {
+    expect(await readUnit(USER)).toBe('kg')
+  })
+
+  it('takes the unit the server reports, so the other phone follows a choice made here', async () => {
+    server(() => response({ unit: 'lb' }))
+    await sync(USER)
+    expect(await readUnit(USER)).toBe('lb')
+  })
+
+  it('applies a choice at once, pushes it on the next sync, and then stops sending it', async () => {
+    await setUnit(USER, 'lb')
+    expect(await readUnit(USER)).toBe('lb')
+
+    // The server keeps what it was told, like the real one.
+    let stored: 'kg' | 'lb' = 'kg'
+    const { calls } = server((request) => response({ unit: (stored = request.unit ?? stored) }))
+    await sync(USER)
+    await sync(USER)
+
+    expect(calls[0]?.unit).toBe('lb')
+    expect(calls[1]?.unit).toBeUndefined()
+    expect(await readUnit(USER)).toBe('lb')
+  })
+
+  it('keeps a choice made while the request was in flight, over what the server answered', async () => {
+    await setUnit(USER, 'lb')
+    const { calls } = server(async (request) => {
+      await setUnit(USER, 'kg')
+      return response({ unit: request.unit ?? 'kg' })
+    })
+
+    await sync(USER)
+    expect(await readUnit(USER)).toBe('kg')
+
+    await sync(USER)
+    expect(calls[1]?.unit).toBe('kg')
+  })
+
+  it('sends nothing about the unit when nothing was chosen', async () => {
+    const { calls } = server(acceptAll)
+    await sync(USER)
+    expect(calls[0]).not.toHaveProperty('unit')
   })
 })
 

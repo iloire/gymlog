@@ -38,10 +38,10 @@ Components never fetch. The sync engine is the only network caller, and it runs 
 ```jsonc
 // request
 { "cursor": 0, "clientId": "…", "mutations": [ { "id": "…", "table": "setLogs",
-  "rowId": "…", "op": "upsert", "row": { … } } ] }
+  "rowId": "…", "op": "upsert", "row": { … } } ], "unit": "lb" }   // unit only when chosen since last push
 
 // response
-{ "cursor": 412, "serverTime": 1757937600000,
+{ "cursor": 412, "serverTime": 1757937600000, "unit": "lb",
   "changes": { "setLogs": [ … ] }, "applied": ["…"], "rejected": [ … ] }
 ```
 
@@ -68,6 +68,16 @@ Components never fetch. The sync engine is the only network caller, and it runs 
   `Date.now() + clockOffset`. Without this a phone four minutes fast wins every conflict forever.
 - **Deletes** are ordinary upserts with `deletedAt` set, so the same rule decides delete-vs-edit.
 - `userId` is always taken from the JWT and overwritten on every incoming row.
+- **The display unit** (`users.unit`, kg or lb) is the one account setting a device can change,
+  and it is not a row: it rides beside the mutations. The Units page writes it to `meta` (`unit`,
+  plus `unitPending`) in one transaction, so every figure changes at once, offline or not; the
+  next push sends `unit`, the server stores it as given (last device to choose wins, no rev) and
+  every response carries the current value, which the client keeps unless a newer choice was made
+  while the request was in flight. Weights stay kilograms on disk and on the wire; `lib/units.ts`
+  converts at the edge — `displayWeight`/`formatWeight` to show, `fromUnit` to store what was
+  typed (to the gram, so two phones write the same row), `tidyWeight` to move a prescription or
+  history written in the other unit onto a weight the plates make (an empty 20 kg bar is 44.1 lb,
+  which becomes 45). Steps and plates have a table per unit (`lib/weights.ts`, `lib/plates.ts`).
 
 ## Deterministic ids
 

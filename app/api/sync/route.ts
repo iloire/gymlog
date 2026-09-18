@@ -6,6 +6,7 @@ import { db } from '@/db'
 import { exercises, syncedTables as tables, users } from '@/db/schema'
 import { currentUserId } from '@/lib/auth'
 import { MAX_PUSH, SYNC_TABLES, type RejectedMutation, type SyncRow, type SyncTable } from '@/lib/sync/types'
+import { UNITS } from '@/lib/units'
 
 /**
  * Parents before children. The outbox holds one entry per row and a re-edit
@@ -30,6 +31,8 @@ const requestSchema = z.object({
   globalCursor: z.number().int().nonnegative().default(0),
   clientId: z.string().min(1),
   mutations: z.array(mutationSchema).max(MAX_PUSH),
+  /** A display unit chosen on the device; absent when it has not changed. */
+  unit: z.enum(UNITS).optional(),
 })
 
 export async function POST(request: Request) {
@@ -43,18 +46,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'bad_request', issues: parsed.error.issues }, { status: 400 })
   }
 
-  const { cursor, globalCursor, mutations } = parsed.data
+  const { cursor, globalCursor, mutations, unit: chosenUnit } = parsed.data
   const applied: string[] = []
   const rejected: RejectedMutation[] = []
 
   const [user] = await db
-    .select({ syncRev: users.syncRev })
+    .select({ syncRev: users.syncRev, unit: users.unit })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
   if (!user) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
+  const unit = chosenUnit ?? user.unit
 
   // Validated up front so the transaction below can never need a rollback.
   if (mutations.some((m) => !Number.isFinite(Number((m.row as SyncRow).updatedAt)))) {
@@ -130,8 +134,8 @@ export async function POST(request: Request) {
       applied.push(mutation.id)
     }
 
-    if (rev !== base) {
-      await tx.update(users).set({ syncRev: rev }).where(eq(users.id, userId))
+    if (rev !== base || chosenUnit) {
+      await tx.update(users).set({ syncRev: rev, unit }).where(eq(users.id, userId))
     }
   })
 
@@ -161,6 +165,7 @@ export async function POST(request: Request) {
   return NextResponse.json({
     cursor: rev,
     serverTime: Date.now(),
+    unit,
     changes,
     applied,
     rejected,

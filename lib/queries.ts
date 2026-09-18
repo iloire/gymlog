@@ -2,6 +2,7 @@
 
 import { getDb, type LocalProgram, type LocalSetLog, type LocalTemplateItem } from '@/lib/db/dexie'
 import { estimateWorkoutMs, formatLast, formatTarget, type PlanLine } from '@/lib/plan'
+import { readUnit } from '@/lib/sync/client'
 
 /** Local calendar date, 'YYYY-MM-DD'. Never derive this from a UTC timestamp. */
 export function today(date = new Date()): string {
@@ -89,6 +90,7 @@ export type PlanPreview = { lines: PlanLine[]; estimateMs: number }
 export async function planPreview(userId: string, templateId: string): Promise<PlanPreview> {
   const db = getDb(userId)
   const items = await templateItems(userId, templateId)
+  const unit = await readUnit(userId)
 
   const lines = await Promise.all(
     items.map(async (item) => {
@@ -98,7 +100,7 @@ export async function planPreview(userId: string, templateId: string): Promise<P
         exerciseId: item.exerciseId,
         name: exercise?.name ?? 'Exercise',
         target: formatTarget(item),
-        last: last ? formatLast(last.topSet) : null,
+        last: last ? formatLast(last.topSet, unit) : null,
       }
     }),
   )

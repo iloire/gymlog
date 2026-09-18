@@ -16,18 +16,20 @@ import { Loading, Placeholder } from '@/components/loading'
 import { SessionSets } from '@/components/session-sets'
 import { useSync, useUserId } from '@/components/session-boot'
 import { SyncBadge } from '@/components/sync-badge'
+import { useUnit } from '@/components/use-unit'
 import { WeekStrip } from '@/components/week-strip'
 import { WeighIn } from '@/components/weigh-in'
 import { bodyParts } from '@/lib/body-parts'
 import { addDays, weekStart } from '@/lib/calendar'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
-import { formatMinutes, kg } from '@/lib/format'
+import { formatMinutes } from '@/lib/format'
 import { daysAgo, isNewAccount, rotation, sessionHistory, trainedOn, type Rotation } from '@/lib/history'
 import { planSummary } from '@/lib/plan'
 import type { HistoryEntry } from '@/lib/session-summary'
 import { dayOfWeek, planPreview, today, weekSchedule, type PlanPreview } from '@/lib/queries'
 import { addToSession, startSession } from '@/lib/sessions'
 import { lastSyncAt } from '@/lib/sync/client'
+import { formatWeight } from '@/lib/units'
 import { planWeek, weekdayName, type WeekDay } from '@/lib/week'
 
 /** A workout planned for a day that went by without it. */
@@ -418,12 +420,13 @@ function WorkoutList({ templates, onStart }: { templates: Rotation[]; onStart: (
 /** One session trained today: what is logged so far, and the way back into it. */
 function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }) {
   const userId = useUserId()
+  const unit = useUnit()
   const router = useRouter()
   const [picking, setPicking] = useState(false)
   const { session, setsDone, setsPlanned, volumeKg, cardioSec, exercises } = entry
   const totals = [
     `${setsDone}/${setsPlanned} sets`,
-    volumeKg > 0 ? kg(volumeKg) : null,
+    volumeKg > 0 ? formatWeight(volumeKg, unit) : null,
     cardioSec > 0 ? `${formatMinutes(cardioSec)} cardio` : null,
   ].filter(Boolean)
 

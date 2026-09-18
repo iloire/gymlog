@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatDay, formatDuration, formatSet, kg, parseNumber } from '@/lib/format'
+import { formatDay, formatDuration, formatSet, parseNumber } from '@/lib/format'
 
 describe('formatDay', () => {
   it('shows one format for a calendar date and for a timestamp', () => {
@@ -11,14 +11,6 @@ describe('formatDay', () => {
 
   it('does not shift a calendar date into the day before, whatever the timezone', () => {
     expect(formatDay('2026-03-01')).toBe('1 Mar 2026')
-  })
-})
-
-describe('kg', () => {
-  it('groups thousands and keeps one decimal only when there is one', () => {
-    expect(kg(4250)).toBe('4,250 kg')
-    expect(kg(62.5)).toBe('62.5 kg')
-    expect(kg(60.04)).toBe('60 kg')
   })
 })
 
@@ -36,6 +28,12 @@ describe('formatSet', () => {
     expect(formatSet({ weightKg: null, reps: null, durationSec: 450 })).toBe('7.5 min')
     expect(formatSet({ weightKg: 80, reps: 5 })).toBe('80×5')
     expect(formatSet({ weightKg: null, reps: 12, durationSec: null })).toBe('12 reps')
+  })
+
+  it('shows the weight in pounds when asked, still from the stored kilograms', () => {
+    expect(formatSet({ weightKg: 61.235, reps: 5 }, 'lb')).toBe('135×5')
+    expect(formatSet({ weightKg: 80, reps: 5 }, 'lb')).toBe('176.4×5')
+    expect(formatSet({ weightKg: null, reps: 12 }, 'lb')).toBe('12 reps')
   })
 })
 

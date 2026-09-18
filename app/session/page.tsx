@@ -19,6 +19,7 @@ import { useUserId } from '@/components/session-boot'
 import { SetSquares } from '@/components/set-squares'
 import { Stepper } from '@/components/stepper'
 import { UndoToast } from '@/components/undo-toast'
+import { useUnit } from '@/components/use-unit'
 import { WorkoutSheet } from '@/components/workout-sheet'
 import { WorkoutSummary } from '@/components/workout-summary'
 import { isCardio } from '@/lib/cardio'
@@ -41,7 +42,8 @@ import {
   unlogSet,
 } from '@/lib/sessions'
 import { useWakeLock } from '@/lib/use-wake-lock'
-import { progressionIncrementKg, weightStepKg } from '@/lib/weights'
+import { displayWeight, fromUnit, tidyWeight } from '@/lib/units'
+import { progressionIncrementKg, weightStep, weightStepKg } from '@/lib/weights'
 
 const REP_STEP = 1
 /** How far a finger travels sideways before it is a swipe to the next exercise. */
@@ -60,6 +62,7 @@ type Values = { weightKg: number | null; reps: number | null; durationSec: numbe
  */
 function Session() {
   const userId = useUserId()
+  const unit = useUnit()
   const router = useRouter()
   const params = useSearchParams()
   const id = params.get('id') ?? ''
@@ -157,8 +160,9 @@ function Session() {
         previous: previous?.sets ?? null,
         before: recent[1]?.sets ?? null,
         prescription: activeSet,
-        incrementKg: progressionIncrementKg(exercise),
-        stepKg: weightStepKg(exercise),
+        incrementKg: progressionIncrementKg(exercise, unit),
+        stepKg: weightStepKg(exercise, unit),
+        unit,
       })
     : null
 
@@ -182,7 +186,7 @@ function Session() {
         progression?.weightKg ??
         lastSame?.weightKg ??
         lastAny?.weightKg ??
-        log.targetWeightKg,
+        (log.targetWeightKg === null ? null : tidyWeight(log.targetWeightKg, unit)),
       reps: log.reps ?? progression?.reps ?? log.targetReps ?? justDone?.reps ?? lastSame?.reps ?? null,
       durationSec:
         log.durationSec ??
@@ -326,7 +330,7 @@ function Session() {
     ? timed
       ? `${values.durationSec ? formatMinutes(values.durationSec) : 'time'}`
       : values.weightKg
-        ? `${values.weightKg} kg × ${values.reps ?? '—'}`
+        ? `${displayWeight(values.weightKg, unit)} ${unit} × ${values.reps ?? '—'}`
         : `${values.reps ?? '—'} reps`
     : null
 
@@ -540,10 +544,10 @@ function Session() {
                 <>
                   <Stepper
                     label="Weight"
-                    unit="kg"
-                    value={values.weightKg}
-                    step={weightStepKg(exercise)}
-                    onChange={(weightKg) => setDraft({ ...values, weightKg })}
+                    unit={unit}
+                    value={values.weightKg === null ? null : displayWeight(values.weightKg, unit)}
+                    step={weightStep(exercise, unit)}
+                    onChange={(weight) => setDraft({ ...values, weightKg: fromUnit(weight, unit) })}
                   />
                   {/* The weights within reach, one tap each: the suggestion, then
                       what this session and last time have already been lifted at. */}
@@ -559,7 +563,7 @@ function Session() {
                               values.weightKg === weight ? 'bg-ink text-ground' : 'border border-line text-ink-dim'
                             }`}
                           >
-                            {weight}
+                            {displayWeight(weight, unit)}
                           </button>
                         </li>
                       ))}

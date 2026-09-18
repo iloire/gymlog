@@ -2,10 +2,12 @@
 
 import { Plus } from 'lucide-react'
 
+import { useUnit } from '@/components/use-unit'
 import type { LocalSetLog } from '@/lib/db/dexie'
 import { formatSet } from '@/lib/format'
 import { heavierThanLastTime } from '@/lib/records'
 import { canSelectSet } from '@/lib/sessions'
+import { displayWeight, type Unit } from '@/lib/units'
 
 /**
  * A row of squares: filled means done, outlined means still to do. You read
@@ -50,6 +52,7 @@ export function SetSquares({
   /** With this, a dashed + square follows the last set: one more than the template said. */
   onAdd?: () => void
 }) {
+  const unit = useUnit()
   if (logs.length === 0) return null
 
   const ghosts = previous ?? []
@@ -68,9 +71,9 @@ export function SetSquares({
               <li
                 key={set.id}
                 className="flex h-11 min-w-12 flex-col items-center justify-center rounded-sm border border-dashed border-line px-2 text-ink-dim"
-                aria-label={`Set ${set.setIndex}, ${formatSet(set)}`}
+                aria-label={`Set ${set.setIndex}, ${formatSet(set, unit)}`}
               >
-                <Figure set={set} />
+                <Figure set={set} unit={unit} />
               </li>
             ))}
           </ol>
@@ -92,7 +95,7 @@ export function SetSquares({
                 aria-pressed={active}
                 aria-label={
                   done
-                    ? `Set ${log.setIndex}, ${log.durationSec != null ? formatSet(log) : `${log.weightKg ?? '—'} kg × ${log.reps ?? '—'}`}${beat ? ', heavier than last time' : ''}`
+                    ? `Set ${log.setIndex}, ${log.durationSec != null ? formatSet(log, unit) : `${log.weightKg === null ? '—' : displayWeight(log.weightKg, unit)} ${unit} × ${log.reps ?? '—'}`}${beat ? ', heavier than last time' : ''}`
                     : `Set ${log.setIndex}`
                 }
                 className={`flex h-12 w-full min-w-12 flex-col items-center justify-center rounded-sm px-2 ${
@@ -103,7 +106,7 @@ export function SetSquares({
                       : 'border border-line text-ink-dim disabled:opacity-50'
                 }`}
               >
-                {done ? <Figure set={log} /> : <span className="figure text-base leading-none">{log.setIndex}</span>}
+                {done ? <Figure set={log} unit={unit} /> : <span className="figure text-base leading-none">{log.setIndex}</span>}
               </button>
             </li>
           )
@@ -126,7 +129,7 @@ export function SetSquares({
 }
 
 /** The two-line figure inside a square: the weight over ×reps, or minutes for a timed set. */
-function Figure({ set }: { set: LocalSetLog }) {
+function Figure({ set, unit }: { set: LocalSetLog; unit: Unit }) {
   if (set.durationSec != null) {
     return (
       <>
@@ -137,7 +140,7 @@ function Figure({ set }: { set: LocalSetLog }) {
   }
   return (
     <>
-      <span className="figure text-base leading-none">{set.weightKg ?? '—'}</span>
+      <span className="figure text-base leading-none">{set.weightKg === null ? '—' : displayWeight(set.weightKg, unit)}</span>
       <span className="mt-0.5 text-[11px] leading-none opacity-80">×{set.reps ?? '—'}</span>
     </>
   )

@@ -1,5 +1,7 @@
 /** Wire types shared by the client sync engine and `/api/sync`. */
 
+import type { Unit } from '@/lib/units'
+
 export const SYNC_TABLES = [
   'exercises',
   'exerciseNotes',
@@ -62,6 +64,12 @@ export type SyncRequest = {
   /** Stable per-device id, so a push can be traced to the phone or laptop that sent it. */
   clientId: string
   mutations: Mutation[]
+  /**
+   * A unit chosen on this device since its last push. The one account setting
+   * a phone can change: it is not a row, so it rides beside the mutations and
+   * the server takes it as given — the last device to choose wins.
+   */
+  unit?: Unit
 }
 
 export type RejectedMutation = {
@@ -83,6 +91,8 @@ export type SyncResponse = {
   cursor: number
   /** Server clock, so the client can correct a skewed device clock. */
   serverTime: number
+  /** `users.unit` after this push, so every device shows weights the same way. */
+  unit: Unit
   changes: Partial<Record<SyncTable, SyncRow[]>>
   applied: string[]
   rejected: RejectedMutation[]

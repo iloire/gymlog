@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { LocalSetLog } from '@/lib/db/dexie'
 import { suggestNext } from '@/lib/progression'
+import { displayWeight } from '@/lib/units'
 import { progressionIncrementKg, roundToStep, weightStepKg } from '@/lib/weights'
 
 let next = 0
@@ -171,5 +172,50 @@ describe('weight steps', () => {
     expect(roundToStep(54, 2.5)).toBe(55)
     expect(roundToStep(53.5, 2.5)).toBe(52.5)
     expect(roundToStep(-1, 2.5)).toBe(0)
+  })
+
+  it('steps in whole pounds for a pound gym, stored as kilograms', () => {
+    const squat = { equipment: 'barbell', primaryMuscles: ['quadriceps'] }
+    expect(weightStepKg(squat, 'lb')).toBeCloseTo(2.268, 3)
+    expect(progressionIncrementKg(squat, 'lb')).toBeCloseTo(4.536, 3)
+    expect(progressionIncrementKg({ equipment: 'machine', primaryMuscles: ['chest'] }, 'lb')).toBeCloseTo(4.536, 3)
+  })
+})
+
+describe('suggestNext in pounds', () => {
+  it('speaks in the unit and lands on a weight the plates make', () => {
+    // 135 lb, logged from a pound gym, is 61.235 kg on disk.
+    const result = suggestNext({
+      previous: [set(61.235, 5), set(61.235, 5), set(61.235, 5)],
+      prescription: threeByFive,
+      incrementKg: progressionIncrementKg({ equipment: 'barbell', primaryMuscles: ['quadriceps'] }, 'lb'),
+      stepKg: weightStepKg({ equipment: 'barbell', primaryMuscles: ['quadriceps'] }, 'lb'),
+      unit: 'lb',
+    })
+    expect(result.reason).toBe('All 3×5 at 135 lb last time → 145 lb')
+    expect(displayWeight(result.weightKg ?? 0, 'lb')).toBe(145)
+  })
+
+  it('lands kilogram history on a pound weight the plates make', () => {
+    const result = suggestNext({
+      previous: [set(77.5, 5), set(77.5, 5), set(77.5, 5)],
+      prescription: threeByFive,
+      incrementKg: 4.536,
+      stepKg: 2.268,
+      unit: 'lb',
+    })
+    // 77.5 kg is 170.9 lb; plus 10 lb is 180.9, which no bar makes → 180.
+    expect(result.reason).toBe('All 3×5 at 170.9 lb last time → 180 lb')
+  })
+
+  it('starts a kilogram prescription on the pound bar', () => {
+    const result = suggestNext({
+      previous: null,
+      prescription: { ...threeByFive, targetWeightKg: 20 },
+      incrementKg: 4.536,
+      stepKg: 2.268,
+      unit: 'lb',
+    })
+    expect(displayWeight(result.weightKg ?? 0, 'lb')).toBe(45)
   })
 })

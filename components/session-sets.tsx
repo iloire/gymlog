@@ -1,8 +1,12 @@
+'use client'
+
+import { useUnit } from '@/components/use-unit'
 import { formatSet } from '@/lib/format'
 import type { HistoryExercise } from '@/lib/session-summary'
 
 /** A session's logged sets, one line per exercise with its note — shared by History and Today. */
 export function SessionSets({ exercises }: { exercises: HistoryExercise[] }) {
+  const unit = useUnit()
   return (
     <ul className="space-y-2">
       {exercises.map((exercise) => (
@@ -11,7 +15,7 @@ export function SessionSets({ exercises }: { exercises: HistoryExercise[] }) {
           <ol className="flex flex-wrap gap-x-4 gap-y-1">
             {exercise.sets.map((set) => (
               <li key={set.id} className="figure text-[15px]">
-                {formatSet(set)}
+                {formatSet(set, unit)}
                 {set.isWarmup && <span className="ml-0.5 text-ink-dim">w</span>}
               </li>
             ))}

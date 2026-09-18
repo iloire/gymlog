@@ -29,6 +29,8 @@ deployed to production** — the workflow waits for Vercel's verdict and smoke-t
 - **Bodyweight** — one field on Today each morning, charted as a 7-day average because single
   readings are noise.
 - **Accounts** — every user sees only their own data; the exercise library is shared.
+- **Kilograms or pounds** — one setting on Profile, saved to the account so every phone follows;
+  weights stay kilograms underneath and the steppers, plates and charts convert at the edge.
 - **API for LLMs** — create a token under Profile → API access and let ChatGPT, Claude or a script
   read your workouts, history and bodyweight; a read and write token can also rework your workouts
   and week. Described by an OpenAPI schema at `/api/v1/openapi.json`.

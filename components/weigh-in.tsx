@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 import { useUserId } from '@/components/session-boot'
+import { useUnit } from '@/components/use-unit'
 import { getDb } from '@/lib/db/dexie'
 import { parseNumber } from '@/lib/format'
 import { bodyWeightSeries, today } from '@/lib/queries'
 import { recordBodyWeight } from '@/lib/sessions'
+import { displayWeight, fromUnit } from '@/lib/units'
 
 /**
  * Today's weigh-in, on Today. The weight log sits two taps deep under
@@ -18,6 +20,7 @@ import { recordBodyWeight } from '@/lib/sessions'
  */
 export function WeighIn() {
   const userId = useUserId()
+  const unit = useUnit()
   const [value, setValue] = useState('')
 
   const state = useLiveQuery(async () => {
@@ -35,7 +38,7 @@ export function WeighIn() {
     event.preventDefault()
     const weight = parseNumber(value)
     if (!userId || weight === null || weight <= 0) return
-    await recordBodyWeight(userId, weight)
+    await recordBodyWeight(userId, fromUnit(weight, unit))
     setValue('')
   }
 
@@ -52,11 +55,11 @@ export function WeighIn() {
           inputMode="decimal"
           value={value}
           onChange={(event) => setValue(event.target.value)}
-          placeholder={state.latest ? state.latest.weightKg.toFixed(1) : '75'}
-          aria-label="Bodyweight in kg"
+          placeholder={state.latest ? displayWeight(state.latest.weightKg, unit).toFixed(1) : unit === 'lb' ? '165' : '75'}
+          aria-label={`Bodyweight in ${unit}`}
           className="figure h-12 w-full min-w-0 bg-transparent text-right text-xl outline-none"
         />
-        <span className="pr-3 text-sm text-ink-dim">kg</span>
+        <span className="pr-3 text-sm text-ink-dim">{unit}</span>
       </label>
       <button
         type="submit"

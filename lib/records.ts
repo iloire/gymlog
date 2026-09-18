@@ -7,8 +7,9 @@
  * this app, so what counts as beating it is decided here and nowhere else.
  */
 import type { LocalSetLog } from '@/lib/db/dexie'
-import { formatMinutes, kg } from '@/lib/format'
+import { formatMinutes } from '@/lib/format'
 import type { HistoryExercise } from '@/lib/session-summary'
+import { formatWeight, type Unit } from '@/lib/units'
 
 /** Last time's working sets for one exercise — the shape `lastPerformance` returns. */
 export type Previous = { sets: LocalSetLog[]; topSet: LocalSetLog }
@@ -99,11 +100,11 @@ export function compareExercise(exercise: HistoryExercise, previous: Previous | 
  * reps beats total work. Null when it did not beat last time — which is what
  * keeps the summary's red list honest.
  */
-export function recordHeadline(record: ExerciseRecord): string | null {
-  if (record.weightUpKg !== null) return `+${kg(record.weightUpKg)}`
+export function recordHeadline(record: ExerciseRecord, unit: Unit = 'kg'): string | null {
+  if (record.weightUpKg !== null) return `+${formatWeight(record.weightUpKg, unit)}`
   if (record.repsUp !== null) return `+${record.repsUp} ${record.repsUp === 1 ? 'rep' : 'reps'}`
   if (record.timeUpSec !== null) return `+${formatMinutes(record.timeUpSec)}`
-  if (record.volumeUpKg !== null) return `+${kg(record.volumeUpKg)} total`
+  if (record.volumeUpKg !== null) return `+${formatWeight(record.volumeUpKg, unit)} total`
   return null
 }
 

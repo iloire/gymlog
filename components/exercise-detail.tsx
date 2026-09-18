@@ -7,6 +7,7 @@ import { ExerciseFrames } from '@/components/exercise-frames'
 import { FavoriteButton } from '@/components/favorite-button'
 import { Placeholder } from '@/components/loading'
 import { StrengthChart } from '@/components/strength-chart'
+import { useUnit } from '@/components/use-unit'
 import { getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
 import { formatDay, formatSet } from '@/lib/format'
@@ -42,6 +43,7 @@ export function ExerciseDetail({
   /** Shown under the name — the exercise page's "Do this now". */
   action?: ReactNode
 }) {
+  const unit = useUnit()
   const data = useLiveQuery(async () => {
     const db = getDb(userId)
     const exercise = await db.exercises.get(exerciseId)
@@ -123,7 +125,7 @@ export function ExerciseDetail({
                   <span className="text-sm text-ink-dim">
                     {formatDay(epochToDate(sets[0]?.performedAt ?? 0))}
                   </span>
-                  <span className="figure text-right text-[15px]">{sets.map(formatSet).join('  ')}</span>
+                  <span className="figure text-right text-[15px]">{sets.map((set) => formatSet(set, unit)).join('  ')}</span>
                 </span>
                 {sets.find((set) => set.notes) && (
                   <span className="mt-1 block text-sm italic text-ink-dim">“{sets.find((set) => set.notes)?.notes}”</span>

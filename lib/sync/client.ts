@@ -2,12 +2,14 @@
 
 import { getDb, type GymlogDexie } from '@/lib/db/dexie'
 import { newId } from '@/lib/id'
+import { DEFAULT_UNIT, parseUnit, type Unit } from '@/lib/units'
 import {
   MAX_PUSH,
   SYNC_TABLES,
   mutationKey,
   type Mutation,
   type RejectedMutation,
+  type SyncRequest,
   type SyncResponse,
   type SyncRow,
   type SyncTable,
@@ -19,6 +21,9 @@ const META_CLIENT_ID = 'clientId'
 const META_CLOCK_OFFSET = 'clockOffset'
 const META_LAST_SYNC = 'lastSyncAt'
 const META_REJECTIONS = 'rejections'
+const META_UNIT = 'unit'
+/** A unit chosen here and not yet pushed; cleared once the server has it. */
+const META_UNIT_PENDING = 'unitPending'
 
 /** How many rejections to keep for the badge; older ones roll off. */
 const MAX_REJECTIONS = 20
@@ -90,12 +95,14 @@ async function run(userId: string): Promise<SyncResult> {
   // session row is written before the set logs that reference it, and never
   // more than the server accepts in one request.
   const mutations = await db.outbox.orderBy('queuedAt').limit(MAX_PUSH).toArray()
+  const pendingUnit = await meta<Unit | null>(db, META_UNIT_PENDING, null)
 
-  const body = {
+  const body: SyncRequest = {
     cursor: await meta<number>(db, META_CURSOR, 0),
     globalCursor: await meta<number>(db, META_GLOBAL_CURSOR, 0),
     clientId: await clientId(db),
     mutations,
+    ...(pendingUnit ? { unit: pendingUnit } : {}),
   }
 
   let response: Response
@@ -155,6 +162,15 @@ async function run(userId: string): Promise<SyncResult> {
       await setMeta(db, META_REJECTIONS, [...kept, ...fresh].slice(-MAX_REJECTIONS))
     }
 
+    // The server's unit is every device's unit — unless this one chose again
+    // while the request was in flight, in which case that choice still stands
+    // and goes up with the next sync.
+    const stillPending = await meta<Unit | null>(db, META_UNIT_PENDING, null)
+    if (result.unit !== undefined && (stillPending === null || stillPending === pendingUnit)) {
+      await setMeta(db, META_UNIT, parseUnit(result.unit))
+      if (stillPending !== null) await db.meta.delete(META_UNIT_PENDING)
+    }
+
     await setMeta(db, META_CURSOR, result.cursor)
     if (globalMax) await setMeta(db, META_GLOBAL_CURSOR, globalMax)
     await setMeta(db, META_CLOCK_OFFSET, result.serverTime - Date.now())
@@ -184,4 +200,21 @@ export async function rejections(userId: string): Promise<Rejection[]> {
 
 export async function clearRejections(userId: string): Promise<void> {
   await getDb(userId).meta.delete(META_REJECTIONS)
+}
+
+/** The unit weights are shown in, as last synced or chosen here; kilograms until then. */
+export async function readUnit(userId: string): Promise<Unit> {
+  return parseUnit(await meta<unknown>(getDb(userId), META_UNIT, DEFAULT_UNIT))
+}
+
+/**
+ * Choose the unit on this device. It applies at once, offline or not, and the
+ * next sync carries it to the account so the other phone follows.
+ */
+export async function setUnit(userId: string, unit: Unit): Promise<void> {
+  const db = getDb(userId)
+  await db.transaction('rw', db.meta, async () => {
+    await setMeta(db, META_UNIT, unit)
+    await setMeta(db, META_UNIT_PENDING, unit)
+  })
 }

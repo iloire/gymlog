@@ -4,7 +4,8 @@
  * will take. Pure and free of Dexie, so it can be read straight off a template
  * item on any screen.
  */
-import { formatDuration, formatMinutes, kg } from '@/lib/format'
+import { formatDuration, formatMinutes } from '@/lib/format'
+import { formatWeight, type Unit } from '@/lib/units'
 
 /** The template fields a planned line is built from. */
 export type PlanTarget = {
@@ -72,7 +73,10 @@ export function planSummary(exercises: number, estimateMs: number): string {
 }
 
 /** The one number worth carrying forward from last time: '60 kg', '12 reps', '8 min'. */
-export function formatLast(set: { weightKg: number | null; reps: number | null; durationSec?: number | null }): string {
+export function formatLast(
+  set: { weightKg: number | null; reps: number | null; durationSec?: number | null },
+  unit: Unit = 'kg',
+): string {
   if (set.durationSec != null) return formatMinutes(set.durationSec)
-  return set.weightKg ? kg(set.weightKg) : `${set.reps ?? 0} reps`
+  return set.weightKg ? formatWeight(set.weightKg, unit) : `${set.reps ?? 0} reps`
 }

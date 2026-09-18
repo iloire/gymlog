@@ -5,7 +5,8 @@ import type { ReactNode } from 'react'
 
 import { WeekStrip } from '@/components/admin/week-strip'
 import { adminUserDetail, type AdminUserDetail } from '@/lib/admin'
-import { formatDay, formatSet, kg } from '@/lib/format'
+import { formatDay, formatSet } from '@/lib/format'
+import { formatWeight } from '@/lib/units'
 
 export const metadata: Metadata = { title: 'Admin' }
 
@@ -120,7 +121,7 @@ export default async function AdminUserPage({ params }: PageProps<'/admin/users/
               {detail.weights.map((entry) => (
                 <li key={entry.measuredOn} className="flex justify-between py-2 text-[15px]">
                   <span className="text-ink-dim">{formatDay(entry.measuredOn)}</span>
-                  <span className="figure">{kg(entry.weightKg)}</span>
+                  <span className="figure">{formatWeight(entry.weightKg, 'kg')}</span>
                 </li>
               ))}
             </ul>
@@ -162,7 +163,7 @@ function SessionRow({ session }: { session: AdminUserDetail['sessions'][number] 
             <span className="ml-1 font-normal text-ink-dim [font-variation-settings:'wdth'_100]">sets</span>
           </span>
           <span className="figure w-28 text-right text-[15px]">
-            {session.volumeKg > 0 ? kg(session.volumeKg) : <span className="text-ink-dim">—</span>}
+            {session.volumeKg > 0 ? formatWeight(session.volumeKg, 'kg') : <span className="text-ink-dim">—</span>}
           </span>
         </summary>
 

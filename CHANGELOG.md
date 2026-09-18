@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-18 08:45
+
+- **Profile is a settings list, and weights can be pounds.** Profile was six identical blocks,
+  each a heading, a sentence and a full-width button repeating the heading. It is now one row per
+  setting with the current value as its second line — "Appearance · Plate, dark", "Equipment ·
+  Full gym", "Units · Kilograms (kg)", "Bodyweight · 82.4 kg · today" — and a chevron. That gave
+  kg/lb a home: `users.unit` was in the schema from day one and never exposed. The new Units page
+  saves it to the account through the sync round trip (`unit` beside the mutations, the server
+  reporting it back on every sync) so the other phone follows; weights stay kilograms underneath,
+  converted at the edge on the steppers, squares, plates, charts, records and the weigh-in
+  (`lib/units.ts`). Pounds get their own steps (5 lb on a bar, 10 on a stack) and plates (45, 35,
+  25, 10, 5, 2.5 on a 45 or 35 lb bar), and a prescription written in kilograms lands on a pound
+  weight the plates make, so a premade programme's empty bar opens at 45 lb, not 44.1. Tests for
+  the conversions, the pound plates, the pound progression and the unit's trip through sync.
+
 ## 2026-09-18 07:38
 
 - **The exercise name stays on one line.** Hyperextensions (Back Extensions) wrapped under the

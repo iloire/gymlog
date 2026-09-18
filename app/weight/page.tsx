@@ -7,15 +7,18 @@ import { useState } from 'react'
 
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
+import { useUnit } from '@/components/use-unit'
 import { WeightChart } from '@/components/weight-chart'
 import { deleteRow } from '@/lib/db/write'
 import { formatDay, parseNumber } from '@/lib/format'
 import { bodyWeightSeries, today } from '@/lib/queries'
 import { recordBodyWeight } from '@/lib/sessions'
 import { bodyWeightId } from '@/lib/id'
+import { displayWeight, fromUnit } from '@/lib/units'
 
 export default function WeightPage() {
   const userId = useUserId()
+  const unit = useUnit()
   const [value, setValue] = useState('')
   const [date, setDate] = useState(today())
 
@@ -34,7 +37,7 @@ export default function WeightPage() {
     if (!userId) return
     const weight = parseNumber(value)
     if (weight === null || weight <= 0) return
-    await recordBodyWeight(userId, weight, date)
+    await recordBodyWeight(userId, fromUnit(weight, unit), date)
     setValue('')
   }
 
@@ -49,9 +52,13 @@ export default function WeightPage() {
 
         {latest ? (
           <p className="mt-2 text-sm text-ink-dim">
-            {latest.rolling.toFixed(1)} kg on a 7-day average
+            {displayWeight(latest.rolling, unit).toFixed(1)} {unit} on a 7-day average
             {series.length > 6 && change !== 0 && (
-              <> — {change > 0 ? 'up' : 'down'} {Math.abs(change).toFixed(1)} kg since you started</>
+              <>
+                {' '}
+                — {change > 0 ? 'up' : 'down'} {displayWeight(Math.abs(change), unit).toFixed(1)} {unit} since you
+                started
+              </>
             )}
           </p>
         ) : (
@@ -66,12 +73,12 @@ export default function WeightPage() {
         <form onSubmit={submit} className="mt-8 border-t border-line pt-5">
           <div className="flex gap-2">
             <label className="block flex-1">
-              <span className="mb-1 block text-xs text-ink-dim">Weight (kg)</span>
+              <span className="mb-1 block text-xs text-ink-dim">Weight ({unit})</span>
               <input
                 inputMode="decimal"
                 value={value}
                 onChange={(event) => setValue(event.target.value)}
-                placeholder={latest ? latest.weightKg.toFixed(1) : '75'}
+                placeholder={latest ? displayWeight(latest.weightKg, unit).toFixed(1) : unit === 'lb' ? '165' : '75'}
                 className="figure h-14 w-full rounded-md border border-line bg-surface px-3 text-2xl outline-none focus-visible:border-plate-blue-lift"
               />
             </label>
@@ -101,7 +108,7 @@ export default function WeightPage() {
               <li key={entry.measuredOn} className="flex items-center justify-between py-3">
                 <span className="text-sm text-ink-dim">{formatDay(entry.measuredOn)}</span>
                 <span className="flex items-center gap-4">
-                  <span className="figure text-lg">{entry.weightKg.toFixed(1)}</span>
+                  <span className="figure text-lg">{displayWeight(entry.weightKg, unit).toFixed(1)}</span>
                   <button
                     type="button"
                     aria-label={`Delete ${formatDay(entry.measuredOn)}`}

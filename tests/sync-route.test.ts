@@ -47,12 +47,12 @@ function mutation(table: SyncTable, row: Record<string, unknown>): Mutation {
 
 async function sync(
   mutations: Mutation[] = [],
-  { cursor = 0, globalCursor = 0 }: { cursor?: number; globalCursor?: number } = {},
+  { cursor = 0, globalCursor = 0, unit }: { cursor?: number; globalCursor?: number; unit?: string } = {},
 ): Promise<{ status: number; body: SyncResponse }> {
   const response = await POST(
     new Request('http://test/api/sync', {
       method: 'POST',
-      body: JSON.stringify({ cursor, globalCursor, clientId: 'device-1', mutations }),
+      body: JSON.stringify({ cursor, globalCursor, clientId: 'device-1', mutations, ...(unit ? { unit } : {}) }),
     }),
   )
   return { status: response.status, body: await response.json() }
@@ -321,5 +321,37 @@ describe('POST /api/sync — pull', () => {
     const before = Date.now()
     const { body } = await sync()
     expect(body.serverTime).toBeGreaterThanOrEqual(before)
+  })
+})
+
+describe('POST /api/sync — display unit', () => {
+  it('reports the account unit on every sync, kilograms until chosen', async () => {
+    const { body } = await sync()
+    expect(body.unit).toBe('kg')
+  })
+
+  it('stores a unit chosen on the device and reports it back to every device', async () => {
+    const chosen = await sync([], { unit: 'lb' })
+    expect(chosen.body.unit).toBe('lb')
+
+    const [user] = await db.select().from(schema.users).where(eq(schema.users.id, ALICE))
+    expect(user?.unit).toBe('lb')
+    // The unit is not a row: the sync counter does not move for it.
+    expect(user?.syncRev).toBe(0)
+
+    const other = await sync()
+    expect(other.body.unit).toBe('lb')
+  })
+
+  it('refuses a unit it does not know', async () => {
+    const { status } = await sync([], { unit: 'st' })
+    expect(status).toBe(400)
+  })
+
+  it("never lets one user's choice reach another", async () => {
+    await sync([], { unit: 'lb' })
+    state.userId = BOB
+    const { body } = await sync()
+    expect(body.unit).toBe('kg')
   })
 })

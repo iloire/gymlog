@@ -1,5 +1,6 @@
 import { isLowerBody } from '@/lib/body-parts'
 import type { LocalExercise } from '@/lib/db/dexie'
+import { fromUnit, type Unit } from '@/lib/units'
 
 /**
  * How weight moves for each kind of equipment. One constant of 2.5 kg served
@@ -9,22 +10,32 @@ import type { LocalExercise } from '@/lib/db/dexie'
  */
 type Equipped = Pick<LocalExercise, 'equipment' | 'primaryMuscles'>
 
-/** The smallest useful change on the weight stepper, in kg. */
-export function weightStepKg(exercise?: Equipped | null): number {
+/**
+ * The smallest useful change on the weight stepper, in the unit the stepper
+ * shows. A pound gym's plates and stacks are not kilogram ones converted, so
+ * each unit has its own table.
+ */
+export function weightStep(exercise?: Equipped | null, unit: Unit = 'kg'): number {
+  const lb = unit === 'lb'
   switch (exercise?.equipment) {
     case 'barbell':
     case 'e-z curl bar':
-      return 2.5 // the smallest pair of plates
+      return lb ? 5 : 2.5 // the smallest pair of plates
     case 'dumbbell':
-      return 2 // the next pair on the rack
+      return lb ? 5 : 2 // the next pair on the rack
     case 'kettlebells':
-      return 4 // the next bell
+      return lb ? 8 : 4 // the next bell
     case 'machine':
     case 'cable':
-      return 5 // one block on the stack
+      return lb ? 10 : 5 // one block on the stack
     default:
-      return 1 // a plate on a belt, a heavier band
+      return lb ? 2.5 : 1 // a plate on a belt, a heavier band
   }
+}
+
+/** `weightStep` as kilograms to store: one clean step in the unit, whatever the unit. */
+export function weightStepKg(exercise?: Equipped | null, unit: Unit = 'kg'): number {
+  return fromUnit(weightStep(exercise, unit), unit)
 }
 
 /**
@@ -32,11 +43,11 @@ export function weightStepKg(exercise?: Equipped | null): number {
  * a barbell lift of the legs, which grows faster than the arms and shoulders.
  * Null for a movement that carries no weight — progression there is a rep.
  */
-export function progressionIncrementKg(exercise?: Equipped | null): number | null {
+export function progressionIncrementKg(exercise?: Equipped | null, unit: Unit = 'kg'): number | null {
   const equipment = exercise?.equipment
   if (!equipment || equipment === 'body only' || equipment === 'bands' || equipment === 'other') return null
   if (equipment === 'foam roll' || equipment === 'exercise ball' || equipment === 'medicine ball') return null
-  const step = weightStepKg(exercise)
+  const step = weightStepKg(exercise, unit)
   return (equipment === 'barbell' || equipment === 'e-z curl bar') && isLowerBody(exercise) ? step * 2 : step
 }
 

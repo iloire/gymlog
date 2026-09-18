@@ -1,7 +1,9 @@
 'use client'
 
+import { useUnit } from '@/components/use-unit'
 import { formatDay } from '@/lib/format'
 import type { StrengthPoint } from '@/lib/progress'
+import { displayWeight } from '@/lib/units'
 
 /**
  * One lift over time: the top set's weight as the bold line, the estimated
@@ -9,6 +11,7 @@ import type { StrengthPoint } from '@/lib/progress'
  * one series each, no interaction, and it has to render with no network.
  */
 export function StrengthChart({ series, className = '' }: { series: StrengthPoint[]; className?: string }) {
+  const unit = useUnit()
   const width = 100
   const height = 34
   const inset = 1.5
@@ -17,6 +20,8 @@ export function StrengthChart({ series, className = '' }: { series: StrengthPoin
 
   const first = series[0]!
   const last = series.at(-1)!
+  const firstTop = displayWeight(first.topKg, unit)
+  const lastTop = displayWeight(last.topKg, unit)
   const values = series.flatMap((point) => [point.topKg, point.e1rmKg])
   const min = Math.min(...values)
   const max = Math.max(...values)
@@ -34,7 +39,7 @@ export function StrengthChart({ series, className = '' }: { series: StrengthPoin
         preserveAspectRatio="none"
         className="h-28 w-full"
         role="img"
-        aria-label={`Top set from ${first.topKg} kg on ${formatDay(first.performedAt)} to ${last.topKg} kg on ${formatDay(last.performedAt)}`}
+        aria-label={`Top set from ${firstTop} ${unit} on ${formatDay(first.performedAt)} to ${lastTop} ${unit} on ${formatDay(last.performedAt)}`}
       >
         <path
           d={path((point) => point.e1rmKg)}
@@ -62,8 +67,8 @@ export function StrengthChart({ series, className = '' }: { series: StrengthPoin
       <figcaption className="mt-1.5 flex justify-between text-xs text-ink-dim">
         <span>{formatDay(first.performedAt)}</span>
         <span>
-          <span className="figure text-ink">{first.topKg}</span> → <span className="figure text-ink">{last.topKg}</span> kg top set ·
-          e1RM <span className="figure">{Math.round(last.e1rmKg)}</span>
+          <span className="figure text-ink">{firstTop}</span> → <span className="figure text-ink">{lastTop}</span> {unit} top set ·
+          e1RM <span className="figure">{Math.round(displayWeight(last.e1rmKg, unit))}</span>
         </span>
         <span>{formatDay(last.performedAt)}</span>
       </figcaption>

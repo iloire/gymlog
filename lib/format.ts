@@ -1,3 +1,5 @@
+import { displayWeight, type Unit } from '@/lib/units'
+
 /**
  * Date formatting for server-rendered screens. Pinned to UTC so the server and
  * a hydrating client never disagree about which day a timestamp falls on.
@@ -24,11 +26,6 @@ export function formatAgo(epochMs: number | null, now = Date.now()): string | nu
   return formatDay(epochMs)
 }
 
-/** '4,250 kg'. Weights are stored in kg and shown as stored, to one decimal. */
-export function kg(value: number): string {
-  return `${Number(value.toFixed(1)).toLocaleString('en-GB')} kg`
-}
-
 /** '52 min' or '1 h 5 min'. */
 export function formatDuration(ms: number): string {
   const minutes = Math.round(ms / 60_000)
@@ -42,10 +39,16 @@ export function formatMinutes(seconds: number): string {
   return `${Number((seconds / 60).toFixed(1))} min`
 }
 
-/** One logged set: '8 min' when timed, '80×5' with a weight, '12 reps' without — a bodyweight set, not a 0 kg one. */
-export function formatSet(set: { weightKg: number | null; reps: number | null; durationSec?: number | null }): string {
+/**
+ * One logged set: '8 min' when timed, '80×5' with a weight in the unit, '12 reps'
+ * without — a bodyweight set, not a 0 kg one.
+ */
+export function formatSet(
+  set: { weightKg: number | null; reps: number | null; durationSec?: number | null },
+  unit: Unit = 'kg',
+): string {
   if (set.durationSec != null) return formatMinutes(set.durationSec)
-  return set.weightKg ? `${set.weightKg}×${set.reps ?? 0}` : `${set.reps ?? 0} reps`
+  return set.weightKg ? `${displayWeight(set.weightKg, unit)}×${set.reps ?? 0}` : `${set.reps ?? 0} reps`
 }
 
 /**

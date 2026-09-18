@@ -1,6 +1,8 @@
 'use client'
 
+import { useUnit } from '@/components/use-unit'
 import { formatDay } from '@/lib/format'
+import { displayWeight } from '@/lib/units'
 
 type Entry = { measuredOn: string; weightKg: number; rolling: number }
 
@@ -13,6 +15,7 @@ type Entry = { measuredOn: string; weightKg: number; rolling: number }
  * has to render with no network.
  */
 export function WeightChart({ series }: { series: Entry[] }) {
+  const unit = useUnit()
   const width = 100
   const height = 34
   // Inset so dots on the first and last day are not clipped by the SVG edge.
@@ -26,6 +29,7 @@ export function WeightChart({ series }: { series: Entry[] }) {
   const min = Math.min(...values)
   const max = Math.max(...values)
   const span = max - min || 1
+  const range = `${displayWeight(min, unit).toFixed(1)}–${displayWeight(max, unit).toFixed(1)} ${unit}`
 
   const x = (index: number) => inset + (index / Math.max(1, series.length - 1)) * (width - inset * 2)
   const y = (value: number) => inset + (1 - (value - min) / span) * (height - inset * 2)
@@ -41,7 +45,7 @@ export function WeightChart({ series }: { series: Entry[] }) {
         preserveAspectRatio="none"
         className="h-36 w-full"
         role="img"
-        aria-label={`Bodyweight from ${first} to ${last}, ${min.toFixed(1)} to ${max.toFixed(1)} kg`}
+        aria-label={`Bodyweight from ${first} to ${last}, ${range}`}
       >
         {series.map((entry, index) => (
           <circle
@@ -64,9 +68,7 @@ export function WeightChart({ series }: { series: Entry[] }) {
       </svg>
       <figcaption className="mt-1.5 flex justify-between text-xs text-ink-dim">
         <span>{first}</span>
-        <span>
-          {min.toFixed(1)}–{max.toFixed(1)} kg
-        </span>
+        <span>{range}</span>
         <span>{last}</span>
       </figcaption>
     </figure>

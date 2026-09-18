@@ -9,7 +9,7 @@
  * is a unit test.
  */
 import type { LocalSetLog } from '@/lib/db/dexie'
-import { kg } from '@/lib/format'
+import { formatWeight, tidyWeight, type Unit } from '@/lib/units'
 import { roundToStep } from '@/lib/weights'
 
 export type Suggestion = {
@@ -47,7 +47,8 @@ function allHit(sets: LocalSetLog[], reps: number): boolean {
  * deload rule); both are working sets only, in set order, as
  * `recentPerformances` returns them. `incrementKg` is what a hit adds, null
  * for a movement that carries no weight, where a hit adds a rep instead.
- * `stepKg` rounds a deload to a weight you can actually load.
+ * `stepKg` rounds a deload to a weight you can actually load. `unit` is only
+ * for the reason's wording; the weights themselves stay kilograms.
  */
 export function suggestNext({
   previous,
@@ -55,18 +56,24 @@ export function suggestNext({
   prescription,
   incrementKg,
   stepKg,
+  unit = 'kg',
 }: {
   previous: LocalSetLog[] | null
   before?: LocalSetLog[] | null
   prescription: Prescription
   incrementKg: number | null
   stepKg: number
+  unit?: Unit
 }): Suggestion {
+  const kg = (value: number) => formatWeight(value, unit)
   const last = (previous ?? []).filter(working)
   const { targetReps, targetRepsMax } = prescription
 
-  // Nothing to build on: the prescription is the plan.
-  if (last.length === 0) return { weightKg: prescription.targetWeightKg, reps: targetReps, reason: null }
+  // Nothing to build on: the prescription is the plan, on a weight the plates make.
+  if (last.length === 0) {
+    const target = prescription.targetWeightKg
+    return { weightKg: target === null ? null : tidyWeight(target, unit), reps: targetReps, reason: null }
+  }
 
   // A timed set, or a prescription with no rep target: repeat what you did.
   if (last.some((set) => set.durationSec != null) || targetReps === null) return NOTHING
@@ -82,7 +89,7 @@ export function suggestNext({
   if (max !== null) {
     if (allHit(last, max)) {
       if (!loaded) return { weightKg: weight || null, reps: max + 1, reason: `All ${sets}×${max} last time → try ${max + 1}` }
-      const next = weight + incrementKg
+      const next = tidyWeight(weight + incrementKg, unit)
       return { weightKg: next, reps: min, reason: `All ${sets}×${max} at ${kg(weight)} last time → ${kg(next)} from ${min}` }
     }
     if (allHit(last, min)) {
@@ -90,16 +97,16 @@ export function suggestNext({
       const reps = Math.min(max, lowest + 1)
       return { weightKg: weight || null, reps, reason: `${kg(weight)} again, aim for ${reps} on every set` }
     }
-    return missed(before, weight, min, stepKg, loaded)
+    return missed(before, weight, min, stepKg, loaded, kg)
   }
 
   if (allHit(last, min)) {
     if (!loaded) return { weightKg: weight || null, reps: min + 1, reason: `All ${sets}×${min} last time → try ${min + 1}` }
-    const next = weight + incrementKg
+    const next = tidyWeight(weight + incrementKg, unit)
     return { weightKg: next, reps: min, reason: `All ${sets}×${min} at ${kg(weight)} last time → ${kg(next)}` }
   }
 
-  return missed(before, weight, min, stepKg, loaded)
+  return missed(before, weight, min, stepKg, loaded, kg)
 }
 
 /**
@@ -112,6 +119,7 @@ function missed(
   reps: number,
   stepKg: number,
   loaded: boolean,
+  kg: (value: number) => string,
 ): Suggestion {
   if (!loaded) return { weightKg: weight || null, reps, reason: `Missed reps last time, go for ${reps} again` }
 
