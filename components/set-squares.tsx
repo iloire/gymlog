@@ -29,6 +29,7 @@ export function SetSquares({
   previousTopKg = null,
   previous = null,
   previousLabel = 'Last time',
+  justLoggedId = null,
   onSelect,
 }: {
   logs: LocalSetLog[]
@@ -39,6 +40,8 @@ export function SetSquares({
   previous?: LocalSetLog[] | null
   /** What to call the ghost row — 'Last time', 'Last time · 3 days ago'. */
   previousLabel?: string
+  /** The set just logged: its square plays the fill animation once. */
+  justLoggedId?: string | null
   onSelect: (id: string) => void
 }) {
   if (logs.length === 0) return null
@@ -88,7 +91,7 @@ export function SetSquares({
                 }
                 className={`flex h-12 w-full min-w-12 flex-col items-center justify-center rounded-sm px-2 ${
                   done
-                    ? `bg-plate-blue text-white ${beat ? 'outline-2 -outline-offset-2 outline-plate-red' : ''} ${active ? 'ring-2 ring-ink ring-offset-2 ring-offset-ground' : ''}`
+                    ? `bg-plate-blue text-white ${beat ? 'outline-2 -outline-offset-2 outline-plate-red' : ''} ${active ? 'ring-2 ring-ink ring-offset-2 ring-offset-ground' : ''} ${log.id === justLoggedId ? 'motion-safe:animate-[set-logged_400ms_ease-out]' : ''}`
                     : active
                       ? 'border-2 border-plate-blue-lift text-ink'
                       : 'border border-line text-ink-dim disabled:opacity-50'

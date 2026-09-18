@@ -232,6 +232,8 @@ function Session() {
     if (!activeSet || !userId) return
     await logSet(userId, activeSet, values)
     setLastLoggedId(activeSet.id)
+    // A short buzz says it landed, for a thumb that is not looking at the screen.
+    navigator.vibrate?.(30)
     // Back to the next set still to do.
     setSelectedId(null)
 
@@ -419,6 +421,7 @@ function Session() {
           previousTopKg={previousTopKg}
           previous={previous?.sets ?? null}
           previousLabel={previous ? `Last time · ${daysAgo(epochToDate(previous.performedAt))}` : 'Last time'}
+          justLoggedId={lastLoggedId}
           onSelect={(logId) => {
             setSelectedId(logId)
             setDraft(null)
@@ -522,7 +525,7 @@ function Session() {
             <button
               type="button"
               onClick={() => void completeSet()}
-              className="mt-3 h-14 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift"
+              className="mt-3 h-14 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-[background-color,transform] hover:bg-plate-blue-lift motion-safe:active:scale-[0.98]"
             >
               {timed && groupLogs.length === 1
                 ? `${activeSet.completedAt ? 'Update' : 'Log'} ${values.durationSec ? formatMinutes(values.durationSec) : 'time'}`

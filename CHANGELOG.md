@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-18 03:18
+
+- **Logging a set is felt as well as seen.** The phone buzzes briefly on Log set (it only
+  vibrated at the end of rest), the square just logged swells as it fills and settles
+  (`set-logged` keyframes, once, and never under reduced motion), and the Log button presses in.
+
 ## 2026-09-18 03:12
 
 - **The last set ends the workout.** After the last set there is no rest, but Finish sat as an
