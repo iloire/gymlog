@@ -21,11 +21,11 @@ const BODY_PART: Record<string, string> = {
   biceps: 'Arms',
   triceps: 'Arms',
   forearms: 'Arms',
-  abdominals: 'Core',
+  abdominals: 'Abs',
 }
 
 /** Every body part, in the order the library's chips and headers show them. */
-export const BODY_PARTS = ['Legs', 'Chest', 'Back', 'Shoulders', 'Arms', 'Core', 'Cardio'] as const
+export const BODY_PARTS = ['Legs', 'Chest', 'Back', 'Shoulders', 'Arms', 'Abs', 'Cardio'] as const
 
 /**
  * The body parts one exercise works, by its primary muscles — its first

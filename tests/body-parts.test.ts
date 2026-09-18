@@ -24,7 +24,7 @@ describe('bodyParts', () => {
       'Chest',
       'Arms',
     ])
-    expect(bodyParts([lift(['shoulders'], 3), lift(['abdominals'], 3)])).toEqual(['Shoulders', 'Core'])
+    expect(bodyParts([lift(['shoulders'], 3), lift(['abdominals'], 3)])).toEqual(['Shoulders', 'Abs'])
   })
 
   it('calls cardio cardio, and skips exercises with no muscles', () => {

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-18 10:02
+
+- **Search forgives plurals and knows body parts, and Core is Abs.** "leg raises" found the
+  three hamstring and quad raises and not Hanging Leg Raise or Flat Bench Lying Leg Raise, because
+  every search word had to appear as typed. A word is now tried as typed, then without its s or
+  es, and a body part's name counts as a word: "abs" lists every abs exercise. The Core chip held
+  only the library's abdominals, so it is called Abs, in the library, the workout editor's picker
+  and the body parts a session is tagged with.
+
 ## 2026-09-18 09:50
 
 - **A workout continues where you were.** Opening a workout again, from Today's Continue or after

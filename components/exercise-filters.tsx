@@ -55,6 +55,17 @@ export const NO_FILTER: ExerciseFilter = {
  * what you have logged (most recent first), then the rest of the library
  * alphabetically — 873 movements from 3/4 Sit-Up is no way to open a library.
  */
+/**
+ * A search word as typed, then without a plural's s or es, so "leg raises"
+ * finds "Hanging Leg Raise" and "flyes" finds "Dumbbell Flye"; the other way
+ * round, "crunch" is simply inside "Crunches". Short stems are left out —
+ * "abs" must not find every Cable exercise through "ab".
+ */
+function forms(word: string): string[] {
+  const stems = [word.replace(/s$/, ''), word.replace(/es$/, '')].filter((stem) => stem.length >= 3)
+  return [...new Set([word, ...stems])]
+}
+
 export function filterExercises(
   exercises: LocalExercise[],
   filter: ExerciseFilter,
@@ -67,7 +78,7 @@ export function filterExercises(
   const recency = (exercise: LocalExercise) => rank.lastDone.get(exercise.id) ?? 0
 
   // Every word must appear, in any order: "incline press" finds "Barbell Incline Bench Press".
-  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean).map(forms)
   return exercises
     .filter((exercise) => exercise.deletedAt === null)
     .filter((exercise) => !filter.favoritesOnly || favorites.has(exercise.id))
@@ -80,8 +91,10 @@ export function filterExercises(
       }),
     )
     .filter((exercise) => {
+      // A body part counts as a word of the name: "abs" finds every Abs exercise.
       const name = exercise.name.toLowerCase()
-      return words.every((word) => name.includes(word))
+      const parts = bodyPartsOf(exercise).map((part) => part.toLowerCase())
+      return words.every((word) => word.some((form) => name.includes(form) || parts.includes(form)))
     })
     .sort((a, b) => {
       if (tier(a) !== tier(b)) return tier(a) - tier(b)

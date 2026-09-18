@@ -53,6 +53,19 @@ describe('filterExercises', () => {
     expect(names({ level: ['expert'] })).toEqual(['Barbell Row'])
   })
 
+  it('finds a plural by its singular and the other way round', () => {
+    expect(names({}, 'flye')).toEqual(['Dumbbell Flyes'])
+    expect(names({}, 'bench presses')).toEqual(['Barbell Bench Press'])
+    expect(names({}, 'pushup')).toEqual(['Pushups'])
+    // A stem too short to mean anything is not tried: "abs" is not "ab", which is in Cable.
+    expect(names({}, 'abs')).toEqual([])
+  })
+
+  it('finds exercises by their body part', () => {
+    expect(names({}, 'back')).toEqual(['Barbell Row'])
+    expect(names({}, 'chest press')).toEqual(['Barbell Bench Press'])
+  })
+
   it('finds every word of a search in any order', () => {
     expect(names({}, 'press bench')).toEqual(['Barbell Bench Press'])
     expect(names({}, '  barbell   row ')).toEqual(['Barbell Row'])
