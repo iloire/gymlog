@@ -174,6 +174,11 @@ export function openApiSpec(origin: string) {
             weightKg: nullable('number'),
             reps: nullable('integer'),
             durationSec: { ...nullable('integer'), description: 'Cardio: how long it lasted. Null for weight × reps sets.' },
+            effort: {
+              ...nullable('string'),
+              enum: ['easy', 'hard', 'failed', null],
+              description: 'How the set felt, if it was rated. A failed set counts as a miss for progression.',
+            },
             warmup: { type: 'boolean' },
             targetReps: { ...nullable('integer'), description: 'Prescribed reps (bottom of the range).' },
             targetRepsMax: { ...nullable('integer'), description: 'Top of a rep range such as 8–12.' },

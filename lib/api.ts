@@ -279,6 +279,7 @@ export async function apiHistory(userId: string, query: z.infer<typeof historyQu
             weightKg: set.weightKg,
             reps: set.reps,
             durationSec: set.durationSec,
+            effort: set.effort ?? null,
             warmup: set.isWarmup,
             targetReps: set.targetReps,
             targetRepsMax: set.targetRepsMax,

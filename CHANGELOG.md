@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-18 02:55
+
+- **One tap of effort instead of RPE.** After logging a set, the rest screen asks how it felt:
+  Easy, Hard or Failed (`components/effort-chips.tsx`), and a done set opened to fix it offers
+  the same. That is all the progression needs — a failed set is a miss even when the reps were
+  there — and one tap gets entered where a number from one to ten would not. New `effort`
+  column on `set_logs` (migration `0005_set_effort.sql`; run `db:migrate` and `db:migrate:prod`
+  before deploying, or the server refuses rated sets), carried by backups and `/api/v1/history`.
+
 ## 2026-09-18 02:40
 
 - **The weight input works with chalk on your hands.** Holding − or + repeats it (an empty bar

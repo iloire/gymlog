@@ -105,6 +105,7 @@ const rowSchemas = {
     weightKg: num,
     reps: num,
     durationSec: num,
+    effort: z.enum(['easy', 'hard', 'failed']).nullable().default(null),
     isWarmup: z.boolean().default(false),
     completedAt: num,
     performedAt: z.number(),

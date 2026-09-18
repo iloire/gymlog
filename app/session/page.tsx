@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
+import { EffortChips } from '@/components/effort-chips'
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseNote } from '@/components/exercise-note'
 import { ExerciseFrames } from '@/components/exercise-frames'
@@ -64,6 +65,9 @@ function Session() {
   // Set by finishing the workout here, so the summary is the reward for ending
   // one rather than something every visit to a past session has to scroll past.
   const [finished, setFinished] = useState(false)
+  // The set just logged, so the rest can ask how it felt — even once the
+  // screen has moved on to the next exercise.
+  const [lastLoggedId, setLastLoggedId] = useState<string | null>(null)
 
   useWakeLock()
   // Mounted once for the whole screen: the takeover and the bar both draw it.
@@ -222,6 +226,7 @@ function Session() {
   async function completeSet() {
     if (!activeSet || !userId) return
     await logSet(userId, activeSet, values)
+    setLastLoggedId(activeSet.id)
     // Back to the next set still to do.
     setSelectedId(null)
 
@@ -266,6 +271,7 @@ function Session() {
     : null
 
   const allDone = data.logs.every((log) => log.completedAt !== null)
+  const lastLogged = data.logs.find((log) => log.id === lastLoggedId && log.completedAt !== null) ?? null
   const exerciseName = groupLogs[0]?.exerciseName ?? 'Workout'
   const nameAt = (index: number) =>
     data.logs.find((log) => log.position === positions[index])?.exerciseName
@@ -406,7 +412,9 @@ function Session() {
                 Set {activeSet.setIndex} · <span className="figure">{nextSet}</span>
               </>
             }
-          />
+          >
+            {lastLogged && <EffortChips userId={userId} log={lastLogged} className="mt-5" />}
+          </RestTakeover>
         ) : activeSet ? (
           <section className="mt-4">
             {/* Stacked, not side by side: two steppers across a phone leave ~58px for
@@ -483,6 +491,10 @@ function Session() {
                   ? `Update set ${activeSet.setIndex}`
                   : `Log set ${activeSet.setIndex} · ${nextSet}`}
             </button>
+
+            {activeSet.completedAt !== null && !timed && (
+              <EffortChips userId={userId} log={activeSet} className="mt-4" />
+            )}
 
             {groupLogs[0] && <ExerciseNote key={groupLogs[0].id} userId={userId} log={groupLogs[0]} />}
           </section>

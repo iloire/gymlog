@@ -296,6 +296,8 @@ export const setLogs = sqliteTable(
     reps: integer('reps'),
     /** How long a timed set (cardio) lasted; null for weight × reps sets. */
     durationSec: integer('duration_sec'),
+    /** How the set felt, one tap after logging it: easy, hard, or failed (a miss for progression). */
+    effort: text('effort', { enum: ['easy', 'hard', 'failed'] }),
     isWarmup: integer('is_warmup', { mode: 'boolean' }).notNull().default(false),
     completedAt: integer('completed_at'),
 

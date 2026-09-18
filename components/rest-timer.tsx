@@ -161,9 +161,12 @@ export function RestTakeover({
   rest,
   remaining,
   next,
+  children,
 }: RestState & {
   /** What comes after the rest — 'Set 3 · 77.5 kg × 10'. */
   next: React.ReactNode
+  /** About the set just done — how it felt — between the clock and what is next. */
+  children?: React.ReactNode
 }) {
   const userId = useUserId()
   if (!rest || remaining === 0 || !userId) return null
@@ -187,6 +190,8 @@ export function RestTakeover({
           style={{ width: `${progress * 100}%` }}
         />
       </div>
+
+      {children}
 
       <p className="mt-5 text-sm text-ink-dim">Next</p>
       <p className="mt-0.5 text-[17px]">{next}</p>

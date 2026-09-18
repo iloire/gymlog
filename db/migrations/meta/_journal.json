@@ -36,6 +36,13 @@
       "when": 1789547235418,
       "tag": "0004_cardio_duration",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1789693690091,
+      "tag": "0005_set_effort",
+      "breakpoints": true
     }
   ]
 }

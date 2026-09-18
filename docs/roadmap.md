@@ -189,9 +189,11 @@ do: sessions done versus planned, and weekly volume.
 
 ### 3.5 Notes and effort — S
 
-Per-session and per-set notes (the `notes` columns exist; no UI writes them), and an optional
-**RPE** per set — a new column, and a better progression signal than reps alone once past the
-beginner stage.
+Per-session and per-set notes (the `notes` columns exist; the exercise note on the session
+screen writes one), and ~~an optional **RPE** per set — a new column, and a better progression
+signal than reps alone once past the beginner stage.~~ ✅ Shipped 2026-09-18 as three chips,
+easy / hard / failed (`setLogs.effort`), asked on the rest screen after each set; a failed set
+is a miss for progression (§1.2). Three taps' worth of choice, not ten.
 
 ---
 
