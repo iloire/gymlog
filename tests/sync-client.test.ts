@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { destroyDb, getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
-import { clientId, now, sync } from '@/lib/sync/client'
+import { clearRejections, clientId, now, rejections, sync } from '@/lib/sync/client'
 import { MAX_PUSH, mutationKey, type SyncRequest, type SyncResponse } from '@/lib/sync/types'
 
 const USER = 'user-1'
@@ -117,6 +117,31 @@ describe('sync — push', () => {
 
     expect(result).toMatchObject({ ok: true, pushed: 1 })
     expect(await getDb(USER).outbox.count()).toBe(0)
+  })
+
+  it('keeps a record of what was refused until it is dismissed', async () => {
+    await writeRow(USER, 'workoutTemplates', { id: 't1', name: 'A', archivedAt: null })
+    await writeRow(USER, 'bodyWeights', { id: 'bw-1', measuredOn: '2026-09-15', weightKg: 80 })
+    server((request) =>
+      response({
+        applied: [mutationKey('bodyWeights', 'bw-1')],
+        rejected: [
+          {
+            mutationId: mutationKey('workoutTemplates', 't1'),
+            table: 'workoutTemplates',
+            rowId: 't1',
+            reason: 'stale',
+            winner: { id: 't1', updatedAt: request.mutations[0]?.row.updatedAt as number },
+          },
+        ],
+      }),
+    )
+
+    await sync(USER)
+
+    expect(await rejections(USER)).toMatchObject([{ table: 'workoutTemplates', rowId: 't1', reason: 'stale' }])
+    await clearRejections(USER)
+    expect(await rejections(USER)).toEqual([])
   })
 
   it('drops rejected mutations too, so they are not retried forever', async () => {

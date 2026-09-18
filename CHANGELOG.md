@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-18 03:45
+
+- **Sign out cannot silently lose a workout.** Signing out wiped the local database without
+  looking at the outbox, so doing it in a basement after logging destroyed every unsynced set.
+  It now syncs first when online and, with changes still waiting, stops: "3 changes have not
+  synced yet", Wait or Sign out anyway.
+- **What the server refused is said, not swallowed.** A set overwritten by another device, or
+  a row the server could not store, was dropped from the outbox in silence. The sync client
+  now keeps a record (`rejections()` in `lib/sync/client.ts`) and the badge on Today shows
+  "1 change was overwritten by another device" or "1 change could not be saved" until dismissed.
+
 ## 2026-09-18 03:32
 
 - **Weigh in from Today.** The weight log moved from a tab to Profile → Weight log, two taps

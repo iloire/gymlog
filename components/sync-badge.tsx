@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 
 import { useSync } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
+import { clearRejections, rejections } from '@/lib/sync/client'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -11,7 +12,10 @@ const DAY_MS = 24 * 60 * 60 * 1000
  * The "ready for the gym" check: is everything I have logged actually on the
  * server, and how stale is my copy of the plan? Shows nothing when all is
  * well — a "Synced just now" line on every load is a row of reassurance
- * nobody reads — and a yellow bar only when something needs doing.
+ * nobody reads — and a yellow bar only when something needs doing. Under it,
+ * what the server refused since you last looked: a set another phone
+ * overwrote, or a row it could not store, which the outbox has already let
+ * go of and would otherwise never mention.
  */
 export function SyncBadge() {
   const { userId, status, lastSyncAt, syncNow } = useSync()
@@ -22,33 +26,55 @@ export function SyncBadge() {
     async () => ({
       pending: userId ? await getDb(userId).outbox.count() : 0,
       stale: !lastSyncAt || Date.now() - lastSyncAt > DAY_MS,
+      refused: userId ? await rejections(userId) : [],
     }),
     [userId, lastSyncAt],
   )
 
   if (!userId || !state) return null
 
-  const { pending, stale } = state
-
-  if (pending === 0 && !stale && status !== 'offline') return null
+  const { pending, stale, refused } = state
+  const overwritten = refused.filter((r) => r.reason === 'stale').length
+  const unsaved = refused.length - overwritten
 
   const message =
     pending > 0
       ? `${pending} ${pending === 1 ? 'change' : 'changes'} waiting to sync`
       : status === 'offline'
         ? 'Offline — your log is saved on this phone'
-        : 'Your copy of the plan is over a day old'
+        : stale
+          ? 'Your copy of the plan is over a day old'
+          : null
+
+  if (!message && refused.length === 0) return null
 
   return (
-    <button
-      type="button"
-      onClick={() => void syncNow()}
-      className="mt-6 flex w-full items-center justify-between gap-3 border-l-2 border-plate-yellow bg-surface px-4 py-3 text-left text-sm"
-    >
-      <span>{message}</span>
-      <span className="shrink-0 text-ink-dim">
-        {status === 'syncing' ? 'Syncing…' : 'Sync now'}
-      </span>
-    </button>
+    <div className="mt-6">
+      {message && (
+        <button
+          type="button"
+          onClick={() => void syncNow()}
+          className="flex w-full items-center justify-between gap-3 border-l-2 border-plate-yellow bg-surface px-4 py-3 text-left text-sm"
+        >
+          <span>{message}</span>
+          <span className="shrink-0 text-ink-dim">{status === 'syncing' ? 'Syncing…' : 'Sync now'}</span>
+        </button>
+      )}
+      {refused.length > 0 && (
+        <div
+          role="status"
+          className={`flex items-center justify-between gap-3 border-l-2 border-line bg-surface px-4 py-3 text-sm ${message ? 'mt-px' : ''}`}
+        >
+          <span>
+            {overwritten > 0 && `${overwritten} ${overwritten === 1 ? 'change was' : 'changes were'} overwritten by another device`}
+            {overwritten > 0 && unsaved > 0 && ' · '}
+            {unsaved > 0 && `${unsaved} ${unsaved === 1 ? 'change' : 'changes'} could not be saved`}
+          </span>
+          <button type="button" onClick={() => void clearRejections(userId)} className="shrink-0 text-ink-dim">
+            Dismiss
+          </button>
+        </div>
+      )}
+    </div>
   )
 }

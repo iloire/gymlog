@@ -93,7 +93,10 @@ intended weeks, suggest the next stage. A nudge, never an automatic switch.
 
 Everything here is about the moment of use: one hand, no signal, between sets.
 
-### 2.1 Don't lose unsynced sets on sign-out — S · **data loss**
+### ~~2.1 Don't lose unsynced sets on sign-out — S · **data loss**~~ ✅
+
+**Shipped 2026-09-18:** `components/sign-out-button.tsx` syncs first when online and, with
+changes still waiting, asks — Wait, or Sign out anyway.
 
 Signing out deletes the local database (`components/sign-out-button.tsx`) without checking the
 outbox. Signing out in a basement after logging a workout destroys every set that has not synced.
@@ -268,7 +271,11 @@ the technical starting point; the hard parts are consent, invites and revocation
 
 ## 6. Engineering and operations
 
-### 6.1 Surface sync problems to the user — S
+### ~~6.1 Surface sync problems to the user — S~~ ✅
+
+**Shipped 2026-09-18:** the sync client records what the server refused (`rejections()` in
+`lib/sync/client.ts`) and the badge on Today says so until dismissed. Still open: keeping an
+invalid row visibly marked until it is resolved.
 
 The server now rejects a row it cannot store as `invalid`, and the client drops every rejection
 from the outbox — silently. The plan's promised *"1 change was overwritten by another device"*

@@ -7,6 +7,7 @@ import {
   SYNC_TABLES,
   mutationKey,
   type Mutation,
+  type RejectedMutation,
   type SyncResponse,
   type SyncRow,
   type SyncTable,
@@ -17,6 +18,17 @@ const META_GLOBAL_CURSOR = 'globalCursor'
 const META_CLIENT_ID = 'clientId'
 const META_CLOCK_OFFSET = 'clockOffset'
 const META_LAST_SYNC = 'lastSyncAt'
+const META_REJECTIONS = 'rejections'
+
+/** How many rejections to keep for the badge; older ones roll off. */
+const MAX_REJECTIONS = 20
+
+/**
+ * A change the server refused, kept so the badge can say so. `stale` means
+ * another device wrote the same row later and won; `invalid` and `forbidden`
+ * mean the row can never sync as it is, and the local copy still shows it.
+ */
+export type Rejection = { table: SyncTable; rowId: string; reason: RejectedMutation['reason']; at: number }
 
 async function meta<T>(db: GymlogDexie, key: string, fallback: T): Promise<T> {
   const row = await db.meta.get(key)
@@ -134,6 +146,15 @@ async function run(userId: string): Promise<SyncResult> {
       .filter((row) => row.userId === null)
       .reduce((max, row) => Math.max(max, Number(row.updatedAt) || 0), 0)
 
+    // What was refused stays on record until the badge is dismissed: a set
+    // overwritten by another phone, or a row the server cannot store, must
+    // not vanish from the outbox in silence.
+    if (result.rejected.length) {
+      const kept = await meta<Rejection[]>(db, META_REJECTIONS, [])
+      const fresh = result.rejected.map((r) => ({ table: r.table, rowId: r.rowId, reason: r.reason, at: Date.now() }))
+      await setMeta(db, META_REJECTIONS, [...kept, ...fresh].slice(-MAX_REJECTIONS))
+    }
+
     await setMeta(db, META_CURSOR, result.cursor)
     if (globalMax) await setMeta(db, META_GLOBAL_CURSOR, globalMax)
     await setMeta(db, META_CLOCK_OFFSET, result.serverTime - Date.now())
@@ -154,4 +175,13 @@ export async function lastSyncAt(userId: string): Promise<number | null> {
 
 export async function pendingCount(userId: string): Promise<number> {
   return getDb(userId).outbox.count()
+}
+
+/** Changes the server refused since the badge was last dismissed, oldest first. */
+export async function rejections(userId: string): Promise<Rejection[]> {
+  return meta<Rejection[]>(getDb(userId), META_REJECTIONS, [])
+}
+
+export async function clearRejections(userId: string): Promise<void> {
+  await getDb(userId).meta.delete(META_REJECTIONS)
 }
