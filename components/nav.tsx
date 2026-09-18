@@ -4,7 +4,8 @@ import { Dumbbell, History, Library, ListChecks, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import { RestTimer } from '@/components/rest-timer'
+import { OpenWorkoutBar } from '@/components/open-workout-bar'
+import { RestBar, useRest } from '@/components/rest-timer'
 
 const items = [
   { href: '/', label: 'Today', icon: Dumbbell },
@@ -26,14 +27,17 @@ const parents: Record<string, string> = {
 export function Nav({ children }: { children?: React.ReactNode }) {
   const path = usePathname()
   const pathname = parents[path] ?? path
+  const rest = useRest()
+  const resting = rest.rest !== null && rest.remaining > 0
 
   return (
     // A rest started on the session screen keeps counting above the tabs, so
-    // checking an exercise or the week mid-rest does not lose the clock.
+    // checking an exercise or the week mid-rest does not lose the clock; with
+    // no rest running, the workout under way keeps its own way back here.
     // `children` is a screen's own bar for the same spot, such as an undo toast.
     <div className="sticky bottom-0 z-10">
       {children}
-      <RestTimer link />
+      {resting ? <RestBar {...rest} link /> : path !== '/' && <OpenWorkoutBar />}
       <nav className="border-t border-line bg-ground/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
         <ul className="mx-auto flex max-w-lg">
           {items.map(({ href, label, icon: Icon }) => {

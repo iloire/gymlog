@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 03:25
+
+- **The open workout follows you to every tab.** Like a player's now-playing bar: "Full Body A
+  · Squat, set 2 of 3 · Continue" sits above the tabs on every screen but Today while a workout
+  started today is unfinished (`components/open-workout-bar.tsx`). Checking an exercise or the
+  week mid-workout no longer loses the way back. While a rest runs, the rest bar takes the spot,
+  as it already did.
+
 ## 2026-09-18 03:18
 
 - **Logging a set is felt as well as seen.** The phone buzzes briefly on Log set (it only
