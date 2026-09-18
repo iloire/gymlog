@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 07:16
+
+- **Skip a set.** A set you were not going to do stayed pending until Finish asked about it.
+  Under Log set there is now "Skip set N": the set leaves the row, so Finish is the next tap
+  once the rest are logged, and a "Set 2 skipped · Undo" bar brings it back for six seconds
+  (`restoreSet()` in `lib/sessions.ts`). Skipped sets stay skipped when the workout is opened
+  again, like a removed exercise.
+
 ## 2026-09-18 07:15
 
 - **One more set mid-workout.** The template said three and there was nothing to tap for a

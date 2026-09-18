@@ -195,6 +195,11 @@ export async function skipSet(userId: string, log: LocalSetLog): Promise<void> {
   if (left === 0 && (await currentRest(userId))?.sessionId === log.sessionId) await clearRest(userId)
 }
 
+/** The Undo of skipSet(): the set is back, still to do. */
+export async function restoreSet(userId: string, id: string): Promise<void> {
+  await writeRow(userId, 'setLogs', { id, deletedAt: null })
+}
+
 /**
  * Add an exercise to a session that is already under way — the stair machine
  * you warmed up on, which is not in the workout. It goes last, as one timed

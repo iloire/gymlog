@@ -18,6 +18,7 @@ import {
   removeFromSession,
   reopenSession,
   rescheduleSession,
+  restoreSet,
   skipSet,
   startSession,
   unlogSet,
@@ -342,6 +343,18 @@ describe('skipSet', () => {
     expect((await getDb(USER).setLogs.get(second!.id))?.deletedAt).toBeTypeOf('number')
     expect(await currentRest(USER)).not.toBeNull()
     expect(activeSet(await logsFor(id).then((logs) => logs.filter((log) => log.deletedAt === null)), null)?.setIndex).toBe(3)
+  })
+
+  it('comes back on Undo, still to do, and stays skipped when the workout is opened again', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [, second] = await logsFor(id)
+    await skipSet(USER, second!)
+
+    await startSession(USER, 'tpl', null, DATE)
+    expect((await getDb(USER).setLogs.get(second!.id))?.deletedAt).toBeTypeOf('number')
+
+    await restoreSet(USER, second!.id)
+    expect(await getDb(USER).setLogs.get(second!.id)).toMatchObject({ deletedAt: null, completedAt: null })
   })
 
   it('ends the rest once the skipped set was the last one to do', async () => {

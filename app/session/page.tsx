@@ -36,6 +36,7 @@ import {
   logSet,
   removeFromSession,
   reopenSession,
+  restoreSet,
   skipSet,
   unlogSet,
 } from '@/lib/sessions'
@@ -73,7 +74,7 @@ function Session() {
   // one rather than something every visit to a past session has to scroll past.
   const [finished, setFinished] = useState(false)
   const [overview, setOverview] = useState(false)
-  // The one-tap change on offer to take back for six seconds — a set added.
+  // The one-tap change on offer to take back for six seconds — a set added or skipped.
   const [undoable, setUndoable] = useState<{ key: number; message: string; onUndo: () => void } | null>(null)
   const dismissUndoable = useCallback(() => setUndoable(null), [])
   const undoCount = useRef(0)
@@ -266,6 +267,23 @@ function Session() {
   }
   // The set to take back from the menu: the last one logged for this exercise.
   const lastDone = groupLogs.filter((log) => log.completedAt !== null).at(-1)
+
+  // A set you are not going to do, out of the way of Finish. Undo brings it back.
+  async function skipOneSet(log: LocalSetLog) {
+    if (!userId) return
+    await skipSet(userId, log)
+    setSelectedId(null)
+    setDraft(null)
+    undoCount.current += 1
+    setUndoable({
+      key: undoCount.current,
+      message: `Set ${log.setIndex} skipped`,
+      onUndo: () => {
+        setUndoable(null)
+        void restoreSet(userId, log.id)
+      },
+    })
+  }
 
   // One more set than the template said. Undo takes it out again while the
   // bar shows, unless it has been logged in the meantime — then it stands.
@@ -581,9 +599,11 @@ function Session() {
               <EffortChips userId={userId} log={activeSet} className="mt-4" />
             )}
 
-            {/* A logged set picked to fix can also be taken back altogether:
-                the square goes hollow and the set is there to do again. */}
-            {activeSet.completedAt !== null && (
+            {/* One quiet line under the button. A logged set picked to fix can
+                be taken back altogether: the square goes hollow and the set is
+                there to do again. A set still to do can be skipped: it leaves
+                the row, so Finish does not ask about it, with Undo on offer. */}
+            {activeSet.completedAt !== null ? (
               <button
                 type="button"
                 onClick={() => void undoSet(activeSet)}
@@ -591,6 +611,16 @@ function Session() {
               >
                 Clear set {activeSet.setIndex}
               </button>
+            ) : (
+              data.session.completedAt === null && (
+                <button
+                  type="button"
+                  onClick={() => void skipOneSet(activeSet)}
+                  className="mt-3 h-11 w-full rounded-md text-sm text-ink-dim"
+                >
+                  Skip set {activeSet.setIndex}
+                </button>
+              )
             )}
 
             {groupLogs[0] && <ExerciseNote key={groupLogs[0].id} userId={userId} log={groupLogs[0]} />}
