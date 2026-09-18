@@ -411,22 +411,29 @@ function Session() {
       >
         {/* The photo runs the full width, cropped wide: a landscape strip of the
             movement reads far bigger than a thumbnail beside the name, and costs
-            about the same height. Its height follows the screen, so a short phone
-            gets a letterbox that keeps Log set above the fold and a tall one shows
-            the frame nearer whole; the width never gives, only the crop. Tapping
-            it opens the cues and instructions without leaving. */}
+            about the same height. It is the one flex child that grows, so its
+            height is whatever the screen has left once the name, the squares, the
+            steppers and Log set have theirs: a short phone gets a letterbox that
+            keeps Log set above the fold, a tall one nearer the whole frame, and
+            spare height beyond the cap pools above Prev and Next as before. No
+            viewport arithmetic to keep right; the width never gives, only the
+            crop. Tapping it opens the cues and instructions without leaving. */}
         {exercise?.images?.length ? (
-          <button
-            type="button"
-            onClick={() => setViewingExercise(true)}
-            aria-label={`About ${exerciseName}`}
-            className="relative block w-full"
-          >
-            <ExerciseFrames exercise={exercise} className="h-[clamp(6rem,24dvh,15rem)] w-full" />
-            <span className="absolute right-1.5 bottom-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-ground/70 text-ink">
-              <Info size={13} aria-hidden />
-            </span>
-          </button>
+          // The div does the sizing; the button covers it, because a percentage
+          // height inside a flexed button resolves to nothing.
+          <div className="relative max-h-60 min-h-20 w-full flex-1">
+            <button
+              type="button"
+              onClick={() => setViewingExercise(true)}
+              aria-label={`About ${exerciseName}`}
+              className="absolute inset-0 block"
+            >
+              <ExerciseFrames exercise={exercise} className="h-full w-full" />
+              <span className="absolute right-1.5 bottom-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-ground/70 text-ink">
+                <Info size={13} aria-hidden />
+              </span>
+            </button>
+          </div>
         ) : null}
 
         <div className="mt-3 flex items-start gap-3">
@@ -707,8 +714,10 @@ function SessionLoading() {
         <Placeholder className="h-4 w-24" />
       </header>
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-3 pb-8">
-        <Placeholder className="h-[clamp(6rem,24dvh,15rem)] w-full" />
+        <Placeholder className="max-h-60 min-h-20 w-full flex-1" />
         <Placeholder className="mt-3 h-8 w-3/4" />
+        {/* The controls' share of the height, so the photo lands at the size it keeps. */}
+        <div className="h-96" />
       </main>
     </div>
   )

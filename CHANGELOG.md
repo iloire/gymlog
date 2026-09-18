@@ -8,6 +8,16 @@
   tree is dirty, `release` drops it after the push. An agent that finds it held starts in a
   worktree instead. The flow is in CLAUDE.md, "Parallel work".
 
+||||||| parent of d655fff (feat: size the exercise photo from the height the controls leave - a share of the viewport is never right on both a short phone and a tall one: 24dvh was a 203px photo on a 390×844 with slack still pooling above Next, and a 136px one on a 320×568 that pushed Log set below the fold. The photo is now the one flex child of the screen that grows (flex-1 between min-h-20 and max-h-60): the name, the squares, the steppers, Log set and the Prev and Next row take what they need and the photo gets the rest, so the tall phone shows a 223px frame with Log set above the fold and the short one a 5rem letterbox with Log set back on the first screen. No viewport arithmetic to keep right as the controls change. A div does the sizing with the button absolute over it, since a percentage height inside a flexed button resolves to nothing. The crop sits at 35% from the top rather than 40%, because the letterbox cut heads. The loading skeleton reserves the controls' height so the placeholder lands where the photo will)
+## 2026-09-18 07:27
+
+- **The photo takes the height the controls leave.** Its height was a share of the screen, which
+  is never right on both a short phone and a tall one. It is now the one part of the screen that
+  grows: the name, the squares, the steppers, Log set and the Prev and Next row take what they
+  need, and the photo gets the rest, between a 5rem letterbox and a 15rem cap. On a 390 × 844
+  phone that is a 223px photo with Log set well above the fold; on a 320 × 568 it is the
+  letterbox, cropped a little higher so heads stay in.
+
 ## 2026-09-18 07:25
 
 - **The exercise photo runs the full width.** It was a thumbnail beside the name, capped at
