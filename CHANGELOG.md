@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 09:33
+
+- **The exercise note is there while you rest.** The rest is when there is time to write how the
+  set went, and Add a note was only offered once the clock had gone: it sat inside the steppers,
+  which the rest takeover replaces. The note now sits under whichever block the screen shows, the
+  clock, the Finish button or the steppers, and stays mounted across the switch, so a note begun
+  mid-rest survives the rest ending under it.
+
 ## 2026-09-18 09:15
 
 - **Change an exercise's rest from the rest screen.** The moment you know 90 s is not enough for

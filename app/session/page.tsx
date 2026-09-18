@@ -633,12 +633,16 @@ function Session() {
                 </button>
               )
             )}
-
-            {groupLogs[0] && <ExerciseNote key={groupLogs[0].id} userId={userId} log={groupLogs[0]} />}
           </section>
         ) : (
           <p className="mt-8 text-ink-dim">This workout has no exercises yet.</p>
         )}
+
+        {/* Under the clock, the Finish button and the steppers alike: the rest is
+            when there is time to write how the set went, and the note was only
+            offered once the clock had gone. It stays mounted across the switch, so
+            a note begun mid-rest survives the rest ending under it. */}
+        {groupLogs[0] && <ExerciseNote key={groupLogs[0].id} userId={userId} log={groupLogs[0]} />}
 
         {/* The way between exercises is the swipe and the sheet behind the
             workout's name in the header; no Previous / Next row, so the height
