@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-18 09:15
+
+- **The sync badge says when the server refused the push.** A failed push left the badge on
+  "43 changes waiting to sync · Sync now", and tapping it did the same thing again with nothing
+  to show for it, so a server that could not take the rows looked like a flaky connection. When
+  the last attempt failed the badge now reads "· the server could not take them" and offers Try
+  again. Found because production was one migration behind: `set_logs.effort` existed in the code
+  and not in the database, so every sync returned 500 until `npm run db:migrate:prod` ran.
+
 ## 2026-09-18 10:02
 
 - **Search forgives plurals and knows body parts, and Core is Abs.** "leg raises" found the

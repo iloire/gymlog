@@ -37,9 +37,14 @@ export function SyncBadge() {
   const overwritten = refused.filter((r) => r.reason === 'stale').length
   const unsaved = refused.length - overwritten
 
+  // A push the server could not take is not "waiting": tapping Sync now again
+  // changes nothing, and the badge has to say so or it reads as a flaky link.
+  const waiting = `${pending} ${pending === 1 ? 'change' : 'changes'} waiting to sync`
   const message =
     pending > 0
-      ? `${pending} ${pending === 1 ? 'change' : 'changes'} waiting to sync`
+      ? status === 'error'
+        ? `${waiting} · the server could not take them`
+        : waiting
       : status === 'offline'
         ? 'Offline — your log is saved on this phone'
         : stale
@@ -57,7 +62,9 @@ export function SyncBadge() {
           className="flex w-full items-center justify-between gap-3 border-l-2 border-plate-yellow bg-surface px-4 py-3 text-left text-sm"
         >
           <span>{message}</span>
-          <span className="shrink-0 text-ink-dim">{status === 'syncing' ? 'Syncing…' : 'Sync now'}</span>
+          <span className="shrink-0 text-ink-dim">
+            {status === 'syncing' ? 'Syncing…' : status === 'error' ? 'Try again' : 'Sync now'}
+          </span>
         </button>
       )}
       {refused.length > 0 && (
