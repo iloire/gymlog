@@ -133,3 +133,51 @@ function missed(
   }
   return { weightKg: weight, reps, reason: `Missed reps at ${kg(weight)} last time, repeat it` }
 }
+
+export type Values = { weightKg: number | null; reps: number | null; durationSec: number | null }
+
+/**
+ * What the steppers open on for a set, most specific first:
+ *   1. what you already logged for this set (editing it),
+ *   2. the set you just did in this session — after two sets at 77.5 kg for 8
+ *      the third should say 77.5 and 8, not last week's numbers or the plan's,
+ *   3. the progression's next step, worked out from last time,
+ *   4. the same set number last time, then any set last time,
+ *   5. the prescription.
+ * `sets` are this exercise's sets in this session, in set order, whatever
+ * their state; `previous` last time's; `suggestion` the progression's.
+ */
+export function openingValues({
+  log,
+  sets,
+  previous,
+  suggestion,
+  unit,
+}: {
+  log: LocalSetLog
+  sets: LocalSetLog[]
+  previous: LocalSetLog[] | null
+  suggestion: Suggestion | null
+  unit: Unit
+}): Values {
+  const justDone = sets.filter((set) => set.completedAt !== null && set.setIndex < log.setIndex).at(-1)
+  const lastSame = previous?.find((set) => set.setIndex === log.setIndex)
+  const lastAny = previous?.at(-1)
+  return {
+    weightKg:
+      log.weightKg ??
+      justDone?.weightKg ??
+      suggestion?.weightKg ??
+      lastSame?.weightKg ??
+      lastAny?.weightKg ??
+      (log.targetWeightKg === null ? null : tidyWeight(log.targetWeightKg, unit)),
+    reps: log.reps ?? justDone?.reps ?? suggestion?.reps ?? log.targetReps ?? lastSame?.reps ?? null,
+    durationSec:
+      log.durationSec ??
+      log.targetDurationSec ??
+      justDone?.durationSec ??
+      lastSame?.durationSec ??
+      lastAny?.durationSec ??
+      null,
+  }
+}

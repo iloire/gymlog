@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { LocalSetLog } from '@/lib/db/dexie'
-import { suggestNext } from '@/lib/progression'
+import { openingValues, suggestNext } from '@/lib/progression'
 import { displayWeight } from '@/lib/units'
 import { progressionIncrementKg, roundToStep, weightStepKg } from '@/lib/weights'
 
@@ -217,5 +217,37 @@ describe('suggestNext in pounds', () => {
       unit: 'lb',
     })
     expect(displayWeight(result.weightKg ?? 0, 'lb')).toBe(45)
+  })
+})
+
+describe('openingValues', () => {
+  const todo = (setIndex: number) => set(null, null, { setIndex, completedAt: null, targetReps: 10, targetWeightKg: 80 })
+  const plan = { weightKg: 80, reps: 10, reason: 'All 3×10 at 77.5 kg last time → 80 kg' }
+
+  it('opens the first set on the progression', () => {
+    expect(openingValues({ log: todo(1), sets: [todo(1), todo(2)], previous: null, suggestion: plan, unit: 'kg' }))
+      .toMatchObject({ weightKg: 80, reps: 10 })
+  })
+
+  it('opens the next set on what you just did, reps included, not on the plan', () => {
+    // 80 kg was too much for 10: the second set should say 77.5 × 8, not 80 × 10 again.
+    const first = set(77.5, 8, { setIndex: 1 })
+    expect(openingValues({ log: todo(2), sets: [first, todo(2), todo(3)], previous: null, suggestion: plan, unit: 'kg' }))
+      .toMatchObject({ weightKg: 77.5, reps: 8 })
+  })
+
+  it('keeps what a set already logged when it is opened again', () => {
+    const first = set(77.5, 8, { setIndex: 1 })
+    const second = set(75, 6, { setIndex: 2 })
+    expect(openingValues({ log: second, sets: [first, second], previous: null, suggestion: plan, unit: 'kg' }))
+      .toMatchObject({ weightKg: 75, reps: 6 })
+  })
+
+  it('falls back to last time, then the prescription, when there is no plan', () => {
+    const lastTime = [set(70, 9, { setIndex: 1 }), set(70, 7, { setIndex: 2 })]
+    expect(openingValues({ log: todo(2), sets: [todo(1), todo(2)], previous: lastTime, suggestion: null, unit: 'kg' }))
+      .toMatchObject({ weightKg: 70, reps: 10 })
+    expect(openingValues({ log: todo(1), sets: [todo(1)], previous: null, suggestion: null, unit: 'kg' }))
+      .toMatchObject({ weightKg: 80, reps: 10 })
   })
 })

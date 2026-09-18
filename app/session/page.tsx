@@ -26,7 +26,7 @@ import { isCardio } from '@/lib/cardio'
 import { getDb, type LocalSetLog } from '@/lib/db/dexie'
 import { formatMinutes } from '@/lib/format'
 import { daysAgo } from '@/lib/history'
-import { suggestNext } from '@/lib/progression'
+import { openingValues, suggestNext, type Values } from '@/lib/progression'
 import { epochToDate, recentPerformances, type LastPerformance } from '@/lib/queries'
 import { heavierThanLastTime } from '@/lib/records'
 import { changeRest, startRest } from '@/lib/rest'
@@ -42,7 +42,7 @@ import {
   unlogSet,
 } from '@/lib/sessions'
 import { useWakeLock } from '@/lib/use-wake-lock'
-import { displayWeight, fromUnit, tidyWeight } from '@/lib/units'
+import { displayWeight, fromUnit } from '@/lib/units'
 import { progressionIncrementKg, weightStep, weightStepKg } from '@/lib/weights'
 
 const REP_STEP = 1
@@ -50,7 +50,6 @@ const REP_STEP = 1
 const SWIPE_PX = 64
 const MINUTE_STEP = 1
 
-type Values = { weightKg: number | null; reps: number | null; durationSec: number | null }
 
 /**
  * The session lives at `/session?id=…` rather than `/session/<id>`.
@@ -166,38 +165,6 @@ function Session() {
       })
     : null
 
-  // What to put in the steppers for a set, most specific first:
-  //   1. what you already logged for this set (editing it),
-  //   2. the set you just did in this session — after two sets at 77.5 kg the
-  //      third should say 77.5, not last week's number,
-  //   3. the progression's next step, worked out from last time,
-  //   4. the same set number last time, then any set last time,
-  //   5. the prescription.
-  function suggestion(log: LocalSetLog): Values {
-    const justDone = groupLogs
-      .filter((set) => set.completedAt !== null && set.setIndex < log.setIndex)
-      .at(-1)
-    const lastSame = previous?.sets.find((set) => set.setIndex === log.setIndex)
-    const lastAny = previous?.sets.at(-1)
-    return {
-      weightKg:
-        log.weightKg ??
-        justDone?.weightKg ??
-        progression?.weightKg ??
-        lastSame?.weightKg ??
-        lastAny?.weightKg ??
-        (log.targetWeightKg === null ? null : tidyWeight(log.targetWeightKg, unit)),
-      reps: log.reps ?? progression?.reps ?? log.targetReps ?? justDone?.reps ?? lastSame?.reps ?? null,
-      durationSec:
-        log.durationSec ??
-        log.targetDurationSec ??
-        justDone?.durationSec ??
-        lastSame?.durationSec ??
-        lastAny?.durationSec ??
-        null,
-    }
-  }
-
   if (!userId || !data) return <SessionLoading />
 
   // Finished from this screen: the summary takes it over, with the way back
@@ -222,7 +189,10 @@ function Session() {
     activeSet && draft?.id === activeSet.id
       ? draft
       : activeSet
-        ? { id: activeSet.id, ...suggestion(activeSet) }
+        ? {
+            id: activeSet.id,
+            ...openingValues({ log: activeSet, sets: groupLogs, previous: previous?.sets ?? null, suggestion: progression, unit }),
+          }
         : { id: '', weightKg: null, reps: null, durationSec: null }
   // Cardio by the library's category, or by the rows themselves if the exercise is not loaded.
   const timed =

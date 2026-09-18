@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 09:41
+
+- **The next set opens on the reps you just did.** The weight already carried over from the set
+  before, but the reps went back to the plan's number every set: 80 kg was too much for 10, you
+  did 8, and set two opened on 10 again. Now the set you just did comes first for reps as it does
+  for weight; the plan, last time and the prescription follow. The rule is `openingValues()` in
+  `lib/progression.ts`, out of the session page, with tests.
+
 ## 2026-09-18 09:38
 
 - **Weight and reps tell apart at a glance.** The two steppers were the same box with a tiny word
