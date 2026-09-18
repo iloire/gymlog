@@ -24,6 +24,16 @@ const BODY_PART: Record<string, string> = {
   abdominals: 'Core',
 }
 
+/** The broad body part a library muscle belongs to, or undefined for one it does not know. */
+export function bodyPartOf(muscle: string): string | undefined {
+  return BODY_PART[muscle]
+}
+
+/** A movement of the legs — squats, deadlifts, lunges — which progresses faster than the arms. */
+export function isLowerBody(exercise?: Pick<LocalExercise, 'primaryMuscles'> | null): boolean {
+  return (exercise?.primaryMuscles ?? []).some((muscle) => BODY_PART[muscle] === 'Legs')
+}
+
 type Worked = { exercise: Pick<LocalExercise, 'category' | 'primaryMuscles'> | undefined; sets: number }
 
 /**

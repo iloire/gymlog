@@ -10,6 +10,7 @@ import {
   exerciseRank,
   lastPerformance,
   planPreview,
+  recentPerformances,
   today,
   weekSchedule,
 } from '@/lib/queries'
@@ -101,6 +102,18 @@ describe('lastPerformance', () => {
     const result = await lastPerformance(USER, SQUAT, 's-today')
 
     expect(result?.sets.map((set) => set.weightKg)).toEqual([60])
+  })
+
+  it('returns the sessions before last too, newest first, for the deload rule', async () => {
+    await loggedSet('s-1', 1, 55, 5, dateToEpoch('2026-09-01'))
+    await loggedSet('s-2', 1, 60, 4, dateToEpoch('2026-09-04'))
+    await loggedSet('s-3', 1, 60, 3, dateToEpoch('2026-09-08'))
+    await loggedSet('s-today', 1, 60, 5, dateToEpoch('2026-09-15'))
+
+    const recent = await recentPerformances(USER, SQUAT, 's-today')
+
+    expect(recent.map((entry) => entry.sets[0]?.sessionId)).toEqual(['s-3', 's-2'])
+    expect((await recentPerformances(USER, SQUAT, 's-today', 5)).length).toBe(3)
   })
 
   it('counts a timed set, which has minutes and no reps', async () => {

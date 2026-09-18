@@ -129,6 +129,8 @@ export type LocalSetLog = {
   weightKg: number | null
   reps: number | null
   durationSec?: number | null
+  /** How the set felt, tapped after logging it; absent on rows written before it existed. */
+  effort?: 'easy' | 'hard' | 'failed' | null
   isWarmup: boolean
   completedAt: number | null
   performedAt: number

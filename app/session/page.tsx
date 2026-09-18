@@ -21,7 +21,8 @@ import { isCardio } from '@/lib/cardio'
 import { getDb, type LocalSetLog } from '@/lib/db/dexie'
 import { formatMinutes } from '@/lib/format'
 import { daysAgo } from '@/lib/history'
-import { epochToDate, lastPerformance, type LastPerformance } from '@/lib/queries'
+import { suggestNext } from '@/lib/progression'
+import { epochToDate, recentPerformances, type LastPerformance } from '@/lib/queries'
 import { heavierThanLastTime } from '@/lib/records'
 import { startRest } from '@/lib/rest'
 import {
@@ -32,6 +33,7 @@ import {
   reopenSession,
 } from '@/lib/sessions'
 import { useWakeLock } from '@/lib/use-wake-lock'
+import { progressionIncrementKg, weightStepKg } from '@/lib/weights'
 
 const WEIGHT_STEP = 2.5 // the smallest pair of plates
 const REP_STEP = 1
@@ -104,13 +106,16 @@ function Session() {
   const groupLogs = (data?.logs ?? []).filter((log) => log.position === currentPosition)
   const exerciseId = groupLogs[0]?.exerciseId
 
-  const [previous, setPrevious] = useState<LastPerformance | null>(null)
+  // Last time and the time before: the first for the ghost row and the red
+  // edge, both for the progression rule that spots a weight missed twice.
+  const [recent, setRecent] = useState<LastPerformance[]>([])
+  const previous: LastPerformance | null = recent[0] ?? null
 
   useEffect(() => {
     if (!userId || !exerciseId) return
     let cancelled = false
-    void lastPerformance(userId, exerciseId, id).then((result) => {
-      if (!cancelled) setPrevious(result)
+    void recentPerformances(userId, exerciseId, id).then((result) => {
+      if (!cancelled) setRecent(result)
     })
     return () => {
       cancelled = true
@@ -125,12 +130,27 @@ function Session() {
     setSelectedId(null)
   }
 
+  const exercise = exerciseId ? data?.exercises.get(exerciseId) : undefined
+
+  // The next step for this exercise, and why: the same suggestion for every
+  // set of it, so the steppers open on the progression rather than on a repeat.
+  const progression = activeSet
+    ? suggestNext({
+        previous: previous?.sets ?? null,
+        before: recent[1]?.sets ?? null,
+        prescription: activeSet,
+        incrementKg: progressionIncrementKg(exercise),
+        stepKg: weightStepKg(exercise),
+      })
+    : null
+
   // What to put in the steppers for a set, most specific first:
   //   1. what you already logged for this set (editing it),
   //   2. the set you just did in this session — after two sets at 77.5 kg the
   //      third should say 77.5, not last week's number,
-  //   3. the same set number last time, then any set last time,
-  //   4. the prescription.
+  //   3. the progression's next step, worked out from last time,
+  //   4. the same set number last time, then any set last time,
+  //   5. the prescription.
   function suggestion(log: LocalSetLog): Values {
     const justDone = groupLogs
       .filter((set) => set.completedAt !== null && set.setIndex < log.setIndex)
@@ -139,8 +159,13 @@ function Session() {
     const lastAny = previous?.sets.at(-1)
     return {
       weightKg:
-        log.weightKg ?? justDone?.weightKg ?? lastSame?.weightKg ?? lastAny?.weightKg ?? log.targetWeightKg,
-      reps: log.reps ?? log.targetReps ?? justDone?.reps ?? lastSame?.reps ?? null,
+        log.weightKg ??
+        justDone?.weightKg ??
+        progression?.weightKg ??
+        lastSame?.weightKg ??
+        lastAny?.weightKg ??
+        log.targetWeightKg,
+      reps: log.reps ?? progression?.reps ?? log.targetReps ?? justDone?.reps ?? lastSame?.reps ?? null,
       durationSec:
         log.durationSec ??
         log.targetDurationSec ??
@@ -177,7 +202,6 @@ function Session() {
       : activeSet
         ? { id: activeSet.id, ...suggestion(activeSet) }
         : { id: '', weightKg: null, reps: null, durationSec: null }
-  const exercise = exerciseId ? data.exercises.get(exerciseId) : undefined
   // Cardio by the library's category, or by the rows themselves if the exercise is not loaded.
   const timed =
     isCardio(exercise) || groupLogs.some((log) => log.targetDurationSec != null || log.durationSec != null)
@@ -190,6 +214,10 @@ function Session() {
     (log) => log.completedAt !== null && heavierThanLastTime(log.weightKg, previousTopKg),
   )
   const beatsLastTime = !banked && heavierThanLastTime(values.weightKg, previousTopKg)
+  // The reason under the steppers, while the numbers are still the suggestion:
+  // once you change them, or the set is logged, the reason no longer applies.
+  const reason =
+    activeSet && activeSet.completedAt === null && draft === null && !timed ? progression?.reason : null
 
   async function completeSet() {
     if (!activeSet || !userId) return
@@ -397,10 +425,16 @@ function Session() {
               )}
             </div>
 
-            {beatsLastTime && (
-              <p className="mt-3 border-l-2 border-plate-red pl-3 text-sm">
-                Heavier than last time&apos;s top set.
+            {reason ? (
+              <p className={`mt-3 border-l-2 pl-3 text-sm ${beatsLastTime ? 'border-plate-red' : 'border-line text-ink-dim'}`}>
+                {reason}
               </p>
+            ) : (
+              beatsLastTime && (
+                <p className="mt-3 border-l-2 border-plate-red pl-3 text-sm">
+                  Heavier than last time&apos;s top set.
+                </p>
+              )
             )}
 
             <button
@@ -412,7 +446,7 @@ function Session() {
                 ? `${activeSet.completedAt ? 'Update' : 'Log'} ${values.durationSec ? formatMinutes(values.durationSec) : 'time'}`
                 : activeSet.completedAt
                   ? `Update set ${activeSet.setIndex}`
-                  : `Log set ${activeSet.setIndex}`}
+                  : `Log set ${activeSet.setIndex} · ${nextSet}`}
             </button>
 
             {groupLogs[0] && <ExerciseNote key={groupLogs[0].id} userId={userId} log={groupLogs[0]} />}

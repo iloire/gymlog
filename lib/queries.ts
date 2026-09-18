@@ -155,7 +155,7 @@ export type LastPerformance = {
 }
 
 /**
- * What you lifted the last time you did this exercise.
+ * What you lifted the last few times you did this exercise, newest first.
  *
  * Runs entirely against IndexedDB — this is the number read while standing at
  * the bar with no signal, so it must never touch the network. The
@@ -163,13 +163,16 @@ export type LastPerformance = {
  * `performedAt` denormalisation on set_logs exists for exactly this query.
  *
  * `beforeSessionId` excludes the session in progress, so mid-workout the
- * prefill still shows *last* time rather than the set just logged.
+ * prefill still shows *last* time rather than the set just logged. `count` is
+ * how many sessions back to return: the progression rules need two, to see a
+ * weight missed twice.
  */
-export async function lastPerformance(
+export async function recentPerformances(
   userId: string,
   exerciseId: string,
   beforeSessionId?: string,
-): Promise<LastPerformance | null> {
+  count = 2,
+): Promise<LastPerformance[]> {
   const recent = await getDb(userId)
     .setLogs.where('[exerciseId+performedAt]')
     .between([exerciseId, -Infinity], [exerciseId, Infinity])
@@ -185,21 +188,28 @@ export async function lastPerformance(
     .limit(60)
     .toArray()
 
-  const mostRecent = recent[0]
-  if (!mostRecent) return null
+  const sessions: string[] = []
+  for (const log of recent) {
+    if (!sessions.includes(log.sessionId)) sessions.push(log.sessionId)
+    if (sessions.length > count) break
+  }
 
-  const sets = recent
-    .filter((log) => log.sessionId === mostRecent.sessionId)
-    .sort((a, b) => a.setIndex - b.setIndex)
+  return sessions.slice(0, count).map((sessionId) => {
+    const sets = recent.filter((log) => log.sessionId === sessionId).sort((a, b) => a.setIndex - b.setIndex)
+    const topSet = sets.reduce((best, log) => ((log.weightKg ?? 0) > (best.weightKg ?? 0) ? log : best))
+    // Epley: an estimate, only ever compared against itself over time.
+    const bestE1rm = Math.max(...sets.map((log) => (log.weightKg ?? 0) * (1 + (log.reps ?? 0) / 30)))
+    return { performedAt: sets[0]?.performedAt ?? 0, sets, topSet, bestE1rm }
+  })
+}
 
-  const topSet = sets.reduce((best, log) => ((log.weightKg ?? 0) > (best.weightKg ?? 0) ? log : best))
-
-  // Epley: an estimate, only ever compared against itself over time.
-  const bestE1rm = Math.max(
-    ...sets.map((log) => (log.weightKg ?? 0) * (1 + (log.reps ?? 0) / 30)),
-  )
-
-  return { performedAt: mostRecent.performedAt, sets, topSet, bestE1rm }
+/** What you lifted the last time you did this exercise — `recentPerformances` for one session. */
+export async function lastPerformance(
+  userId: string,
+  exerciseId: string,
+  beforeSessionId?: string,
+): Promise<LastPerformance | null> {
+  return (await recentPerformances(userId, exerciseId, beforeSessionId, 1))[0] ?? null
 }
 
 /** Bodyweight series, oldest first, with a trailing 7-day rolling average. */

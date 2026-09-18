@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-18 02:30
+
+- **The steppers open on the next step, not on a repeat.** `lib/progression.ts` works out what
+  to try from the last two times you did the exercise: every prescribed rep hit → one increment
+  up (2.5 kg on a barbell, 5 on a barbell leg lift, 2 on dumbbells, 5 on a stack; a rep on a
+  bodyweight movement), reps missed → the same weight, missed twice at that weight → 10% off,
+  rounded to a loadable weight; a rep range climbs its reps first. The reason sits in one line
+  under the steppers until you change the numbers, red-edged when it is heavier than last time,
+  and the button says what it will log: "Log set 3 · 77.5 kg × 10". Increments follow the
+  equipment (`lib/weights.ts`); `recentPerformances()` in `lib/queries.ts` returns the sessions
+  before last as well.
+
 ## 2026-09-18 02:15
 
 - **Last time is a row of squares, not a sentence.** "Last time 75×10, 75×10, 75×8" made you parse

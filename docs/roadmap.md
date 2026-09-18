@@ -59,7 +59,16 @@ barbell lifts).
 - **Onboarding:** a new account's empty Today screen offers the starter programme first, with
   "build my own" second.
 
-### 1.2 Automatic progression — M
+### ~~1.2 Automatic progression — M~~ ✅
+
+**Shipped 2026-09-18 as `lib/progression.ts`:** the steppers open on the next step with the reason
+under them. Increments follow the equipment (`lib/weights.ts`): a barbell leg lift goes up two
+steps (5 kg), other barbell lifts one (2.5 kg), dumbbells 2 kg, a stack 5 kg, a bodyweight
+movement one rep — rather than the 2.5/1.25 kg below, which no plate rack can load. Double
+progression works over a rep range once the editor sets one (§4.2). Still open: an increment
+overridable per exercise.
+
+The original brief:
 
 The core mechanic of beginner training is linear progression. The gym screen already prefills from
 last time; it should also *suggest the next step* and say why.
