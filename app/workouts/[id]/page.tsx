@@ -69,7 +69,7 @@ export default function WorkoutEditorPage() {
       <Loading className="pt-5">
         <Link href="/workouts" className="flex items-center gap-1 text-sm text-ink-dim">
           <ChevronLeft size={18} aria-hidden />
-          Workouts
+          Plan
         </Link>
         <Placeholder className="mt-4 h-9 w-56" />
       </Loading>
@@ -124,7 +124,7 @@ export default function WorkoutEditorPage() {
       <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-5 pb-6">
         <Link href="/workouts" className="flex items-center gap-1 text-sm text-ink-dim">
           <ChevronLeft size={18} aria-hidden />
-          Workouts
+          Plan
         </Link>
 
         <input

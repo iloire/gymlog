@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { destroyDb } from '@/lib/db/dexie'
+import { destroyDb, getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
+import { assignDay, startNewStage } from '@/lib/program'
 import { activeProgram, templateForDay, templateItems } from '@/lib/queries'
 
 const USER = 'user-1'
@@ -97,5 +98,40 @@ describe('templateItems', () => {
     await writeRow(USER, 'templateItems', { id: 'other', templateId: 'other-tpl', exerciseId: 'x', position: 1 })
 
     expect((await templateItems(USER, 'tpl')).map((i) => i.id)).toEqual(['squat', 'bench', 'row'])
+  })
+})
+
+describe('assignDay and startNewStage', () => {
+  it('starts a programme on the first assignment and puts the workout on the day', async () => {
+    await assignDay(USER, MONDAY, 'workout-a')
+
+    const created = await activeProgram(USER)
+    expect(created?.name).toBe('My programme')
+    expect(await templateForDay(USER, MONDAY)).toEqual({ templateId: 'workout-a', programId: created?.id })
+  })
+
+  it('replaces the workout on a day, and clears it with null', async () => {
+    await assignDay(USER, MONDAY, 'workout-a')
+    await assignDay(USER, MONDAY, 'workout-b')
+    expect(await templateForDay(USER, MONDAY)).toMatchObject({ templateId: 'workout-b' })
+
+    await assignDay(USER, MONDAY, null)
+    expect(await templateForDay(USER, MONDAY)).toBeNull()
+    expect(await templateForDay(USER, FRIDAY)).toBeNull()
+  })
+
+  it('ends the current programme and starts an empty one on a new stage', async () => {
+    await assignDay(USER, MONDAY, 'workout-a')
+    const first = await activeProgram(USER)
+
+    const id = await startNewStage(USER, 'Intermediate 4-day')
+
+    expect((await activeProgram(USER))?.id).toBe(id)
+    expect((await activeProgram(USER))?.name).toBe('Intermediate 4-day')
+    expect(await templateForDay(USER, MONDAY)).toBeNull()
+    // The old programme is over, not gone.
+    const ended = (await getDb(USER).programs.get(first!.id))!
+    expect(ended.endedOn).not.toBeNull()
+    expect(ended.deletedAt).toBeNull()
   })
 })

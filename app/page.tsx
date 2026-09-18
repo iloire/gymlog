@@ -278,7 +278,7 @@ export default function TodayPage() {
 
             <p className="mt-6 text-sm text-ink-dim">
               Nothing was scheduled for {weekday}.{' '}
-              <Link href="/program" className="text-ink underline underline-offset-4">
+              <Link href="/workouts" className="text-ink underline underline-offset-4">
                 Change your week
               </Link>
               .
@@ -295,7 +295,7 @@ export default function TodayPage() {
           <section className="mt-6">
             <p className="text-[15px] text-ink-dim">
               Nothing is scheduled for {weekday}.{' '}
-              <Link href="/program" className="text-ink underline underline-offset-4">
+              <Link href="/workouts" className="text-ink underline underline-offset-4">
                 Set up your week
               </Link>
               , or train something anyway.

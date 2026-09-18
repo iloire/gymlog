@@ -15,12 +15,10 @@ const items = [
   { href: '/profile', label: 'Profile', icon: UserRound },
 ]
 
-// Pages with no tab of their own, reached from the tab named here. Workouts,
-// the week and the premade programmes are one tab; components/plan-tabs.tsx
-// switches between them.
+// Pages with no tab of their own, reached from the tab named here. The
+// premade programmes are browsed from the Plan tab.
 const parents: Record<string, string> = {
   '/weight': '/profile',
-  '/program': '/workouts',
   '/programmes': '/workouts',
 }
 

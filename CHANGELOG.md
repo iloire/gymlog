@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-18 04:05
+
+- **Workouts and the week are one Plan screen.** The week was seven native selects on its own
+  sub-tab. The Plan tab now opens on the week along the top, a cell per day wearing the letter
+  of its workout (A, B, C… the workouts under it wear the same letters), and a tap on a day
+  picks its workout or Rest from a sheet (`components/day-picker.tsx`). Programmes moved
+  behind *Browse premade programmes*; *Start a new stage* is a plain section at the bottom
+  instead of a collapsed "Moved up a stage?". The segmented control is gone; `/program`
+  redirects to `/workouts`. Writing the week lives in `lib/program.ts`, with tests.
+
 ## 2026-09-18 03:45
 
 - **Sign out cannot silently lose a workout.** Signing out wiped the local database without

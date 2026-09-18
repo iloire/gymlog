@@ -11,7 +11,6 @@ import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { Loading, Placeholder } from '@/components/loading'
 import { Nav } from '@/components/nav'
-import { PlanTabs } from '@/components/plan-tabs'
 import { useUserId } from '@/components/session-boot'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
 import { equipmentName, presetFor } from '@/lib/equipment'
@@ -95,8 +94,11 @@ function ProgrammesLoading({ detail = false }: { detail?: boolean }) {
         </>
       ) : (
         <>
-          <PlanTabs />
-          <h1 className="figure text-4xl">Programmes</h1>
+          <Link href="/workouts" className="flex items-center gap-1 text-sm text-ink-dim">
+            <ChevronLeft size={18} aria-hidden />
+            Plan
+          </Link>
+          <h1 className="figure mt-4 text-4xl">Programmes</h1>
           <Placeholder className="mt-2 h-5 w-64" />
         </>
       )}
@@ -120,8 +122,11 @@ function Catalogue({ have, library }: { have: string[] | null; library: Library 
 
   return (
     <>
-      <PlanTabs />
-      <h1 className="figure text-4xl">Programmes</h1>
+      <Link href="/workouts" className="flex items-center gap-1 text-sm text-ink-dim">
+        <ChevronLeft size={18} aria-hidden />
+        Plan
+      </Link>
+      <h1 className="figure mt-4 text-4xl">Programmes</h1>
       <p className="mt-2 text-sm text-ink-dim">
         Ready-made weeks of training. Picking one copies it into your workouts, where you can change
         anything.
@@ -231,7 +236,7 @@ function ProgrammeDetail({
     if (adopting) return
     setAdopting(true)
     await adoptProgramme(userId, programme, fit, { schedule, shift })
-    router.push(schedule ? '/program' : '/workouts')
+    router.push('/workouts')
   }
 
   return (

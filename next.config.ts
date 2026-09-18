@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
     // to be rendered there. Absent outside Vercel, and then nothing renders.
     NEXT_PUBLIC_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA ?? '',
   },
+  // The week used to be its own screen; it is the top of the Plan tab now.
+  redirects: async () => [{ source: '/program', destination: '/workouts', permanent: true }],
 }
 
 export default nextConfig
