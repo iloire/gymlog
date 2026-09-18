@@ -45,8 +45,9 @@ export function OpenWorkoutBar() {
   return (
     <Link
       href={`/session?id=${open.sessionId}`}
-      className="flex min-h-14 items-center gap-3 border-t border-line bg-surface pr-4 pl-5"
+      className="block border-t border-line bg-surface"
     >
+      <span className="mx-auto flex min-h-14 w-full max-w-page items-center gap-3 pr-4 pl-5">
       <span className="size-2 shrink-0 rounded-full bg-plate-blue-lift motion-safe:animate-pulse" aria-hidden />
       <span className="min-w-0 flex-1 truncate text-sm">
         <span className="text-ink-dim">{open.name} · </span>
@@ -62,6 +63,7 @@ export function OpenWorkoutBar() {
       <span className="flex shrink-0 items-center gap-0.5 text-sm text-ink-dim">
         {open.next ? 'Continue' : 'Finish'}
         <ChevronRight size={16} aria-hidden />
+      </span>
       </span>
     </Link>
   )
