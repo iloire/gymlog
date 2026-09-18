@@ -1,10 +1,10 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronLeft, ChevronRight, Info } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 
 import { EffortChips } from '@/components/effort-chips'
 import { ExerciseDialog } from '@/components/exercise-dialog'
@@ -18,6 +18,7 @@ import { RestBar, RestTakeover, useRest } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
 import { SetSquares } from '@/components/set-squares'
 import { Stepper } from '@/components/stepper'
+import { WorkoutSheet } from '@/components/workout-sheet'
 import { WorkoutSummary } from '@/components/workout-summary'
 import { isCardio } from '@/lib/cardio'
 import { getDb, type LocalSetLog } from '@/lib/db/dexie'
@@ -38,6 +39,8 @@ import { useWakeLock } from '@/lib/use-wake-lock'
 import { progressionIncrementKg, weightStepKg } from '@/lib/weights'
 
 const REP_STEP = 1
+/** How far a finger travels sideways before it is a swipe to the next exercise. */
+const SWIPE_PX = 64
 const MINUTE_STEP = 1
 
 type Values = { weightKg: number | null; reps: number | null; durationSec: number | null }
@@ -65,6 +68,8 @@ function Session() {
   // Set by finishing the workout here, so the summary is the reward for ending
   // one rather than something every visit to a past session has to scroll past.
   const [finished, setFinished] = useState(false)
+  const [overview, setOverview] = useState(false)
+  const swipe = useRef<{ x: number; y: number } | null>(null)
   // The set just logged, so the rest can ask how it felt — even once the
   // screen has moved on to the next exercise.
   const [lastLoggedId, setLastLoggedId] = useState<string | null>(null)
@@ -280,47 +285,43 @@ function Session() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between px-4 pt-3 pb-1">
-        <Link href="/" className="flex items-center gap-1 text-sm text-ink-dim">
-          <ChevronLeft size={18} aria-hidden />
-          {data.session.templateName}
+      {/* The way back, then the workout's name as the way to the whole of it:
+          a sheet with every exercise and its squares, and a tap to jump. The
+          count beside the name says where you are without a bar to hit. */}
+      <header className="flex items-center gap-1 px-4 pt-3 pb-1">
+        <Link href="/" aria-label="Today" className="flex h-11 w-9 items-center text-ink-dim">
+          <ChevronLeft size={20} aria-hidden />
         </Link>
-        {positions.length > 0 && (
-          <span className="text-sm text-ink-dim">
-            Exercise <span className="figure text-ink">{Math.min(position + 1, positions.length)}</span> of{' '}
-            {positions.length}
-          </span>
-        )}
+        <button
+          type="button"
+          onClick={() => setOverview(true)}
+          aria-haspopup="dialog"
+          className="flex min-w-0 flex-1 items-center gap-1.5 py-2 text-left text-sm text-ink-dim"
+        >
+          <span className="truncate">{data.session.templateName}</span>
+          {positions.length > 0 && (
+            <span className="shrink-0">
+              · <span className="figure text-ink">{Math.min(position + 1, positions.length)}</span>/{positions.length}
+            </span>
+          )}
+          <ChevronDown size={16} aria-hidden className="shrink-0" />
+        </button>
       </header>
 
-      {/* One segment per exercise: filled once every set of it is logged, so the
-          whole workout reads at a glance the way the set squares read one exercise. */}
-      {positions.length > 1 && (
-        <ol className="flex gap-1 px-4 pt-2" aria-hidden>
-          {positions.map((at, index) => {
-            const done = data.logs.every((log) => log.position !== at || log.completedAt !== null)
-            return (
-              <li key={at} className="flex-1">
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  onClick={() => goTo(index)}
-                  className="block w-full py-1.5"
-                >
-                  <span
-                    className={`block h-1 rounded-full ${
-                      done
-                        ? 'bg-plate-blue'
-                        : index === position
-                          ? 'bg-ink'
-                          : 'bg-line'
-                    }`}
-                  />
-                </button>
-              </li>
-            )
+      {overview && (
+        <WorkoutSheet
+          name={data.session.templateName}
+          exercises={positions.map((at) => {
+            const logs = data.logs.filter((log) => log.position === at)
+            return { position: at, name: logs[0]?.exerciseName ?? 'Exercise', logs }
           })}
-        </ol>
+          current={position}
+          onPick={(index) => {
+            goTo(index)
+            setOverview(false)
+          }}
+          onClose={() => setOverview(false)}
+        />
       )}
 
       {viewingExercise && exerciseId && (
@@ -331,7 +332,26 @@ function Session() {
         />
       )}
 
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-3 pb-8">
+      {/* A horizontal swipe moves between exercises; a mostly vertical one is a
+          scroll and is left alone, as is anything that starts on a scrolling row. */}
+      <main
+        className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-3 pb-8"
+        onTouchStart={(event) => {
+          const touch = event.touches[0]
+          swipe.current = touch ? { x: touch.clientX, y: touch.clientY } : null
+        }}
+        onTouchEnd={(event) => {
+          const start = swipe.current
+          const touch = event.changedTouches[0]
+          swipe.current = null
+          if (!start || !touch) return
+          const dx = touch.clientX - start.x
+          const dy = touch.clientY - start.y
+          if (Math.abs(dx) < SWIPE_PX || Math.abs(dx) < Math.abs(dy) * 2) return
+          if (dx < 0 && position < positions.length - 1) goTo(position + 1)
+          if (dx > 0 && position > 0) goTo(position - 1)
+        }}
+      >
         {/* A thumbnail beside the name, not a hero above it: the photo is a
             reminder of the movement, and at full width it pushed the weight, the
             reps and the Log button off the first screen. Tapping it still opens
@@ -581,11 +601,11 @@ function Session() {
 function SessionLoading() {
   return (
     <div className="flex flex-1 flex-col" aria-busy="true">
-      <header className="flex items-center justify-between px-4 pt-3 pb-1">
-        <Link href="/" aria-label="Today" className="flex items-center gap-1 text-sm text-ink-dim">
-          <ChevronLeft size={18} aria-hidden />
-          <Placeholder className="h-4 w-24" />
+      <header className="flex items-center gap-1 px-4 pt-3 pb-1">
+        <Link href="/" aria-label="Today" className="flex h-11 w-9 items-center text-ink-dim">
+          <ChevronLeft size={20} aria-hidden />
         </Link>
+        <Placeholder className="h-4 w-24" />
       </header>
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-3 pb-8">
         <div className="flex items-center gap-3">

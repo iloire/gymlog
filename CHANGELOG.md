@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-18 03:05
+
+- **Swipe between exercises; the workout's name opens the whole of it.** The session screen had
+  three ways to move between exercises: "1 of 3" in the header, 4px segments nobody could hit,
+  and Previous / Next. The segments and the counter are gone. A horizontal swipe on the screen
+  goes to the next or previous exercise, and the workout's name in the header (with "2/3"
+  beside it) opens a sheet listing every exercise with its sets as small squares, a tap on any
+  to jump (`components/workout-sheet.tsx`). Previous / Next stay at the bottom, where the thumb is.
+
 ## 2026-09-18 02:55
 
 - **One tap of effort instead of RPE.** After logging a set, the rest screen asks how it felt:
