@@ -12,6 +12,7 @@ import { ExercisePicker } from '@/components/exercise-picker'
 import { FinishSession } from '@/components/finish-session'
 import { Nav } from '@/components/nav'
 import { PlanList } from '@/components/plan-list'
+import { Loading, Placeholder } from '@/components/loading'
 import { SessionSets } from '@/components/session-sets'
 import { useSync, useUserId } from '@/components/session-boot'
 import { SyncBadge } from '@/components/sync-badge'
@@ -146,13 +147,10 @@ export default function TodayPage() {
 
   if (plan === undefined || awaitingFirstSync) {
     return (
-      <>
-        <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8" aria-busy="true">
-          <p className="text-sm text-ink-dim">{weekday}</p>
-          <div className="mt-2 h-10 w-48 animate-pulse rounded bg-surface" />
-        </main>
-        <Nav />
-      </>
+      <Loading>
+        <p className="text-sm text-ink-dim">{weekday}</p>
+        <Placeholder className="mt-2 h-10 w-48" />
+      </Loading>
     )
   }
 

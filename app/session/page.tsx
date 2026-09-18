@@ -9,6 +9,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseNote } from '@/components/exercise-note'
 import { ExerciseFrames } from '@/components/exercise-frames'
+import { Placeholder } from '@/components/loading'
 import { OverflowMenu } from '@/components/overflow-menu'
 import { RemoveExercise } from '@/components/remove-exercise'
 import { RestTimer } from '@/components/rest-timer'
@@ -147,9 +148,7 @@ function Session() {
     }
   }
 
-  if (!userId || !data) {
-    return <main className="p-6 text-ink-dim">Loading…</main>
-  }
+  if (!userId || !data) return <SessionLoading />
 
   // Finished from this screen: the summary takes it over, with the way back
   // into the workout on it. Opening an old session still lands on the sets.
@@ -486,9 +485,33 @@ function Session() {
   )
 }
 
+/**
+ * The session's frame while its rows load: the way back to Today, then the
+ * thumbnail and name at the size they take once the exercise is known. The
+ * gym screen has no tab bar, so this is not `Loading` from components.
+ */
+function SessionLoading() {
+  return (
+    <div className="flex flex-1 flex-col" aria-busy="true">
+      <header className="flex items-center justify-between px-4 pt-3 pb-1">
+        <Link href="/" aria-label="Today" className="flex items-center gap-1 text-sm text-ink-dim">
+          <ChevronLeft size={18} aria-hidden />
+          <Placeholder className="h-4 w-24" />
+        </Link>
+      </header>
+      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-3 pb-8">
+        <div className="flex items-center gap-3">
+          <Placeholder className="aspect-[3/2] w-[clamp(7rem,min(26dvh,45vw),13rem)] shrink-0" />
+          <Placeholder className="h-8 flex-1" />
+        </div>
+      </main>
+    </div>
+  )
+}
+
 export default function SessionPage() {
   return (
-    <Suspense fallback={<main className="p-6 text-ink-dim">Loading…</main>}>
+    <Suspense fallback={<SessionLoading />}>
       <Session />
     </Suspense>
   )

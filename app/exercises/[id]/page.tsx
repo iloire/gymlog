@@ -6,7 +6,8 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { ExerciseDetail } from '@/components/exercise-detail'
+import { ExerciseDetail, ExerciseDetailLoading } from '@/components/exercise-detail'
+import { Loading } from '@/components/loading'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
@@ -21,7 +22,15 @@ export default function ExerciseDetailPage() {
   const exercise = useLiveQuery(async () => (userId ? getDb(userId).exercises.get(id) : undefined), [userId, id])
 
   if (!userId) {
-    return <main className="p-6 text-ink-dim">Loading…</main>
+    return (
+      <Loading className="pt-5">
+        <Link href="/exercises" className="mb-4 flex items-center gap-1 text-sm text-ink-dim">
+          <ChevronLeft size={18} aria-hidden />
+          Exercises
+        </Link>
+        <ExerciseDetailLoading />
+      </Loading>
+    )
   }
 
   async function doNow() {

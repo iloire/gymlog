@@ -6,6 +6,7 @@ import { useState } from 'react'
 
 import { DeleteSession } from '@/components/delete-session'
 import { FinishSession } from '@/components/finish-session'
+import { Loading, Placeholder } from '@/components/loading'
 import { Nav } from '@/components/nav'
 import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
@@ -26,7 +27,12 @@ export default function HistoryPage() {
   }, [userId])
 
   if (!userId || !data) {
-    return <main className="p-6 text-ink-dim">Loading…</main>
+    return (
+      <Loading>
+        <h1 className="figure text-4xl">History</h1>
+        <Placeholder className="mt-2 h-5 w-40" />
+      </Loading>
+    )
   }
 
   const count = data.history.length

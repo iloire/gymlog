@@ -9,6 +9,7 @@ import { useCallback, useState } from 'react'
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { ExercisePicker } from '@/components/exercise-picker'
+import { Loading, Placeholder } from '@/components/loading'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { UndoToast } from '@/components/undo-toast'
@@ -64,7 +65,15 @@ export default function WorkoutEditorPage() {
   }, [userId, id])
 
   if (!userId || !data) {
-    return <main className="p-6 text-ink-dim">Loading…</main>
+    return (
+      <Loading className="pt-5">
+        <Link href="/workouts" className="flex items-center gap-1 text-sm text-ink-dim">
+          <ChevronLeft size={18} aria-hidden />
+          Workouts
+        </Link>
+        <Placeholder className="mt-4 h-9 w-56" />
+      </Loading>
+    )
   }
 
   const { template, items, scheduledOn } = data

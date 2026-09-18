@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-18 00:40
+
+- **Every screen loads the same way.** Today drew its header with a pulsing bar where the
+  workout's name would go; the session, history, week, programmes, workout editor, exercise
+  detail and workout summary printed "Loading…" in the corner and then jumped to the real page,
+  and the workouts list opened on "No workouts yet" for a frame. Each now renders its frame —
+  tabs, back link, a fixed heading — with a placeholder the size of what it is waiting for
+  (`Loading`, `Placeholder` in `components/loading.tsx`), so the page keeps its shape.
+
 ## 2026-09-18 00:34
 
 - **The library opens with your exercises, not 3/4 Sit-Up.** Favourites come first, then the

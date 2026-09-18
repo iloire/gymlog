@@ -131,5 +131,11 @@ change. No all-caps labels, no monospace for data.
   never a button under Next where a thumb reaching for it can land.
 - **Sign in** is the one screen with a picture: equipment in one plate colour, no people, with the
   wordmark set large on its lower edge. See `docs/login-images.md`.
+- **A screen loads as its own frame.** Every screen reads off IndexedDB, which answers a frame or
+  two after the page paints. In that gap a screen draws what it knows without data — the tabs,
+  the back link, a heading that never changes — and a pulsing block the size of what it waits
+  for (`Loading` and `Placeholder` in `components/loading.tsx`), so nothing moves when the rows
+  land. Never a "Loading…" in the corner, and never an empty state: on a cold start in the gym,
+  *Rest day* or *No workouts yet* for one frame is a lie the eye catches.
 - Motion answers a tap (a set collapsing into a square, the timer draining). Nothing animates on
   load, and everything respects `prefers-reduced-motion`.

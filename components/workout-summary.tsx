@@ -2,6 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks'
 
+import { Loading, Placeholder } from '@/components/loading'
 import { SessionSets } from '@/components/session-sets'
 import { streakMessage, weekStreak } from '@/lib/calendar'
 import { formatDay, formatDuration, formatMinutes, formatSet, kg } from '@/lib/format'
@@ -65,7 +66,15 @@ export function WorkoutSummary({
     }
   }, [userId, sessionId])
 
-  if (!data) return <main className="p-6 text-ink-dim">Loading…</main>
+  // The frame of the summary below: the workout's line, then the total.
+  if (!data) {
+    return (
+      <Loading nav={false}>
+        <Placeholder className="h-5 w-48" />
+        <Placeholder className="mt-2 h-[60px] w-40" />
+      </Loading>
+    )
+  }
 
   if (!data.entry) {
     return (

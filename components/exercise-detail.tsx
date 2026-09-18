@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { FavoriteButton } from '@/components/favorite-button'
+import { Placeholder } from '@/components/loading'
 import { getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
 import { formatDay, formatSet } from '@/lib/format'
@@ -17,6 +18,16 @@ import { epochToDate } from '@/lib/queries'
  * the workout editor — so looking up a movement never navigates you out of the
  * workout you are building.
  */
+/** The detail's frame — the photo and the name at their sizes — for the page and the dialog alike. */
+export function ExerciseDetailLoading() {
+  return (
+    <div aria-busy="true">
+      <Placeholder className="aspect-[4/3] w-full" />
+      <Placeholder className="mt-5 h-9 w-2/3" />
+    </div>
+  )
+}
+
 export function ExerciseDetail({
   userId,
   exerciseId,
@@ -55,9 +66,7 @@ export function ExerciseDetail({
     return { exercise, note: note ?? null, history }
   }, [userId, exerciseId])
 
-  if (!data) {
-    return <p className="py-6 text-ink-dim">Loading…</p>
-  }
+  if (!data) return <ExerciseDetailLoading />
 
   const { exercise, note, history } = data
 

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { BodyPartBadges } from '@/components/body-part-badges'
+import { Placeholder } from '@/components/loading'
 import { Nav } from '@/components/nav'
 import { PlanTabs } from '@/components/plan-tabs'
 import { useUserId } from '@/components/session-boot'
@@ -80,7 +81,13 @@ export default function WorkoutsPage() {
           A workout is a list of exercises with the sets, reps and rest you plan to do.
         </p>
 
-        {workouts?.length ? (
+        {workouts === undefined ? (
+          // One row's shape, so the list does not open on "No workouts yet".
+          <div className="mt-7 border-y border-line py-4" aria-busy="true">
+            <Placeholder className="h-5 w-40" />
+            <Placeholder className="mt-2 h-4 w-56" />
+          </div>
+        ) : workouts.length ? (
           <ul className="mt-7 divide-y divide-line border-y border-line">
             {workouts.map((workout) => (
               <li key={workout.id} className="flex items-center gap-3">

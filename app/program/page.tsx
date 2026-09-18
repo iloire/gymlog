@@ -3,6 +3,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import Link from 'next/link'
 
+import { Loading, Placeholder } from '@/components/loading'
 import { Nav } from '@/components/nav'
 import { PlanTabs } from '@/components/plan-tabs'
 import { useUserId } from '@/components/session-boot'
@@ -35,7 +36,13 @@ export default function ProgramPage() {
   }, [userId])
 
   if (!userId || !data) {
-    return <main className="p-6 text-ink-dim">Loading…</main>
+    return (
+      <Loading className="pt-5">
+        <PlanTabs />
+        <h1 className="figure text-4xl">Your week</h1>
+        <Placeholder className="mt-2 h-5 w-64" />
+      </Loading>
+    )
   }
 
   async function ensureProgram(): Promise<string> {

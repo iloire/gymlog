@@ -9,6 +9,7 @@ import { Suspense, useMemo, useState } from 'react'
 import { EquipmentPicker, useEquipment } from '@/components/equipment-picker'
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseFrames } from '@/components/exercise-frames'
+import { Loading, Placeholder } from '@/components/loading'
 import { Nav } from '@/components/nav'
 import { PlanTabs } from '@/components/plan-tabs'
 import { useUserId } from '@/components/session-boot'
@@ -37,7 +38,7 @@ type Library = ReadonlyMap<string, LocalExercise>
  */
 export default function ProgrammesPage() {
   return (
-    <Suspense fallback={<main className="p-6 text-ink-dim">Loading…</main>}>
+    <Suspense fallback={<ProgrammesLoading />}>
       <Programmes />
     </Suspense>
   )
@@ -58,7 +59,7 @@ function Programmes() {
   )
 
   if (!userId || !exercises) {
-    return <main className="p-6 text-ink-dim">Loading…</main>
+    return <ProgrammesLoading detail={id !== null} />
   }
 
   const programme = id ? programmeById(id) : undefined
@@ -74,6 +75,32 @@ function Programmes() {
       </main>
       <Nav />
     </>
+  )
+}
+
+/**
+ * The catalogue's frame, or a programme's: the way back and the heading are
+ * known before the library is, so they are drawn where they will stay.
+ */
+function ProgrammesLoading({ detail = false }: { detail?: boolean }) {
+  return (
+    <Loading className="pt-5">
+      {detail ? (
+        <>
+          <Link href="/programmes" className="flex items-center gap-1 text-sm text-ink-dim">
+            <ChevronLeft size={18} aria-hidden />
+            Programmes
+          </Link>
+          <Placeholder className="mt-4 h-10 w-56" />
+        </>
+      ) : (
+        <>
+          <PlanTabs />
+          <h1 className="figure text-4xl">Programmes</h1>
+          <Placeholder className="mt-2 h-5 w-64" />
+        </>
+      )}
+    </Loading>
   )
 }
 
