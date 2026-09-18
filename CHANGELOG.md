@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-18 04:25
+
+- **The workout editor is one line per exercise.** Each exercise was a card with three
+  always-visible number fields and four buttons, so a six-exercise workout was a long scroll.
+  A row now shows the thumbnail, the name and "3×10 · 90 s rest"; a tap opens a sheet with
+  sets, reps or minutes, rest and the top of a rep range (`components/item-sheet.tsx`, which
+  also has the exercise's photos and Remove); the handle at the left drags a row into place on
+  touch and mouse alike (`components/use-reorder.ts`, `reorderItems()` in `lib/workouts.ts`);
+  a swipe to the left removes it with the same Undo. The estimated duration Today computes now
+  sits under the workout's name.
+
 ## 2026-09-18 04:05
 
 - **Workouts and the week are one Plan screen.** The week was seven native selects on its own

@@ -4,7 +4,7 @@ import { destroyDb, getDb } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
 import { templateItems } from '@/lib/queries'
 import { mutationKey } from '@/lib/sync/types'
-import { duplicateWorkout, restoreTemplateItem } from '@/lib/workouts'
+import { duplicateWorkout, reorderItems, restoreTemplateItem } from '@/lib/workouts'
 
 const USER = 'user-1'
 
@@ -116,5 +116,32 @@ describe('restoreTemplateItem', () => {
     await restoreTemplateItem(USER, 'i-bench')
 
     expect(await getDb(USER).outbox.count()).toBe(0)
+  })
+})
+
+describe('reorderItems', () => {
+  beforeEach(async () => {
+    await destroyDb(USER)
+    await seedWorkout()
+  })
+
+  it('rewrites positions in the order given', async () => {
+    await reorderItems(USER, 'push', ['i-ohp', 'i-bench'])
+
+    expect((await templateItems(USER, 'push')).map((item) => item.id)).toEqual(['i-ohp', 'i-bench'])
+    expect((await templateItems(USER, 'push')).map((item) => item.position)).toEqual([1, 2])
+  })
+
+  it('keeps an item left out of the order, at the end, and ignores unknown ids', async () => {
+    await reorderItems(USER, 'push', ['ghost', 'i-ohp'])
+
+    expect((await templateItems(USER, 'push')).map((item) => item.id)).toEqual(['i-ohp', 'i-bench'])
+  })
+
+  it('writes only the rows that moved', async () => {
+    await getDb(USER).outbox.clear()
+    await reorderItems(USER, 'push', ['i-bench', 'i-ohp'])
+    const queued = await getDb(USER).outbox.toArray()
+    expect(queued.map((m) => m.id)).not.toContain(mutationKey('templateItems', 'i-bench'))
   })
 })

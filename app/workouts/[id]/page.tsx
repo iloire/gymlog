@@ -1,32 +1,39 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronDown, ChevronLeft, ChevronUp, Copy, Plus, Trash2 } from 'lucide-react'
+import { ChevronLeft, Copy, GripVertical, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { ExercisePicker } from '@/components/exercise-picker'
+import { ItemSheet, type EditableItem } from '@/components/item-sheet'
 import { Loading, Placeholder } from '@/components/loading'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { UndoToast } from '@/components/undo-toast'
+import { useReorder } from '@/components/use-reorder'
 import { CARDIO_ITEM, isCardio } from '@/lib/cardio'
 import { getDb, type LocalTemplateItem } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
 import { newId } from '@/lib/id'
+import { estimateWorkoutMs, formatTarget, planSummary } from '@/lib/plan'
 import { activeProgram, templateItems } from '@/lib/queries'
-import { duplicateWorkout, restoreTemplateItem } from '@/lib/workouts'
+import { duplicateWorkout, reorderItems, restoreTemplateItem } from '@/lib/workouts'
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+/** How far a row is swiped left before it is removed. */
+const SWIPE_REMOVE_PX = 88
 
 export default function WorkoutEditorPage() {
   const userId = useUserId()
   const router = useRouter()
   const { id } = useParams<{ id: string }>()
   const [picking, setPicking] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [viewingExerciseId, setViewingExerciseId] = useState<string | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   // The exercise last removed, while its Undo is still on offer.
@@ -40,7 +47,7 @@ export default function WorkoutEditorPage() {
     if (!template || template.deletedAt !== null) return null
 
     const items = await templateItems(userId, id)
-    const named = await Promise.all(
+    const named: EditableItem[] = await Promise.all(
       items.map(async (item) => {
         const exercise = await db.exercises.get(item.exerciseId)
         return {
@@ -64,6 +71,16 @@ export default function WorkoutEditorPage() {
     return { template, items: named, scheduledOn }
   }, [userId, id])
 
+  const items = data?.items ?? []
+
+  const reorder = useReorder(items.length, (from, to) => {
+    if (!userId) return
+    const order = items.map((item) => item.id)
+    const [moved] = order.splice(from, 1)
+    if (moved) order.splice(to, 0, moved)
+    void reorderItems(userId, id, order)
+  })
+
   if (!userId || !data) {
     return (
       <Loading className="pt-5">
@@ -76,18 +93,16 @@ export default function WorkoutEditorPage() {
     )
   }
 
-  const { template, items, scheduledOn } = data
+  const { template, scheduledOn } = data
+  const editing = items.find((item) => item.id === editingId) ?? null
 
   async function update(item: LocalTemplateItem, changes: Partial<LocalTemplateItem>) {
     await writeRow(userId!, 'templateItems', { ...item, ...changes })
   }
 
-  async function move(index: number, delta: number) {
-    const a = items[index]
-    const b = items[index + delta]
-    if (!a || !b) return
-    await update(a, { position: b.position })
-    await update(b, { position: a.position })
+  async function remove(item: EditableItem) {
+    await deleteRow(userId!, 'templateItems', item.id)
+    setRemoved({ id: item.id, name: item.exerciseName })
   }
 
   return (
@@ -113,6 +128,19 @@ export default function WorkoutEditorPage() {
         />
       )}
 
+      {editing && !viewingExerciseId && (
+        <ItemSheet
+          item={editing}
+          onChange={(changes) => void update(editing, changes)}
+          onView={() => setViewingExerciseId(editing.exerciseId)}
+          onRemove={() => {
+            setEditingId(null)
+            void remove(editing)
+          }}
+          onClose={() => setEditingId(null)}
+        />
+      )}
+
       {viewingExerciseId && (
         <ExerciseDialog
           userId={userId}
@@ -135,94 +163,49 @@ export default function WorkoutEditorPage() {
           aria-label="Workout name"
           className="figure mt-4 w-full bg-transparent text-3xl outline-none focus-visible:text-plate-blue-lift"
         />
+        <p className="mt-1 text-sm text-ink-dim">{planSummary(items.length, estimateWorkoutMs(items))}</p>
 
-        <ul className="mt-6 space-y-3">
+        {/* One line per exercise, so a whole workout fits on a screen: the
+            handle drags it into place, a swipe left takes it out, and a tap
+            opens the sheet with its sets, reps and rest. */}
+        <ol className="mt-6 divide-y divide-line border-y border-line">
           {items.map((item, index) => (
-            <li key={item.id} className="rounded-md border border-line bg-surface p-4">
+            <li
+              key={item.id}
+              ref={reorder.rowRef(index)}
+              style={reorder.rowStyle(index)}
+              className={`flex items-stretch bg-ground ${reorder.dragging === index ? 'shadow-lg' : ''}`}
+            >
               <button
                 type="button"
-                onClick={() => setViewingExerciseId(item.exerciseId)}
-                className="flex w-full min-w-0 items-center gap-3 text-left"
+                aria-label={`Move ${item.exerciseName}`}
+                {...reorder.handleProps(index)}
+                className="flex w-10 shrink-0 cursor-grab items-center justify-center text-ink-dim active:cursor-grabbing"
+              >
+                <GripVertical size={18} aria-hidden />
+              </button>
+              <SwipeRow
+                onOpen={() => setEditingId(item.id)}
+                onRemove={() => void remove(item)}
+                label={`Edit ${item.exerciseName}`}
               >
                 <ExerciseFrames
                   exercise={{ name: item.exerciseName, images: item.exerciseImages }}
-                  className="aspect-[3/2] w-20 shrink-0"
+                  className="aspect-[3/2] w-14 shrink-0"
                   animate={false}
                 />
-                <span className="text-[15px]">{item.exerciseName}</span>
-              </button>
-
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                <NumberField
-                  label="Sets"
-                  value={item.sets}
-                  min={1}
-                  onChange={(sets) => void update(item, { sets })}
-                />
-                {item.cardio ? (
-                  <NumberField
-                    label="Time"
-                    unit="min"
-                    value={Math.round((item.targetDurationSec ?? CARDIO_ITEM.targetDurationSec) / 60)}
-                    min={1}
-                    onChange={(minutes) => void update(item, { targetDurationSec: minutes * 60 })}
-                  />
-                ) : (
-                  <NumberField
-                    label="Reps"
-                    value={item.targetReps}
-                    min={1}
-                    onChange={(targetReps) => void update(item, { targetReps })}
-                  />
-                )}
-                <NumberField
-                  label="Rest"
-                  unit="s"
-                  value={item.restSec}
-                  min={0}
-                  step={15}
-                  onChange={(restSec) => void update(item, { restSec })}
-                />
-              </div>
-
-              {/* 44px targets, and Remove at the far end from the arrows: a thumb
-                  reordering should not be able to take the exercise out. */}
-              <div className="-mx-3 mt-2 -mb-2 flex items-center justify-between text-ink-dim">
-                <div className="flex">
-                  <button
-                    type="button"
-                    aria-label="Move up"
-                    disabled={index === 0}
-                    onClick={() => void move(index, -1)}
-                    className="flex size-11 items-center justify-center disabled:opacity-25"
-                  >
-                    <ChevronUp size={20} aria-hidden />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Move down"
-                    disabled={index === items.length - 1}
-                    onClick={() => void move(index, 1)}
-                    className="flex size-11 items-center justify-center disabled:opacity-25"
-                  >
-                    <ChevronDown size={20} aria-hidden />
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  aria-label={`Remove ${item.exerciseName}`}
-                  onClick={async () => {
-                    await deleteRow(userId, 'templateItems', item.id)
-                    setRemoved({ id: item.id, name: item.exerciseName })
-                  }}
-                  className="flex size-11 items-center justify-center"
-                >
-                  <Trash2 size={18} aria-hidden />
-                </button>
-              </div>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[15px]">{item.exerciseName}</span>
+                  <span className="block text-sm text-ink-dim">
+                    <span className="figure">{formatTarget(item)}</span>
+                    {' · '}
+                    <span className="figure">{item.restSec} s</span> rest
+                  </span>
+                </span>
+              </SwipeRow>
             </li>
           ))}
-        </ul>
+        </ol>
 
         {items.length === 0 && (
           <p className="mt-6 border-y border-line py-6 text-[15px] text-ink-dim">
@@ -310,39 +293,65 @@ export default function WorkoutEditorPage() {
   )
 }
 
-function NumberField({
+/**
+ * A row that opens on a tap and goes on a swipe to the left. It follows the
+ * finger so the swipe is visible, snaps back short of the threshold, and a
+ * swipe never counts as the tap that follows it.
+ */
+function SwipeRow({
   label,
-  value,
-  unit,
-  min = 0,
-  step = 1,
-  onChange,
+  onOpen,
+  onRemove,
+  children,
 }: {
   label: string
-  value: number
-  unit?: string
-  min?: number
-  step?: number
-  onChange: (next: number) => void
+  onOpen: () => void
+  onRemove: () => void
+  children: React.ReactNode
 }) {
+  const [dx, setDx] = useState(0)
+  const start = useRef<{ x: number; y: number } | null>(null)
+  const swiped = useRef(false)
+
   return (
-    <label className="block">
-      <span className="mb-1 block text-xs text-ink-dim">
-        {label}
-        {unit ? ` (${unit})` : ''}
-      </span>
-      <input
-        type="number"
-        inputMode="numeric"
-        min={min}
-        step={step}
-        value={value}
-        onChange={(event) => {
-          const next = Number(event.target.value)
-          if (Number.isFinite(next) && next >= min) onChange(next)
-        }}
-        className="figure h-12 w-full rounded-md border border-line bg-ground px-2 text-center text-xl outline-none focus-visible:border-plate-blue-lift"
-      />
-    </label>
+    <button
+      type="button"
+      aria-label={label}
+      onClick={() => {
+        if (swiped.current) {
+          swiped.current = false
+          return
+        }
+        onOpen()
+      }}
+      onTouchStart={(event) => {
+        const touch = event.touches[0]
+        start.current = touch ? { x: touch.clientX, y: touch.clientY } : null
+        swiped.current = false
+      }}
+      onTouchMove={(event) => {
+        const touch = event.touches[0]
+        if (!start.current || !touch) return
+        const moveX = touch.clientX - start.current.x
+        const moveY = touch.clientY - start.current.y
+        // Sideways and leftward only; anything else is a scroll.
+        if (moveX < 0 && Math.abs(moveX) > Math.abs(moveY)) {
+          setDx(Math.max(moveX, -SWIPE_REMOVE_PX * 1.5))
+          swiped.current = true
+        }
+      }}
+      onTouchEnd={() => {
+        const gone = dx <= -SWIPE_REMOVE_PX
+        setDx(0)
+        start.current = null
+        if (gone) onRemove()
+      }}
+      style={{ transform: dx ? `translateX(${dx}px)` : undefined, transition: dx ? 'none' : 'transform 150ms ease-out' }}
+      className={`flex min-w-0 flex-1 items-center gap-3 py-3 pr-1 text-left ${
+        dx <= -SWIPE_REMOVE_PX ? 'text-ink-dim' : ''
+      }`}
+    >
+      {children}
+    </button>
   )
 }

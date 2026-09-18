@@ -208,10 +208,10 @@ The schema supports a user's own exercises (`exercises.userId` non-null) and syn
 writes to the global library, but there is no UI to create one. Name, equipment, muscles,
 optional photo (Vercel Blob or Supabase Storage), and cues.
 
-### 4.2 Rep ranges in the editor — S
+### ~~4.2 Rep ranges in the editor — S~~ ✅
 
-`templateItems.targetRepsMax` exists; the workout editor only sets a single rep target. Add
-"8–12"-style ranges. Prerequisite for double progression (§1.2).
+**Shipped 2026-09-18:** the top of the range is a field in the exercise's sheet in the editor;
+the gym screen runs double progression over it (§1.2).
 
 ### 4.3 Supersets and circuits — M
 

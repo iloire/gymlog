@@ -71,3 +71,26 @@ export async function restoreTemplateItem(userId: string, itemId: string): Promi
     })
   })
 }
+
+/**
+ * Put a workout's exercises in a new order — the editor's drag. `orderedIds`
+ * is every live item of the workout, first to last; positions are rewritten
+ * 1..n in one transaction, so a drag that crosses several rows lands whole.
+ * An id not in the list keeps its row but goes to the end.
+ */
+export async function reorderItems(userId: string, templateId: string, orderedIds: string[]): Promise<void> {
+  const db = getDb(userId)
+
+  await db.transaction('rw', [db.templateItems, db.outbox, db.meta], async () => {
+    const live = await templateItems(userId, templateId)
+    const rest = live.filter((item) => !orderedIds.includes(item.id)).map((item) => item.id)
+    const order = [...orderedIds.filter((id) => live.some((item) => item.id === id)), ...rest]
+
+    for (const [index, id] of order.entries()) {
+      const item = live.find((row) => row.id === id)
+      if (item && item.position !== index + 1) {
+        await writeRow(userId, 'templateItems', { id, position: index + 1 })
+      }
+    }
+  })
+}
