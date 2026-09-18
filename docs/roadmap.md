@@ -209,7 +209,8 @@ Planks, carries, cardio. The model is weight × reps only. Add a measurement typ
 ### 4.5 Swap an exercise mid-session — S
 
 The squat rack is taken: swap to an alternative sharing the primary muscle and equipment the gym
-has, for this session only. Favourites (already built) rank the suggestions.
+has, for this session only. Favourites (already built) rank the suggestions. It goes in the ⋮ menu
+beside the exercise name on the session screen, next to Remove exercise.
 
 ---
 

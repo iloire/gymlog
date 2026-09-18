@@ -9,6 +9,8 @@ import { Suspense, useEffect, useState } from 'react'
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseNote } from '@/components/exercise-note'
 import { ExerciseFrames } from '@/components/exercise-frames'
+import { OverflowMenu } from '@/components/overflow-menu'
+import { RemoveExercise } from '@/components/remove-exercise'
 import { RestTimer } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
 import { SetSquares } from '@/components/set-squares'
@@ -293,11 +295,36 @@ function Session() {
           {/* A long name steps down a size so it stays about as tall as the photo
               instead of wrapping to five lines on a narrow phone. */}
           <h1
-            className={`figure min-w-0 text-balance leading-tight ${exerciseName.length > 18 ? 'text-lg' : 'text-2xl'}`}
+            className={`figure min-w-0 flex-1 text-balance leading-tight ${exerciseName.length > 18 ? 'text-lg' : 'text-2xl'}`}
           >
             {exerciseName}
           </h1>
+
+          {/* Removing is the one thing you never want mid-set, so it is two taps
+              away behind ⋮ rather than a button under Next, and it takes no
+              height on the 320px phone where Log set already touches the bottom
+              edge. Swap exercise (roadmap §4.5) joins it here when it lands. */}
+          {exerciseId && (
+            <OverflowMenu
+              label={`More for ${exerciseName}`}
+              items={[{ label: 'Remove exercise', onSelect: () => setRemoving(exerciseId) }]}
+            />
+          )}
         </div>
+
+        {exerciseId && removing === exerciseId && (
+          <RemoveExercise
+            exerciseName={exerciseName}
+            loggedSets={groupLogs.some((log) => log.completedAt !== null)}
+            onCancel={() => setRemoving(null)}
+            onConfirm={async () => {
+              await removeFromSession(userId, id, exerciseId)
+              setRemoving(null)
+              // The next exercise slides into this index; past the end, the last one shows.
+              goTo(Math.max(0, Math.min(position, positions.length - 2)))
+            }}
+          />
+        )}
 
         <p className="mt-2 text-sm text-ink-dim">
           {previous ? (
@@ -390,9 +417,9 @@ function Session() {
           <p className="mt-8 text-ink-dim">This workout has no exercises yet.</p>
         )}
 
-        {/* Previous, Next and Remove sit at the bottom of the screen, where the
-            thumb is: on a tall phone the spare height opens up between the Log
-            button and this row instead of pooling under Remove exercise. */}
+        {/* Previous and Next sit at the bottom of the screen, where the thumb
+            is: on a tall phone the spare height opens up between the Log button
+            and this row instead of pooling under it. */}
         <div className="mt-auto pt-10">
           <div className="grid grid-cols-2 gap-3 border-t border-line pt-3">
             {previousName ? (
@@ -424,52 +451,6 @@ function Session() {
               </button>
             )}
           </div>
-
-          {exerciseId &&
-            (removing === exerciseId ? (
-              <div
-                role="alertdialog"
-                aria-labelledby="remove-exercise-title"
-                className="mt-4 rounded-md border border-plate-red p-4"
-              >
-                <p id="remove-exercise-title" className="text-[15px]">
-                  Remove {exerciseName} from this workout?
-                </p>
-                {groupLogs.some((log) => log.completedAt !== null) && (
-                  <p className="mt-1 text-sm text-ink-dim">The sets you logged for it go too.</p>
-                )}
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    autoFocus
-                    onClick={() => setRemoving(null)}
-                    className="h-12 rounded-md border border-line text-sm"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      await removeFromSession(userId, id, exerciseId)
-                      setRemoving(null)
-                      // The next exercise slides into this index; past the end, the last one shows.
-                      goTo(Math.max(0, Math.min(position, positions.length - 2)))
-                    }}
-                    className="h-12 rounded-md bg-plate-red text-sm font-semibold text-white"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setRemoving(exerciseId)}
-                className="mt-4 h-12 w-full rounded-md border border-line text-sm text-ink-dim"
-              >
-                Remove exercise
-              </button>
-            ))}
 
           {data.session.completedAt ? (
             // Finished by accident, or one more exercise in you: the workout goes

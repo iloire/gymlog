@@ -125,7 +125,10 @@ change. No all-caps labels, no monospace for data.
   adding an exercise, deleting the workout (`components/delete-session.tsx`) — lives where the
   workout is shown whole: its card on Today, its row in History. Only Finish / Reopen stay, and
   Finish only once every set is logged; ending a workout cut short
-  (`components/finish-session.tsx`) is on Today and History too, behind a confirm.
+  (`components/finish-session.tsx`) is on Today and History too, behind a confirm. What acts on
+  the exercise but is never wanted mid-set — Remove exercise, and Swap exercise when it lands — is
+  behind a ⋮ beside the name (`components/overflow-menu.tsx`), two taps and a modal confirm away,
+  never a button under Next where a thumb reaching for it can land.
 - **Sign in** is the one screen with a picture: equipment in one plate colour, no people, with the
   wordmark set large on its lower edge. See `docs/login-images.md`.
 - Motion answers a tap (a set collapsing into a square, the timer draining). Nothing animates on

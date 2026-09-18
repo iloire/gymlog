@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-18 00:26
+
+- **Remove exercise moves behind a ⋮ beside the exercise name.** It was a full-width button
+  under Next — the one action you never want mid-set, in the thumb's path — and its height was
+  what pushed Log set onto the bottom edge of a 320 × 568 phone. It is now an item in a small
+  overflow menu next to the name (`components/overflow-menu.tsx`), and the confirm is a modal
+  (`components/remove-exercise.tsx`) rather than a panel in the page. Swap exercise (roadmap §4.5)
+  joins the menu when it lands.
+
 ## 2026-09-18 00:21
 
 - **The rest bar has +30 s and Skip, and the last set starts none.** The timer ran on after the
