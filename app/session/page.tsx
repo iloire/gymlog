@@ -34,6 +34,7 @@ import {
   logSet,
   removeFromSession,
   reopenSession,
+  unlogSet,
 } from '@/lib/sessions'
 import { useWakeLock } from '@/lib/use-wake-lock'
 import { progressionIncrementKg, weightStepKg } from '@/lib/weights'
@@ -249,6 +250,16 @@ function Session() {
     }
   }
 
+  // A set back to still-to-do: the steppers return for it, on its own suggestion.
+  async function undoSet(log: LocalSetLog) {
+    if (!userId) return
+    await unlogSet(userId, log)
+    setSelectedId(null)
+    setDraft(null)
+  }
+  // The set to take back from the menu: the last one logged for this exercise.
+  const lastDone = groupLogs.filter((log) => log.completedAt !== null).at(-1)
+
   const previousNote = previous?.sets.find((set) => set.notes)?.notes
 
   // The suggestion first, then the weights already lifted this session and
@@ -389,11 +400,18 @@ function Session() {
           {/* Removing is the one thing you never want mid-set, so it is two taps
               away behind ⋮ rather than a button under Next, and it takes no
               height on the 320px phone where Log set already touches the bottom
-              edge. Swap exercise (roadmap §4.5) joins it here when it lands. */}
+              edge. Undoing the set just logged sits with it: Log tapped before
+              the set was done is a regret about the set, not the exercise.
+              Swap exercise (roadmap §4.5) joins them here when it lands. */}
           {exerciseId && (
             <OverflowMenu
               label={`More for ${exerciseName}`}
-              items={[{ label: 'Remove exercise', onSelect: () => setRemoving(exerciseId) }]}
+              items={[
+                ...(lastDone
+                  ? [{ label: `Undo set ${lastDone.setIndex}`, onSelect: () => void undoSet(lastDone) }]
+                  : []),
+                { label: 'Remove exercise', onSelect: () => setRemoving(exerciseId) },
+              ]}
             />
           )}
         </div>
@@ -536,6 +554,18 @@ function Session() {
 
             {activeSet.completedAt !== null && !timed && (
               <EffortChips userId={userId} log={activeSet} className="mt-4" />
+            )}
+
+            {/* A logged set picked to fix can also be taken back altogether:
+                the square goes hollow and the set is there to do again. */}
+            {activeSet.completedAt !== null && (
+              <button
+                type="button"
+                onClick={() => void undoSet(activeSet)}
+                className="mt-3 h-11 w-full rounded-md text-sm text-ink-dim"
+              >
+                Clear set {activeSet.setIndex}
+              </button>
             )}
 
             {groupLogs[0] && <ExerciseNote key={groupLogs[0].id} userId={userId} log={groupLogs[0]} />}

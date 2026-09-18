@@ -4,6 +4,7 @@ import { destroyDb, getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
 import { bodyWeightId, sessionId, setLogId } from '@/lib/id'
 import { dateToEpoch } from '@/lib/queries'
+import { currentRest, startRest } from '@/lib/rest'
 import {
   activeSet,
   addToSession,
@@ -17,6 +18,7 @@ import {
   reopenSession,
   rescheduleSession,
   startSession,
+  unlogSet,
 } from '@/lib/sessions'
 import { mutationKey } from '@/lib/sync/types'
 
@@ -182,6 +184,40 @@ describe('logging sets', () => {
       reps: 6,
       completedAt: logged.completedAt,
     })
+  })
+
+  it('takes a logged set back to still-to-do, keeping the prescription and the note', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [set] = await logsFor(id)
+    await logSet(USER, set!, { weightKg: 60, reps: 5 })
+    await writeRow(USER, 'setLogs', { id: set!.id, effort: 'hard', notes: 'Belt on' })
+
+    await unlogSet(USER, (await getDb(USER).setLogs.get(set!.id))!)
+
+    expect(await getDb(USER).setLogs.get(set!.id)).toMatchObject({
+      weightKg: null,
+      reps: null,
+      effort: null,
+      completedAt: null,
+      targetWeightKg: 60,
+      targetReps: 5,
+      notes: 'Belt on',
+      deletedAt: null,
+    })
+    expect(await getDb(USER).outbox.get(mutationKey('setLogs', set!.id))).toBeDefined()
+    expect(activeSet(await logsFor(id), null)?.id).toBe(set!.id)
+  })
+
+  it('ends the rest the undone set started', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [set] = await logsFor(id)
+    await logSet(USER, set!, { weightKg: 60, reps: 5 })
+    await startRest(USER, id, 180)
+    expect(await currentRest(USER)).not.toBeNull()
+
+    await unlogSet(USER, set!)
+
+    expect(await currentRest(USER)).toBeNull()
   })
 
   it('finishes a session', async () => {

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-18 07:13
+
+- **Undo a logged set.** Log tapped before the set was done, or on the wrong set, could only
+  be fixed by re-logging it or removing the whole exercise. The ⋮ menu now offers "Undo set N"
+  for the last set logged on the exercise, and a logged set picked to fix has "Clear set N"
+  under Update. Either takes the set back to still-to-do — figures, effort and completion go,
+  the prescription and the note stay — and ends the rest it started, so the steppers come
+  back for it (`unlogSet()` in `lib/sessions.ts`, with tests).
+
 ## 2026-09-18 05:20
 
 - **Copy and screenshots.** The library no longer says "438 movements, saved on this phone";

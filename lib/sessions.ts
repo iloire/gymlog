@@ -5,6 +5,7 @@ import { getDb, type LocalExercise, type LocalSession, type LocalSetLog } from '
 import { deleteRow, writeRow } from '@/lib/db/write'
 import { bodyWeightId, sessionId, setLogId } from '@/lib/id'
 import { dateToEpoch, templateItems, today } from '@/lib/queries'
+import { clearRest, currentRest } from '@/lib/rest'
 
 /**
  * Start (or re-open) the session for a template on a date.
@@ -120,6 +121,26 @@ export async function logSet(
     // Correcting a set later keeps when it was done, not when it was fixed.
     completedAt: log.completedAt ?? Date.now(),
   })
+}
+
+/**
+ * Take a logged set back to still-to-do — Log tapped before the set was done,
+ * or on the wrong set. Its figures, how it felt and when it was done all go;
+ * the prescription and the exercise's note on the row stay. The rest the set
+ * started ends with it: there is no set to rest from, and the steppers come
+ * back for the set instead of the clock.
+ */
+export async function unlogSet(userId: string, log: LocalSetLog): Promise<void> {
+  await writeRow(userId, 'setLogs', {
+    id: log.id,
+    weightKg: null,
+    reps: null,
+    durationSec: null,
+    effort: null,
+    completedAt: null,
+  })
+  const rest = await currentRest(userId)
+  if (rest?.sessionId === log.sessionId) await clearRest(userId)
 }
 
 /**
