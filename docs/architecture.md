@@ -48,16 +48,36 @@ Components never fetch. The sync engine is the only network caller, and it runs 
 - **Cursor** is `users.syncRev`, a server-assigned monotonic counter bumped once per written row.
   Delta pull is `WHERE user_id = ? AND rev > ?` — immune to clock skew. `cursor: 0` is the
   bootstrap snapshot, so there is no separate bootstrap endpoint.
-- **Conflict resolution** is last-write-wins per row on `updatedAt`; on an exact tie the stored
-  row stands. (The plan proposed a `clientId` tie-break; a same-millisecond edit of the same row
-  from two devices is vanishingly rare and either answer is fine, so it wasn't worth a column on
-  every table.) This is acceptable *only* because the conflict grain is one set, not one workout:
-  two devices touching different sets both win.
-- **Rejections** come back as `stale` (a newer version is stored), `forbidden` (the row belongs to
+- **Conflict resolution** is last-write-wins per row on `updatedAt`, with two exceptions:
+  - An exact tie is the same write arriving again (the reply to the first push was lost and the
+    device retried), so it counts as applied and the stored row stands. Nobody is told their own
+    change was "overwritten".
+  - A **fresh row never overwrites a stored one**. Fresh means `createdAt === updatedAt`: the
+    device's first write, made without knowing the row existed. Opening a workout pre-creates
+    every set with a deterministic id, so a laptop opening today's workout after the phone logged
+    it mints the same 22 rows, empty and newer. Under plain last-write-wins they would blank the
+    logged sets; instead they lose, and the device takes the logged ones (`isFreshRow()` in
+    `lib/sync/types.ts`).
+
+  This is acceptable *only* because the conflict grain is one set, not one workout: two devices
+  touching different sets both win.
+- **Rejections** come back as `stale` (the stored row stood), `forbidden` (the row belongs to
   another user, or to the read-only global library) or `invalid` (the database refused it, e.g. a
   row referencing one that does not exist). A forbidden rejection never echoes the other user's
   row back. Every rejection is final — the client drops it from the outbox — so one bad row can
-  never block the changes queued behind it.
+  never block the changes queued behind it. On `stale` the client **writes the winner into its
+  local table**, so the two devices agree instead of one keeping a version the server will never
+  hold.
+- **Nothing a device sent is thrown away.** Every rejected row is kept whole in `sync_conflicts`
+  (server only: user, device, table, row id, reason, the losing row as JSON, the winner's
+  `updatedAt`), unless it was blank — a pre-created set nobody did, a session with nothing in it
+  (`isBlankRow()`). Blank losers are also left out of the badge's "overwritten" count. Nothing
+  in the app reads the table yet; it is the record to recover a lost set from by hand.
+- **One-time repair.** Before winners were applied, a device that lost a push kept its losing
+  rows and pulled nothing to replace them, so its copy drifted from the server's for good. The
+  first sync after this fix pulls with `cursor: 0`; any row from before the device's real cursor
+  whose local copy differs is re-queued instead of overwritten, so the next push logs it as a
+  conflict and brings back the winner. `meta.repaired` marks it done.
 - **Parents first.** The server sorts each push into schema dependency order (`SYNC_TABLES`, which
   a test keeps identical to `syncedTables` in `db/schema.ts`) before applying it. Turso enforces
   foreign keys, and the client's order cannot be trusted: re-editing a row moves its outbox entry

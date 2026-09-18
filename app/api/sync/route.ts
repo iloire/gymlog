@@ -3,9 +3,17 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { db } from '@/db'
-import { exercises, syncedTables as tables, users } from '@/db/schema'
+import { exercises, syncConflicts, syncedTables as tables, users } from '@/db/schema'
 import { currentUserId } from '@/lib/auth'
-import { MAX_PUSH, SYNC_TABLES, type RejectedMutation, type SyncRow, type SyncTable } from '@/lib/sync/types'
+import {
+  MAX_PUSH,
+  SYNC_TABLES,
+  isBlankRow,
+  isFreshRow,
+  type RejectedMutation,
+  type SyncRow,
+  type SyncTable,
+} from '@/lib/sync/types'
 import { UNITS } from '@/lib/units'
 
 /**
@@ -46,7 +54,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'bad_request', issues: parsed.error.issues }, { status: 400 })
   }
 
-  const { cursor, globalCursor, mutations, unit: chosenUnit } = parsed.data
+  const { cursor, globalCursor, clientId, mutations, unit: chosenUnit } = parsed.data
   const applied: string[] = []
   const rejected: RejectedMutation[] = []
 
@@ -91,7 +99,7 @@ export async function POST(request: Request) {
 
       const [existing] = await tx.select().from(table).where(eq(table.id, mutation.rowId)).limit(1)
 
-      const reject = (reason: RejectedMutation['reason']) =>
+      const reject = async (reason: RejectedMutation['reason']) => {
         rejected.push({
           mutationId: mutation.id,
           table: mutation.table,
@@ -100,17 +108,49 @@ export async function POST(request: Request) {
           // Never echo another user's row back; an invalid row has no winner.
           winner: reason === 'stale' ? (existing as SyncRow) : { id: mutation.rowId, updatedAt: 0 },
         })
+        // Nothing a device sent is thrown away: the losing row is kept whole,
+        // to be recovered from by hand. A blank one has nothing to recover.
+        if (isBlankRow(mutation.table, incoming)) return
+        try {
+          await tx.insert(syncConflicts).values({
+            id: crypto.randomUUID(),
+            userId,
+            clientId,
+            table: mutation.table,
+            rowId: mutation.rowId,
+            reason,
+            lost: incoming,
+            winnerUpdatedAt: reason === 'stale' ? Number((existing as SyncRow).updatedAt) : null,
+            createdAt: Date.now(),
+          })
+        } catch (error) {
+          // The log must never be what breaks a sync — say so and carry on.
+          console.error(`sync: could not log conflict ${mutation.table}/${mutation.rowId}`, error)
+        }
+      }
 
       // A row owned by someone else is not ours to touch, and a global library
       // row (userId NULL) is read-only to every client.
       if (existing && (existing as { userId: string | null }).userId !== userId) {
-        reject('forbidden')
+        await reject('forbidden')
         continue
       }
 
-      // Last-write-wins on updatedAt. On an exact tie the stored row stands.
-      if (existing && Number((existing as { updatedAt: number }).updatedAt) >= updatedAt) {
-        reject('stale')
+      const stored = existing ? Number((existing as { updatedAt: number }).updatedAt) : null
+
+      // The same write arriving again — the reply to the first one was lost and
+      // the device retried. It is already stored; say so, and no device is told
+      // its own change was overwritten.
+      if (stored === updatedAt) {
+        applied.push(mutation.id)
+        continue
+      }
+
+      // A device that did not know the row existed wrote its own from scratch.
+      // Whatever is stored was put there on purpose; the fresh copy never
+      // replaces it, however new its timestamp. Otherwise last-write-wins.
+      if (stored !== null && (stored > updatedAt || isFreshRow(incoming))) {
+        await reject('stale')
         continue
       }
 
@@ -126,7 +166,7 @@ export async function POST(request: Request) {
       } catch (error) {
         // A constraint failure aborts only this statement, not the transaction.
         console.error(`sync: refused ${mutation.table}/${mutation.rowId}`, error)
-        reject('invalid')
+        await reject('invalid')
         continue
       }
 

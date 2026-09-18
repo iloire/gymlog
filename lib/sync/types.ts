@@ -56,6 +56,31 @@ export function mutationKey(table: SyncTable, rowId: string): string {
   return `${table}:${rowId}`
 }
 
+/**
+ * A row created on a device that did not know the row already existed: its
+ * first write, so created and updated at the same instant. Opening a workout
+ * pre-creates every set with a deterministic id, and a second device doing the
+ * same offline mints the very same rows. Such a row must never replace what is
+ * stored — with last-write-wins alone, opening today's workout on the laptop
+ * after logging it on the phone would blank every set.
+ */
+export function isFreshRow(row: SyncRow): boolean {
+  return Number(row.createdAt) === Number(row.updatedAt)
+}
+
+/**
+ * A row with nothing in it worth keeping: a pre-created set nobody did, or a
+ * session with nothing logged and no note. Losing one is not losing anything,
+ * so neither the badge nor the server's conflict log counts it.
+ */
+export function isBlankRow(table: SyncTable, row: SyncRow): boolean {
+  if (table === 'setLogs') {
+    return row.completedAt == null && row.weightKg == null && row.reps == null && row.durationSec == null
+  }
+  if (table === 'sessions') return row.completedAt == null && row.notes == null
+  return false
+}
+
 export type SyncRequest = {
   /** `users.syncRev` as of the last successful pull. 0 bootstraps a full snapshot. */
   cursor: number
@@ -77,11 +102,15 @@ export type RejectedMutation = {
   table: SyncTable
   rowId: string
   /**
-   * `stale` — a newer version is already stored (last-write-wins).
+   * `stale` — the stored row stands: it is newer (last-write-wins), or the
+   *   sent row was a fresh copy from a device that did not know it existed
+   *   (see `isFreshRow`). The client takes `winner` so the devices agree.
    * `forbidden` — the row belongs to another user or to the global library.
    * `invalid` — the database refused it (e.g. it references a row that does
    *   not exist). Rejected rather than retried, so one bad row cannot wedge
    *   every other change behind it in the outbox forever.
+   * Whatever the reason, the server keeps the losing row in `sync_conflicts`
+   * unless it was blank, so a lost change can always be recovered.
    */
   reason: 'stale' | 'forbidden' | 'invalid'
   winner: SyncRow

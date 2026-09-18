@@ -43,6 +43,13 @@
       "when": 1789693690091,
       "tag": "0005_set_effort",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1789723522465,
+      "tag": "0006_sync_conflicts",
+      "breakpoints": true
     }
   ]
 }

@@ -339,6 +339,37 @@ export const bodyWeights = sqliteTable(
   ],
 )
 
+// ---------------------------------------------------------- sync conflicts
+
+/**
+ * Every row a push lost, kept whole. Last-write-wins drops the losing version
+ * of a row, and a set logged on one phone and overwritten from another would
+ * otherwise be gone for good. Server only, never synced; nothing reads it in
+ * the app yet — it is the record to recover from. Blank rows (a pre-created
+ * set nobody did, a session with nothing in it) are not worth a row here and
+ * are not logged; see `isBlankRow()` in `lib/sync/types.ts`.
+ */
+export const syncConflicts = sqliteTable(
+  'sync_conflicts',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** The device that sent the losing row. */
+    clientId: text('client_id').notNull(),
+    table: text('table_name').notNull(),
+    rowId: text('row_id').notNull(),
+    reason: text('reason', { enum: ['stale', 'forbidden', 'invalid'] }).notNull(),
+    /** The losing row exactly as the device sent it, as JSON. */
+    lost: text('lost', { mode: 'json' }).$type<Record<string, unknown>>().notNull(),
+    /** `updatedAt` of the row that stood, so the two can be compared. */
+    winnerUpdatedAt: integer('winner_updated_at'),
+    createdAt: integer('created_at').notNull(),
+  },
+  (t) => [index('conflict_user').on(t.userId, t.createdAt)],
+)
+
 // ------------------------------------------------------------- exports
 
 /** Tables the sync engine mirrors to the client, in foreign-key-safe apply order. */
@@ -358,6 +389,7 @@ export type SyncedTableName = keyof typeof syncedTables
 
 export type User = typeof users.$inferSelect
 export type ApiToken = typeof apiTokens.$inferSelect
+export type SyncConflict = typeof syncConflicts.$inferSelect
 export type Exercise = typeof exercises.$inferSelect
 export type ExerciseNote = typeof exerciseNotes.$inferSelect
 export type WorkoutTemplate = typeof workoutTemplates.$inferSelect

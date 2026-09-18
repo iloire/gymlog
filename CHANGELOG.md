@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-18 09:28
+
+- **Sync never loses a row, and a fresh copy never blanks a logged set.** After the outage the
+  badge said "20 changes were overwritten by another device", and the losing device kept its
+  version while the server kept the other, for good. Three holes closed. A row a device created
+  without knowing it existed (opening a workout pre-creates every set with the same deterministic
+  id on every device) no longer overwrites what is stored, however new its timestamp, so a laptop
+  opening today's workout after the phone logged it can no longer blank the sets. An exact
+  timestamp tie is the same write arriving again and counts as applied, so a lost reply and a
+  retry no longer read as "overwritten". Every rejected row is kept whole in a new
+  `sync_conflicts` table with the device that sent it, unless it was blank, and blank losers no
+  longer count on the badge. A losing device now takes the winner, so devices agree; a one-time
+  full pull repairs devices that already drifted, re-queueing what they held that the server did
+  not so it is logged rather than lost. Needs `npm run db:migrate:prod` (migration 0006); the
+  route logs and carries on if the table is not there yet.
+
 ## 2026-09-18 09:26
 
 - **Today after a workout is just today's workout.** Finishing Upper B on a day the programme

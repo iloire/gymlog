@@ -6,6 +6,7 @@ import { DEFAULT_UNIT, parseUnit, type Unit } from '@/lib/units'
 import {
   MAX_PUSH,
   SYNC_TABLES,
+  isBlankRow,
   mutationKey,
   type Mutation,
   type RejectedMutation,
@@ -24,6 +25,13 @@ const META_REJECTIONS = 'rejections'
 const META_UNIT = 'unit'
 /** A unit chosen here and not yet pushed; cleared once the server has it. */
 const META_UNIT_PENDING = 'unitPending'
+/**
+ * Set once the device has re-pulled everything and re-queued what it held that
+ * the server did not. Before winners were applied on a stale rejection, a
+ * device kept its losing rows and pulled nothing to replace them, so its copy
+ * drifted from the server's for good; see `repair` in run().
+ */
+const META_REPAIRED = 'repaired'
 
 /** How many rejections to keep for the badge; older ones roll off. */
 const MAX_REJECTIONS = 20
@@ -96,9 +104,14 @@ async function run(userId: string): Promise<SyncResult> {
   // more than the server accepts in one request.
   const mutations = await db.outbox.orderBy('queuedAt').limit(MAX_PUSH).toArray()
   const pendingUnit = await meta<Unit | null>(db, META_UNIT_PENDING, null)
+  const cursor = await meta<number>(db, META_CURSOR, 0)
+  // One full pull to catch up a device that drifted (see META_REPAIRED). Rows
+  // the server sends from before the cursor are ones this device should hold
+  // exactly; a local copy that differs is a change the server never took.
+  const repair = !(await meta<boolean>(db, META_REPAIRED, false))
 
   const body: SyncRequest = {
-    cursor: await meta<number>(db, META_CURSOR, 0),
+    cursor: repair ? 0 : cursor,
     globalCursor: await meta<number>(db, META_GLOBAL_CURSOR, 0),
     clientId: await clientId(db),
     mutations,
@@ -121,6 +134,7 @@ async function run(userId: string): Promise<SyncResult> {
 
   const result: SyncResponse = await response.json()
   let pulled = 0
+  let worthTellingCount = 0
 
   await db.transaction('rw', db.tables, async () => {
     for (const table of SYNC_TABLES) {
@@ -131,7 +145,21 @@ async function run(userId: string): Promise<SyncResult> {
       const pending = new Set(
         (await db.outbox.where('table').equals(table).toArray()).map((m) => m.rowId),
       )
-      const incoming = rows.filter((row) => !pending.has(row.id))
+      const incoming: SyncRow[] = []
+      for (const row of rows) {
+        if (pending.has(row.id)) continue
+        if (repair && Number(row.rev) <= cursor) {
+          // Already pulled once. A local copy that differs lost a push while
+          // rejections were dropped on the floor: it goes back in the outbox,
+          // so the server logs it and sends the winner, and the device converges.
+          const local = (await db.table(table).get(row.id)) as SyncRow | undefined
+          if (local && Number(local.updatedAt) !== Number(row.updatedAt)) {
+            await db.outbox.put(mutationFor(table, local))
+            continue
+          }
+        }
+        incoming.push(row)
+      }
       if (!incoming.length) continue
 
       await db.table(table).bulkPut(incoming)
@@ -149,16 +177,33 @@ async function run(userId: string): Promise<SyncResult> {
       if (current && current.queuedAt === sent.get(id)) await db.outbox.delete(id)
     }
 
+    // The stored row won: take it, so this device shows what the other one
+    // did instead of a version the server will never hold. Not if the row was
+    // edited again mid-flight — that edit goes up next and settles it.
+    for (const r of result.rejected) {
+      if (r.reason !== 'stale') continue
+      const current = await db.outbox.get(r.mutationId)
+      if (current && current.queuedAt !== sent.get(r.mutationId)) continue
+      await db.table(r.table).put(r.winner)
+    }
+
     const globalMax = (result.changes.exercises ?? [])
       .filter((row) => row.userId === null)
       .reduce((max, row) => Math.max(max, Number(row.updatedAt) || 0), 0)
 
     // What was refused stays on record until the badge is dismissed: a set
     // overwritten by another phone, or a row the server cannot store, must
-    // not vanish from the outbox in silence.
-    if (result.rejected.length) {
+    // not vanish from the outbox in silence. A blank row — a pre-created set
+    // nobody did — lost nothing and is not worth a word.
+    const sentRow = new Map(mutations.map((m) => [m.id, m.row]))
+    const worthTelling = result.rejected.filter((r) => {
+      const row = sentRow.get(r.mutationId)
+      return !row || !isBlankRow(r.table, row)
+    })
+    worthTellingCount = worthTelling.length
+    if (worthTelling.length) {
       const kept = await meta<Rejection[]>(db, META_REJECTIONS, [])
-      const fresh = result.rejected.map((r) => ({ table: r.table, rowId: r.rowId, reason: r.reason, at: Date.now() }))
+      const fresh = worthTelling.map((r) => ({ table: r.table, rowId: r.rowId, reason: r.reason, at: Date.now() }))
       await setMeta(db, META_REJECTIONS, [...kept, ...fresh].slice(-MAX_REJECTIONS))
     }
 
@@ -172,6 +217,7 @@ async function run(userId: string): Promise<SyncResult> {
     }
 
     await setMeta(db, META_CURSOR, result.cursor)
+    if (repair) await setMeta(db, META_REPAIRED, true)
     if (globalMax) await setMeta(db, META_GLOBAL_CURSOR, globalMax)
     await setMeta(db, META_CLOCK_OFFSET, result.serverTime - Date.now())
     await setMeta(db, META_LAST_SYNC, result.serverTime)
@@ -181,7 +227,7 @@ async function run(userId: string): Promise<SyncResult> {
     ok: true,
     pushed: result.applied.length,
     pulled,
-    rejected: result.rejected.length,
+    rejected: worthTellingCount,
   }
 }
 

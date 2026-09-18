@@ -159,6 +159,70 @@ describe('sync — push', () => {
     expect(await getDb(USER).outbox.count()).toBe(0)
   })
 
+  it('takes the winner when the stored row stood, so the devices agree', async () => {
+    await writeRow(USER, 'workoutTemplates', { id: 't1', name: 'Mine' })
+    server(() =>
+      response({
+        rejected: [
+          {
+            mutationId: mutationKey('workoutTemplates', 't1'),
+            table: 'workoutTemplates',
+            rowId: 't1',
+            reason: 'stale',
+            winner: { id: 't1', name: 'Theirs', updatedAt: 9, deletedAt: null },
+          },
+        ],
+      }),
+    )
+
+    await sync(USER)
+
+    expect((await getDb(USER).workoutTemplates.get('t1'))?.name).toBe('Theirs')
+    expect(await getDb(USER).outbox.count()).toBe(0)
+  })
+
+  it('keeps an edit made while the request was in flight over the winner', async () => {
+    await writeRow(USER, 'setLogs', { id: 'l1', weightKg: 60 })
+    server(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 5))
+      await writeRow(USER, 'setLogs', { id: 'l1', weightKg: 62.5 })
+      return response({
+        rejected: [
+          { mutationId: mutationKey('setLogs', 'l1'), table: 'setLogs', rowId: 'l1', reason: 'stale', winner: { id: 'l1', weightKg: 50, updatedAt: 9 } },
+        ],
+      })
+    })
+
+    await sync(USER)
+
+    expect((await getDb(USER).setLogs.get('l1'))?.weightKg).toBe(62.5)
+    expect((await getDb(USER).outbox.get(mutationKey('setLogs', 'l1')))?.row.weightKg).toBe(62.5)
+  })
+
+  it('says nothing about a blank set that lost to one that was done', async () => {
+    // Opening a workout pre-creates its sets; the other phone had already done this one.
+    await writeRow(USER, 'setLogs', { id: 'l1', weightKg: null, reps: null, durationSec: null, completedAt: null })
+    server(() =>
+      response({
+        rejected: [
+          {
+            mutationId: mutationKey('setLogs', 'l1'),
+            table: 'setLogs',
+            rowId: 'l1',
+            reason: 'stale',
+            winner: { id: 'l1', weightKg: 60, reps: 5, completedAt: 1, updatedAt: 9 },
+          },
+        ],
+      }),
+    )
+
+    const result = await sync(USER)
+
+    expect(result).toMatchObject({ ok: true, rejected: 0 })
+    expect(await rejections(USER)).toEqual([])
+    expect((await getDb(USER).setLogs.get('l1'))?.weightKg).toBe(60)
+  })
+
   it('keeps an edit made while the request was in flight', async () => {
     await writeRow(USER, 'setLogs', { id: 'l1', weightKg: 60 })
     server(async (request) => {
@@ -203,6 +267,39 @@ describe('sync — pull', () => {
     await sync(USER)
 
     expect((await getDb(USER).setLogs.get('l1'))?.weightKg).toBe(100)
+  })
+
+  it('re-pulls everything once and re-queues what it held that the server did not', async () => {
+    // A device from before winners were applied: it kept the rows it lost and
+    // the server holds different ones. Its outbox is empty and its cursor at 10.
+    const db = getDb(USER)
+    await db.meta.put({ key: 'cursor', value: 10 })
+    await db.table('setLogs').put({ id: 'l1', weightKg: 55, updatedAt: 100, deletedAt: null })
+    await db.table('setLogs').put({ id: 'l2', weightKg: 80, updatedAt: 100, deletedAt: null })
+    const { calls } = server(() =>
+      response({
+        cursor: 12,
+        changes: {
+          setLogs: [
+            // Before the cursor and different: this device lost a push for it.
+            { id: 'l1', weightKg: 60, updatedAt: 200, rev: 3, deletedAt: null },
+            // Before the cursor and the same write: nothing to do.
+            { id: 'l2', weightKg: 80, updatedAt: 100, rev: 4, deletedAt: null },
+            // After the cursor: an ordinary change from the other device.
+            { id: 'l3', weightKg: 70, updatedAt: 200, rev: 12, deletedAt: null },
+          ],
+        },
+      }),
+    )
+
+    await sync(USER)
+    await sync(USER)
+
+    expect(calls[0]?.cursor).toBe(0)
+    expect((await db.setLogs.get('l1'))?.weightKg).toBe(55)
+    expect(calls[1]?.mutations.map((m) => [m.rowId, m.row.weightKg])).toEqual([['l1', 55]])
+    expect((await db.setLogs.get('l3'))?.weightKg).toBe(70)
+    expect(calls[1]?.cursor).toBe(12)
   })
 
   it('remembers the cursor and sends it next time', async () => {

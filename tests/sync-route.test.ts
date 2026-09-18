@@ -170,13 +170,62 @@ describe('POST /api/sync — push', () => {
     expect(body.rejected[0]?.winner).toMatchObject({ name: 'Kept' })
   })
 
-  it('keeps the stored row on an exact updatedAt tie', async () => {
+  it('takes an exact updatedAt tie as the same write arriving again', async () => {
+    // The reply to the first push was lost and the device retried. The row is
+    // already stored: applied, not "overwritten by another device".
     await sync([template('t1', { name: 'First', updatedAt: 1500 })])
     const { body } = await sync([template('t1', { name: 'Second', updatedAt: 1500 })])
 
-    expect(body.rejected[0]?.reason).toBe('stale')
+    expect(body.applied).toEqual(['workoutTemplates:t1'])
+    expect(body.rejected).toEqual([])
     const [row] = await db.select().from(schema.workoutTemplates)
     expect(row?.name).toBe('First')
+    expect(await db.select().from(schema.syncConflicts)).toHaveLength(0)
+  })
+
+  it('never lets a fresh copy of a set blank one that was done', async () => {
+    // Logged on the phone; then the laptop, which never heard of it, opens the
+    // same workout and pre-creates the same set, empty, with a newer timestamp.
+    await insertExercise('Barbell_Squat')
+    await sync([session('session-1'), setLog('set-1', 'session-1', { weightKg: 60, reps: 5 })])
+    const blank = setLog('set-1', 'session-1', {
+      weightKg: null,
+      reps: null,
+      completedAt: null,
+      createdAt: 5000,
+      updatedAt: 5000,
+    })
+
+    const { body } = await sync([blank])
+
+    expect(body.rejected).toMatchObject([{ rowId: 'set-1', reason: 'stale' }])
+    expect(body.rejected[0]?.winner).toMatchObject({ weightKg: 60, reps: 5 })
+    const [row] = await db.select().from(schema.setLogs)
+    expect(row).toMatchObject({ weightKg: 60, reps: 5 })
+    // A set nobody did is not worth a conflict row.
+    expect(await db.select().from(schema.syncConflicts)).toHaveLength(0)
+  })
+
+  it('never lets a fresh session reopen one that was finished', async () => {
+    await sync([session('session-1', { completedAt: 5 })])
+    const fresh = session('session-1', { completedAt: null, createdAt: 5000, updatedAt: 5000 })
+
+    const { body } = await sync([fresh])
+
+    expect(body.rejected).toMatchObject([{ rowId: 'session-1', reason: 'stale' }])
+    const [row] = await db.select().from(schema.sessions)
+    expect(row?.completedAt).toBe(5)
+  })
+
+  it('keeps a lost edit whole, with the device that sent it', async () => {
+    await sync([template('t1', { name: 'Kept', updatedAt: 2000 })])
+    await sync([template('t1', { name: 'Lost', updatedAt: 1000 })])
+
+    const conflicts = await db.select().from(schema.syncConflicts)
+    expect(conflicts).toMatchObject([
+      { userId: ALICE, clientId: 'device-1', table: 'workoutTemplates', rowId: 't1', reason: 'stale', winnerUpdatedAt: 2000 },
+    ])
+    expect(conflicts[0]?.lost).toMatchObject({ id: 't1', name: 'Lost', updatedAt: 1000 })
   })
 
   it("refuses to overwrite another user's row, without leaking it", async () => {
@@ -243,6 +292,8 @@ describe('POST /api/sync — push', () => {
     expect(body.applied).toEqual(['workoutTemplates:t1'])
     expect(body.rejected).toMatchObject([{ rowId: 'orphan', reason: 'invalid' }])
     expect(await db.select().from(schema.setLogs)).toHaveLength(0)
+    // ...but the set itself is not lost.
+    expect(await db.select().from(schema.syncConflicts)).toMatchObject([{ rowId: 'orphan', reason: 'invalid' }])
   })
 })
 
