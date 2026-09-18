@@ -267,14 +267,14 @@ function Session() {
         />
       )}
 
-      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-3 pb-8">
+      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-3 pb-8">
         {/* A thumbnail beside the name, not a hero above it: the photo is a
             reminder of the movement, and at full width it pushed the weight, the
             reps and the Log button off the first screen. Tapping it still opens
             the cues and instructions without leaving. Its width follows the
             screen height, so a short phone keeps the compact thumbnail that lets
-            Log set fit above the fold, and a tall one spends its spare height on
-            the photo rather than on empty space under Remove exercise. */}
+            Log set fit above the fold and a tall one shows the movement larger;
+            the width cap keeps room beside it for a long name on a narrow phone. */}
         <div className="flex items-center gap-3">
           {exercise?.images?.length ? (
             <button
@@ -283,7 +283,7 @@ function Session() {
               aria-label={`About ${exerciseName}`}
               className="relative shrink-0"
             >
-              <ExerciseFrames exercise={exercise} className="aspect-[3/2] w-[clamp(7rem,22dvh,11rem)]" />
+              <ExerciseFrames exercise={exercise} className="aspect-[3/2] w-[clamp(7rem,min(26dvh,45vw),13rem)]" />
               <span className="absolute right-1 bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-ground/70 text-ink">
                 <Info size={12} aria-hidden />
               </span>
@@ -390,107 +390,112 @@ function Session() {
           <p className="mt-8 text-ink-dim">This workout has no exercises yet.</p>
         )}
 
-        <div className="mt-10 grid grid-cols-2 gap-3 border-t border-line pt-3">
-          {previousName ? (
-            <button
-              type="button"
-              onClick={() => goTo(position - 1)}
-              className="flex min-w-0 items-center gap-1.5 py-2 text-left"
-            >
-              <ChevronLeft size={18} className="shrink-0 text-ink-dim" aria-hidden />
-              <span className="min-w-0">
-                <span className="block text-xs text-ink-dim">Previous</span>
-                <span className="block truncate text-sm">{previousName}</span>
-              </span>
-            </button>
-          ) : (
-            <span />
-          )}
-          {nextName && (
-            <button
-              type="button"
-              onClick={() => goTo(position + 1)}
-              className="col-start-2 flex min-w-0 items-center justify-end gap-1.5 py-2 text-right"
-            >
-              <span className="min-w-0">
-                <span className="block text-xs text-ink-dim">Next</span>
-                <span className="block truncate text-sm">{nextName}</span>
-              </span>
-              <ChevronRight size={18} className="shrink-0 text-ink-dim" aria-hidden />
-            </button>
-          )}
-        </div>
+        {/* Previous, Next and Remove sit at the bottom of the screen, where the
+            thumb is: on a tall phone the spare height opens up between the Log
+            button and this row instead of pooling under Remove exercise. */}
+        <div className="mt-auto pt-10">
+          <div className="grid grid-cols-2 gap-3 border-t border-line pt-3">
+            {previousName ? (
+              <button
+                type="button"
+                onClick={() => goTo(position - 1)}
+                className="flex min-w-0 items-center gap-1.5 py-2 text-left"
+              >
+                <ChevronLeft size={18} className="shrink-0 text-ink-dim" aria-hidden />
+                <span className="min-w-0">
+                  <span className="block text-xs text-ink-dim">Previous</span>
+                  <span className="block truncate text-sm">{previousName}</span>
+                </span>
+              </button>
+            ) : (
+              <span />
+            )}
+            {nextName && (
+              <button
+                type="button"
+                onClick={() => goTo(position + 1)}
+                className="col-start-2 flex min-w-0 items-center justify-end gap-1.5 py-2 text-right"
+              >
+                <span className="min-w-0">
+                  <span className="block text-xs text-ink-dim">Next</span>
+                  <span className="block truncate text-sm">{nextName}</span>
+                </span>
+                <ChevronRight size={18} className="shrink-0 text-ink-dim" aria-hidden />
+              </button>
+            )}
+          </div>
 
-        {exerciseId &&
-          (removing === exerciseId ? (
-            <div
-              role="alertdialog"
-              aria-labelledby="remove-exercise-title"
-              className="mt-4 rounded-md border border-plate-red p-4"
-            >
-              <p id="remove-exercise-title" className="text-[15px]">
-                Remove {exerciseName} from this workout?
-              </p>
-              {groupLogs.some((log) => log.completedAt !== null) && (
-                <p className="mt-1 text-sm text-ink-dim">The sets you logged for it go too.</p>
-              )}
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  autoFocus
-                  onClick={() => setRemoving(null)}
-                  className="h-12 rounded-md border border-line text-sm"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await removeFromSession(userId, id, exerciseId)
-                    setRemoving(null)
-                    // The next exercise slides into this index; past the end, the last one shows.
-                    goTo(Math.max(0, Math.min(position, positions.length - 2)))
-                  }}
-                  className="h-12 rounded-md bg-plate-red text-sm font-semibold text-white"
-                >
-                  Remove
-                </button>
+          {exerciseId &&
+            (removing === exerciseId ? (
+              <div
+                role="alertdialog"
+                aria-labelledby="remove-exercise-title"
+                className="mt-4 rounded-md border border-plate-red p-4"
+              >
+                <p id="remove-exercise-title" className="text-[15px]">
+                  Remove {exerciseName} from this workout?
+                </p>
+                {groupLogs.some((log) => log.completedAt !== null) && (
+                  <p className="mt-1 text-sm text-ink-dim">The sets you logged for it go too.</p>
+                )}
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    autoFocus
+                    onClick={() => setRemoving(null)}
+                    className="h-12 rounded-md border border-line text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await removeFromSession(userId, id, exerciseId)
+                      setRemoving(null)
+                      // The next exercise slides into this index; past the end, the last one shows.
+                      goTo(Math.max(0, Math.min(position, positions.length - 2)))
+                    }}
+                    className="h-12 rounded-md bg-plate-red text-sm font-semibold text-white"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setRemoving(exerciseId)}
-              className="mt-4 h-12 w-full rounded-md border border-line text-sm text-ink-dim"
-            >
-              Remove exercise
-            </button>
-          ))}
+            ) : (
+              <button
+                type="button"
+                onClick={() => setRemoving(exerciseId)}
+                className="mt-4 h-12 w-full rounded-md border border-line text-sm text-ink-dim"
+              >
+                Remove exercise
+              </button>
+            ))}
 
-        {data.session.completedAt ? (
-          // Finished by accident, or one more exercise in you: the workout goes
-          // back to being today's, with every set it already has.
-          <button
-            type="button"
-            onClick={() => void reopenSession(userId, data.session)}
-            className="mt-6 h-14 w-full rounded-md border border-line text-base font-semibold"
-          >
-            Reopen workout
-          </button>
-        ) : (
-          allDone && (
+          {data.session.completedAt ? (
+            // Finished by accident, or one more exercise in you: the workout goes
+            // back to being today's, with every set it already has.
             <button
               type="button"
-              onClick={async () => {
-                await finishSession(userId, data.session)
-                setFinished(true)
-              }}
+              onClick={() => void reopenSession(userId, data.session)}
               className="mt-6 h-14 w-full rounded-md border border-line text-base font-semibold"
             >
-              Finish workout
+              Reopen workout
             </button>
-          )
-        )}
+          ) : (
+            allDone && (
+              <button
+                type="button"
+                onClick={async () => {
+                  await finishSession(userId, data.session)
+                  setFinished(true)
+                }}
+                className="mt-6 h-14 w-full rounded-md border border-line text-base font-semibold"
+              >
+                Finish workout
+              </button>
+            )
+          )}
+        </div>
       </main>
 
       <div className="sticky bottom-0 pb-[env(safe-area-inset-bottom)]">
