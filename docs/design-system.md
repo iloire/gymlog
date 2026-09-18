@@ -101,8 +101,9 @@ change. No all-caps labels, no monospace for data.
   line, and each stepper carries its label inside the field. Tapping the photo opens cues and instructions in
   a dialog, never a new page. The workout's name in the header carries
   "2/3" and opens a sheet of every exercise with its squares, a tap on any to jump; a sideways
-  swipe moves to the next or previous exercise, and Previous / Next at the bottom name the
-  exercise they go to.
+  swipe moves to the next or previous exercise. There is no Previous / Next row at the bottom:
+  the header and the swipe already move between exercises, and the row's height is better spent
+  on the photo and the controls.
 - **Set squares carry information.** A row of squares per exercise — filled = done, outlined =
   pending. You read your progress through the workout without parsing text. Above it, last
   time's sets as a dashed, dimmed row aligned by set number, so the comparison is read down a

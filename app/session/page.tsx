@@ -1,7 +1,7 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronDown, ChevronLeft, ChevronRight, Info } from 'lucide-react'
+import { ChevronDown, ChevronLeft, Info } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
@@ -335,10 +335,6 @@ function Session() {
   // Nothing left to log and nothing picked to fix: Finish takes the Log button's place.
   const finishing = allDone && data.session.completedAt === null && selectedId === null
   const exerciseName = groupLogs[0]?.exerciseName ?? 'Workout'
-  const nameAt = (index: number) =>
-    data.logs.find((log) => log.position === positions[index])?.exerciseName
-  const previousName = position > 0 ? nameAt(position - 1) : undefined
-  const nextName = position < positions.length - 1 ? nameAt(position + 1) : undefined
 
   return (
     <div className="flex flex-1 flex-col">
@@ -415,9 +411,9 @@ function Session() {
             height is whatever the screen has left once the name, the squares, the
             steppers and Log set have theirs: a short phone gets a letterbox that
             keeps Log set above the fold, a tall one nearer the whole frame, and
-            spare height beyond the cap pools above Prev and Next as before. No
-            viewport arithmetic to keep right; the width never gives, only the
-            crop. Tapping it opens the cues and instructions without leaving. */}
+            spare height beyond the cap pools under the controls. No viewport
+            arithmetic to keep right; the width never gives, only the crop.
+            Tapping it opens the cues and instructions without leaving. */}
         {exercise?.images?.length ? (
           // The div does the sizing; the button covers it, because a percentage
           // height inside a flexed button resolves to nothing.
@@ -635,53 +631,23 @@ function Session() {
           <p className="mt-8 text-ink-dim">This workout has no exercises yet.</p>
         )}
 
-        {/* Previous and Next sit at the bottom of the screen, where the thumb
-            is: on a tall phone the spare height opens up between the Log button
-            and this row instead of pooling under it. */}
-        <div className="mt-auto pt-10">
-          <div className="grid grid-cols-2 gap-3 border-t border-line pt-3">
-            {previousName ? (
-              <button
-                type="button"
-                onClick={() => goTo(position - 1)}
-                className="flex min-w-0 items-center gap-1.5 py-2 text-left"
-              >
-                <ChevronLeft size={18} className="shrink-0 text-ink-dim" aria-hidden />
-                <span className="min-w-0">
-                  <span className="block text-xs text-ink-dim">Previous</span>
-                  <span className="block truncate text-sm">{previousName}</span>
-                </span>
-              </button>
-            ) : (
-              <span />
-            )}
-            {nextName && (
-              <button
-                type="button"
-                onClick={() => goTo(position + 1)}
-                className="col-start-2 flex min-w-0 items-center justify-end gap-1.5 py-2 text-right"
-              >
-                <span className="min-w-0">
-                  <span className="block text-xs text-ink-dim">Next</span>
-                  <span className="block truncate text-sm">{nextName}</span>
-                </span>
-                <ChevronRight size={18} className="shrink-0 text-ink-dim" aria-hidden />
-              </button>
-            )}
-          </div>
-
-          {data.session.completedAt && (
-            // Finished by accident, or one more exercise in you: the workout goes
-            // back to being today's, with every set it already has.
+        {/* The way between exercises is the swipe and the sheet behind the
+            workout's name in the header; no Previous / Next row, so the height
+            it took goes to the photo and the controls on a short phone. */}
+        {data.session.completedAt && (
+          // Finished by accident, or one more exercise in you: the workout goes
+          // back to being today's, with every set it already has. It sits at the
+          // bottom of the screen, where the thumb is.
+          <div className="mt-auto pt-10">
             <button
               type="button"
               onClick={() => void reopenSession(userId, data.session)}
-              className="mt-6 h-14 w-full rounded-md border border-line text-base font-semibold"
+              className="h-14 w-full rounded-md border border-line text-base font-semibold"
             >
               Reopen workout
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </main>
 
       <div className="sticky bottom-0 pb-[env(safe-area-inset-bottom)]">
@@ -717,7 +683,7 @@ function SessionLoading() {
         <Placeholder className="max-h-60 min-h-20 w-full flex-1" />
         <Placeholder className="mt-3 h-8 w-3/4" />
         {/* The controls' share of the height, so the photo lands at the size it keeps. */}
-        <div className="h-96" />
+        <div className="h-72" />
       </main>
     </div>
   )

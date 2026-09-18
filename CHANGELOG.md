@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 07:34
+
+- **No Previous / Next row on the session screen.** The header already moves between exercises:
+  the workout's name opens the sheet of every exercise, and a sideways swipe goes to the next or
+  previous one. The row at the bottom said the same thing a third way and took about 100px on
+  every phone. It is gone, and the height goes to the photo and the controls. Reopen workout, on
+  a finished session, still sits at the bottom of the screen.
+
 ## 2026-09-18 07:30
 
 - **Task lock for parallel agents.** Several agents work in this checkout at once and each only
