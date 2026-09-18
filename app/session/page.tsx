@@ -38,6 +38,7 @@ import {
   removeFromSession,
   reopenSession,
   restoreSet,
+  resumePosition,
   skipSet,
   unlogSet,
 } from '@/lib/sessions'
@@ -112,16 +113,14 @@ function Session() {
   }, [userId, id])
 
   const positions = data?.positions ?? []
-  // Opened with ?exercise= ("Do this now"): start on that exercise until you move.
+  // Opened with ?exercise= ("Do this now"): start on that exercise until you
+  // move. Otherwise on the exercise you were doing, so coming back after the
+  // app was closed does not mean swiping past everything already logged.
   const requested = params.get('exercise')
-  const position =
-    chosenPosition ??
-    Math.max(
-      0,
-      positions.findIndex((at) =>
-        (data?.logs ?? []).some((log) => log.position === at && log.exerciseId === requested),
-      ),
-    )
+  const requestedIndex = positions.findIndex((at) =>
+    (data?.logs ?? []).some((log) => log.position === at && log.exerciseId === requested),
+  )
+  const position = chosenPosition ?? (requestedIndex !== -1 ? requestedIndex : resumePosition(data?.logs ?? []))
   const currentPosition = positions[Math.min(position, positions.length - 1)]
   const groupLogs = (data?.logs ?? []).filter((log) => log.position === currentPosition)
   const exerciseId = groupLogs[0]?.exerciseId

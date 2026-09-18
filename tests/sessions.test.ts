@@ -19,6 +19,7 @@ import {
   reopenSession,
   rescheduleSession,
   restoreSet,
+  resumePosition,
   skipSet,
   startSession,
   unlogSet,
@@ -572,5 +573,47 @@ describe('activeSet', () => {
     const bench = logs.filter((log) => log.exerciseId === 'Bench')
 
     expect(activeSet(bench, squat[0]!.id)?.id).toBe(bench[0]!.id)
+  })
+})
+
+describe('resumePosition', () => {
+  // Three exercises at positions 1, 2, 3 with two sets each; `done` maps a set id to when it was logged.
+  const workout = (done: Record<string, number>) =>
+    [1, 2, 3].flatMap((position) =>
+      [1, 2].map((setIndex) => {
+        const id = `${position}-${setIndex}`
+        return {
+          id, userId: USER, sessionId: 's', exerciseId: `ex${position}`, exerciseName: `Exercise ${position}`,
+          position, setIndex, targetReps: 5, targetRepsMax: null, targetWeightKg: null, restSec: 90,
+          weightKg: null, reps: null, isWarmup: false, completedAt: done[id] ?? null, performedAt: 1,
+          notes: null, createdAt: 1, updatedAt: 1, deletedAt: null,
+        }
+      }),
+    )
+
+  it('opens on the first exercise when nothing is logged', () => {
+    expect(resumePosition(workout({}))).toBe(0)
+  })
+
+  it('opens on the exercise you were in the middle of', () => {
+    expect(resumePosition(workout({ '1-1': 10, '1-2': 20, '2-1': 30 }))).toBe(1)
+  })
+
+  it('moves on to the next exercise once the last set of one is logged', () => {
+    expect(resumePosition(workout({ '1-1': 10, '1-2': 20 }))).toBe(1)
+  })
+
+  it('goes by when sets were logged, not by their order in the list', () => {
+    // Bench before squat today: the phone died mid-bench, so bench it is.
+    expect(resumePosition(workout({ '2-1': 30 }))).toBe(1)
+    // Both bench sets done, squat untouched: on to the third, as logging the
+    // last bench set moved you on; the squat waits at the start of the list.
+    expect(resumePosition(workout({ '2-1': 30, '2-2': 40 }))).toBe(2)
+    // Nothing after it to do: back to the squat, the only thing left.
+    expect(resumePosition(workout({ '2-1': 30, '2-2': 40, '3-1': 50, '3-2': 60 }))).toBe(0)
+  })
+
+  it('stays on the last exercise done when every set is logged', () => {
+    expect(resumePosition(workout({ '1-1': 1, '1-2': 2, '2-1': 3, '2-2': 4, '3-1': 5, '3-2': 6 }))).toBe(2)
   })
 })

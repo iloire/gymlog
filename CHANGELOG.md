@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-18 09:50
+
+- **A workout continues where you were.** Opening a workout again, from Today's Continue or after
+  the phone killed the app, landed on the first exercise, and the way to the fourth was three
+  swipes past sets already logged. It now opens on the exercise of the most recently logged set;
+  once every set of it is done, on the next exercise with a set still to do, as logging its last
+  set would have moved you on; with nothing logged, on the first. Do this now still opens on the
+  exercise asked for. `resumePosition()` in `lib/sessions.ts`, with tests.
+
 ## 2026-09-18 09:45
 
 - **A rest carried into the next exercise says whose it is.** The last set of an exercise moves

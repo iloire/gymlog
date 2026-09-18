@@ -87,6 +87,30 @@ export async function startSession(
   return id
 }
 
+/**
+ * Where a workout opens when you come back to it — after the phone killed the
+ * app, or from Today's Continue: the exercise you were doing, not the first in
+ * the list. That is the exercise of the most recently logged set; once every
+ * set of it is done, the next exercise with a set still to do, as logging its
+ * last set would have moved you on; nothing logged yet, the first exercise;
+ * everything done, the one you did last. An index into the sorted positions.
+ */
+export function resumePosition(logs: LocalSetLog[]): number {
+  const positions = [...new Set(logs.map((log) => log.position))].sort((a, b) => a - b)
+  const todo = (at: number) => logs.some((log) => log.position === at && log.completedAt === null)
+  const latest = logs
+    .filter((log) => log.completedAt !== null)
+    .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0))[0]
+  if (!latest) return 0
+
+  const from = positions.indexOf(latest.position)
+  if (todo(latest.position)) return from
+  const after = positions.findIndex((at, index) => index > from && todo(at))
+  if (after !== -1) return after
+  const any = positions.findIndex(todo)
+  return any !== -1 ? any : from
+}
+
 /** The next set to do: the first with nothing logged. */
 export function nextSet(logs: LocalSetLog[]): LocalSetLog | undefined {
   return logs.find((log) => log.completedAt === null)
