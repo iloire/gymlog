@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-18 02:40
+
+- **The weight input works with chalk on your hands.** Holding − or + repeats it (an empty bar
+  to 60 kg was twenty-four taps). The step follows the equipment: 2.5 kg on a barbell, 2 on
+  dumbbells, 4 on kettlebells, 5 on a stack, 1 on a belt. Under the field, one-tap chips for the
+  weights within reach — the suggestion, then what this session and last time were lifted at —
+  and, on a barbell lift, the plates to load per side drawn as plates in the competition colours
+  (`components/plate-rail.tsx`, `lib/plates.ts`), with the bar switchable between 20 and 15 kg
+  and a note when the plates cannot make the weight.
+
 ## 2026-09-18 02:30
 
 - **The steppers open on the next step, not on a repeat.** `lib/progression.ts` works out what

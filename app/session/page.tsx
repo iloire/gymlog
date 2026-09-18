@@ -11,6 +11,7 @@ import { ExerciseNote } from '@/components/exercise-note'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { Placeholder } from '@/components/loading'
 import { OverflowMenu } from '@/components/overflow-menu'
+import { PlateRail } from '@/components/plate-rail'
 import { RemoveExercise } from '@/components/remove-exercise'
 import { RestBar, RestTakeover, useRest } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
@@ -35,7 +36,6 @@ import {
 import { useWakeLock } from '@/lib/use-wake-lock'
 import { progressionIncrementKg, weightStepKg } from '@/lib/weights'
 
-const WEIGHT_STEP = 2.5 // the smallest pair of plates
 const REP_STEP = 1
 const MINUTE_STEP = 1
 
@@ -239,6 +239,20 @@ function Session() {
 
   const previousNote = previous?.sets.find((set) => set.notes)?.notes
 
+  // The suggestion first, then the weights already lifted this session and
+  // last time, heaviest first — most sets are one tap on one of these.
+  const quickWeights = [
+    ...new Set(
+      [
+        progression?.weightKg ?? null,
+        ...groupLogs.filter((log) => log.completedAt !== null).map((log) => log.weightKg),
+        ...(previous?.sets ?? []).map((set) => set.weightKg),
+      ].filter((weight): weight is number => weight !== null && weight > 0),
+    ),
+  ]
+    .sort((a, b) => b - a)
+    .slice(0, 4)
+
   // Between sets the clock takes the steppers' place. Tapping a done square to
   // fix it mid-rest brings the steppers back, with the bar at the bottom.
   const resting = rest?.sessionId === id && remaining > 0
@@ -412,9 +426,30 @@ function Session() {
                     label="Weight"
                     unit="kg"
                     value={values.weightKg}
-                    step={WEIGHT_STEP}
+                    step={weightStepKg(exercise)}
                     onChange={(weightKg) => setDraft({ ...values, weightKg })}
                   />
+                  {/* The weights within reach, one tap each: the suggestion, then
+                      what this session and last time have already been lifted at. */}
+                  {quickWeights.length > 1 && (
+                    <ul className="flex gap-2 overflow-x-auto [scrollbar-width:none]" aria-label="Quick weights">
+                      {quickWeights.map((weight) => (
+                        <li key={weight}>
+                          <button
+                            type="button"
+                            aria-pressed={values.weightKg === weight}
+                            onClick={() => setDraft({ ...values, weightKg: weight })}
+                            className={`figure h-9 rounded-full px-3 text-sm ${
+                              values.weightKg === weight ? 'bg-ink text-ground' : 'border border-line text-ink-dim'
+                            }`}
+                          >
+                            {weight}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {exercise?.equipment === 'barbell' && <PlateRail weightKg={values.weightKg} />}
                   <Stepper
                     label="Reps"
                     value={values.reps}
