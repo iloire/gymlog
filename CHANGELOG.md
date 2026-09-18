@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 05:20
+
+- **Copy and screenshots.** The library no longer says "438 movements, saved on this phone";
+  it says what to do: "873 exercises. Search, or start from a body part." The screenshots in
+  `docs/screenshots` and the README hero showed a five-tab bar with Weight and a "Synced just
+  now" line; they are retaken from a production build of this branch — Today, the session
+  screen, the rest screen, the workout sheet, Exercises, Plan, Progress and Weight.
+
 ## 2026-09-18 04:55
 
 - **History is Progress.** The tab is now Progress and opens on the story rather than the log:

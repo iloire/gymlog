@@ -127,8 +127,8 @@ export default function ExercisesPage() {
         <h1 className="figure text-4xl">Exercises</h1>
         <p className="mt-2 text-sm text-ink-dim">
           {exercises.length
-            ? `${exercises.length} movements, saved on this phone.`
-            : 'Syncing the library…'}
+            ? `${exercises.length} exercises. Search, or start from a body part.`
+            : 'Fetching the library…'}
         </p>
 
         <div className="mt-6 flex h-12 items-center gap-2 rounded-md border border-line bg-surface px-3">

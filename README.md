@@ -6,7 +6,7 @@
 Build your workouts, put them on the days you train, then log the weight and reps you actually
 did — **with or without signal**. Made for a gym in a basement.
 
-![gymlog: today's workout, logging a set, the exercise library and bodyweight trend](docs/screenshots/gymlog.png)
+![gymlog: today's workout, logging a set with the plates per side, the exercise library by body part, and progress](docs/screenshots/gymlog.png)
 
 The CI badge is green only when a commit's **unit tests pass, it builds, and that same commit
 deployed to production** — the workflow waits for Vercel's verdict and smoke-tests the live site.
@@ -16,13 +16,18 @@ deployed to production** — the workflow waits for Vercel's verdict and smoke-t
 - **Workouts** — an ordered list of exercises with sets, reps and rest.
 - **Premade programmes** — pick a ready-made week (full body, upper/lower, dumbbells only), fitted
   to the equipment you have: exercises you can't do are swapped for ones you can.
-- **Your week** — put a workout on each training day. Moving up a stage starts a new programme;
-  everything you logged before stays exactly as it was.
-- **The gym screen** — one exercise at a time, big thumb-sized steppers, prefilled with what you
-  just lifted or what you did last time, a rest timer that beeps, and the screen kept awake.
-- **Exercise library** — 859 movements, each with a start and end photo that fade into one
-  another to show the movement.
-- **Bodyweight** — one tap a day, charted as a 7-day average because single readings are noise.
+- **Your week** — the Plan tab opens on the week, a cell per day; tap one to put a workout on it.
+  Moving up a stage starts a new programme; everything you logged before stays exactly as it was.
+- **The gym screen** — one exercise at a time, last time's sets as a ghost row above today's,
+  steppers opened on the next step of the progression with the reason under them, the plates
+  to load per side, a rest that takes the screen and asks how the set felt, and the screen
+  kept awake.
+- **Exercise library** — 873 movements, filed by body part, each with a start and end photo that
+  fade into one another to show the movement.
+- **Progress** — this week against the plan, each main lift's top set and e1RM over time, and
+  records.
+- **Bodyweight** — one field on Today each morning, charted as a 7-day average because single
+  readings are noise.
 - **Accounts** — every user sees only their own data; the exercise library is shared.
 - **API for LLMs** — create a token under Profile → API access and let ChatGPT, Claude or a script
   read your workouts, history and bodyweight; a read and write token can also rework your workouts
