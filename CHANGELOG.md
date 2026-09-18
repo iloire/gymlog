@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-18 09:38
+
+- **Weight and reps tell apart at a glance.** The two steppers were the same box with a tiny word
+  at the top, so which one the thumb was on took a look. The unit now rides beside the number at
+  reading size, 77.5 kg over 8 reps, and an empty box still says — kg or — reps. The number's
+  field sizes to its digits off a hidden twin, so the pair stays centred as the digits grow.
+
 ## 2026-09-18 09:33
 
 - **The exercise note is there while you rest.** The rest is when there is time to write how the

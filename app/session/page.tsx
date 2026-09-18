@@ -574,6 +574,7 @@ function Session() {
                   {exercise?.equipment === 'barbell' && <PlateRail weightKg={values.weightKg} />}
                   <Stepper
                     label="Reps"
+                    unit="reps"
                     value={values.reps}
                     step={REP_STEP}
                     onChange={(reps) => setDraft({ ...values, reps })}

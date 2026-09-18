@@ -80,28 +80,37 @@ export function Stepper({
       </HoldButton>
 
       <label className="flex min-w-0 flex-1 flex-col items-center pt-2">
-        <span className="text-xs leading-none text-ink-dim">
-          {label}
-          {unit && ` ${unit}`}
+        <span className="text-xs leading-none text-ink-dim">{label}</span>
+        {/* The unit rides beside the number at reading size — 77.5 kg, 10 reps —
+            so two boxes one above the other tell apart at a glance, empty or
+            not; a tiny word at the top read the same on both. The input sizes
+            to its digits off a hidden twin in the same grid cell. */}
+        <span className="flex h-11 min-w-0 items-baseline justify-center gap-1.5">
+          <span className="grid min-w-0 shrink">
+            <span aria-hidden className="figure invisible col-start-1 row-start-1 min-w-[1.5ch] text-4xl whitespace-pre">
+              {typing ?? value ?? '—'}
+            </span>
+            <input
+              aria-label={label}
+              inputMode="decimal"
+              value={typing ?? value ?? ''}
+              placeholder="—"
+              onFocus={(event) => {
+                setTyping(`${value ?? ''}`)
+                // Typing replaces the number rather than adding digits to it.
+                event.target.select()
+              }}
+              onChange={(event) => {
+                setTyping(event.target.value)
+                const next = parseNumber(event.target.value)
+                if (next !== null && next >= min) onChange(next)
+              }}
+              onBlur={() => setTyping(null)}
+              className="figure col-start-1 row-start-1 w-full min-w-0 bg-transparent text-center text-4xl outline-none"
+            />
+          </span>
+          {unit && <span className="shrink-0 text-lg text-ink-dim">{unit}</span>}
         </span>
-        <input
-          aria-label={label}
-          inputMode="decimal"
-          value={typing ?? value ?? ''}
-          placeholder="—"
-          onFocus={(event) => {
-            setTyping(`${value ?? ''}`)
-            // Typing replaces the number rather than adding digits to it.
-            event.target.select()
-          }}
-          onChange={(event) => {
-            setTyping(event.target.value)
-            const next = parseNumber(event.target.value)
-            if (next !== null && next >= min) onChange(next)
-          }}
-          onBlur={() => setTyping(null)}
-          className="figure h-11 w-full min-w-0 bg-transparent text-center text-4xl outline-none"
-        />
       </label>
 
       <HoldButton label={`Increase ${label}`} onPress={() => press(step)} onRelease={release} className={buttonClass}>
