@@ -37,7 +37,7 @@ export function Nav({ children }: { children?: React.ReactNode }) {
       {children}
       {resting ? <RestBar {...rest} link /> : path !== '/' && <OpenWorkoutBar />}
       <nav className="border-t border-line bg-ground/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
-        <ul className="mx-auto flex max-w-lg">
+        <ul className="mx-auto flex max-w-page">
           {items.map(({ href, label, icon: Icon }) => {
             const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
             return (

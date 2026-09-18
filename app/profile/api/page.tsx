@@ -28,7 +28,7 @@ export default async function ApiAccessPage() {
 
   return (
     <>
-      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
+      <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
         <a href="/profile" className="flex items-center gap-1 text-sm text-ink-dim">
           <ChevronLeft size={18} aria-hidden />
           Profile

@@ -123,7 +123,7 @@ export default function ExercisesPage() {
 
   return (
     <>
-      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
+      <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
         <h1 className="figure text-4xl">Exercises</h1>
         <p className="mt-2 text-sm text-ink-dim">
           {exercises.length

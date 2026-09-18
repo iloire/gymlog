@@ -90,6 +90,11 @@ change. No all-caps labels, no monospace for data.
 
 ## Structure
 
+- **One page width, `max-w-page`.** Every screen's column and the bars that line up with it (the
+  tab bar, the rest bar, the undo toast) share one token, `--page-width` in `globals.css`: 32rem on
+  a phone, 56rem from 48rem viewports so a workout on a desk is a page rather than a strip down
+  the middle. Sheets and dialogs keep their own `max-w-lg`: they are centred over the page, not
+  part of it. Nothing sets a column width inline.
 - **No card kit.** The session screen is a full-bleed stack: one exercise fills the viewport.
 - **Logging fits the first screen.** Everything between opening an exercise and pressing *Log set*
   — the set squares, weight, reps and the button — sits above the fold on a 320 × 568 phone with the

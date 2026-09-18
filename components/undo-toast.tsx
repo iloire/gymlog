@@ -25,7 +25,7 @@ export function UndoToast({
 
   return (
     <div role="status" className="border-t border-line bg-surface">
-      <div className="mx-auto flex max-w-lg items-center justify-between gap-3 py-1 pr-2 pl-5">
+      <div className="mx-auto flex max-w-page items-center justify-between gap-3 py-1 pr-2 pl-5">
         <span className="min-w-0 truncate text-sm text-ink-dim">{message}</span>
         <button
           type="button"

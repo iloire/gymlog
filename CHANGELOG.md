@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-18 09:10
+
+- **One page width, wider on a desk.** Every screen hardcoded the same phone column, so on a
+  laptop a workout was a 512px strip down the middle with the rest of the screen empty and the
+  thumbnails barely legible. The column, the tab bar, the rest bar and the undo toast now share a
+  single `max-w-page` token (`--page-width` in `globals.css`): unchanged on a phone, 56rem from
+  a tablet in landscape up. Sheets and dialogs keep their phone width, they are centred over the
+  page rather than part of it. Bigger thumbnails and a side-by-side editor build on this.
+
 ## 2026-09-18 08:45
 
 - **Profile is a settings list, and weights can be pounds.** Profile was six identical blocks,

@@ -26,7 +26,7 @@ export function Loading({
 }) {
   return (
     <>
-      <main className={`mx-auto w-full max-w-lg flex-1 px-5 ${className}`} aria-busy="true">
+      <main className={`mx-auto w-full max-w-page flex-1 px-5 ${className}`} aria-busy="true">
         {children}
       </main>
       {nav && <Nav />}

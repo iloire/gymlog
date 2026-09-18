@@ -65,7 +65,7 @@ function Programmes() {
 
   return (
     <>
-      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-5 pb-6">
+      <main className="mx-auto w-full max-w-page flex-1 px-5 pt-5 pb-6">
         {programme ? (
           <ProgrammeDetail userId={userId} programme={programme} have={have} library={library} />
         ) : (

@@ -345,7 +345,7 @@ function Session() {
       {/* The way back, then the workout's name as the way to the whole of it:
           a sheet with every exercise and its squares, and a tap to jump. The
           count beside the name says where you are without a bar to hit. */}
-      <header className="flex items-center gap-1 px-4 pt-3 pb-1">
+      <header className="mx-auto flex w-full max-w-page items-center gap-1 px-4 pt-3 pb-1">
         <Link href="/" aria-label="Today" className="flex h-11 w-9 items-center text-ink-dim">
           <ChevronLeft size={20} aria-hidden />
         </Link>
@@ -392,7 +392,7 @@ function Session() {
       {/* A horizontal swipe moves between exercises; a mostly vertical one is a
           scroll and is left alone, as is anything that starts on a scrolling row. */}
       <main
-        className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-3 pb-8"
+        className="mx-auto flex w-full max-w-page flex-1 flex-col px-5 pt-3 pb-8"
         onTouchStart={(event) => {
           const touch = event.touches[0]
           swipe.current = touch ? { x: touch.clientX, y: touch.clientY } : null
@@ -680,13 +680,13 @@ function Session() {
 function SessionLoading() {
   return (
     <div className="flex flex-1 flex-col" aria-busy="true">
-      <header className="flex items-center gap-1 px-4 pt-3 pb-1">
+      <header className="mx-auto flex w-full max-w-page items-center gap-1 px-4 pt-3 pb-1">
         <Link href="/" aria-label="Today" className="flex h-11 w-9 items-center text-ink-dim">
           <ChevronLeft size={20} aria-hidden />
         </Link>
         <Placeholder className="h-4 w-24" />
       </header>
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-3 pb-8">
+      <main className="mx-auto flex w-full max-w-page flex-1 flex-col px-5 pt-3 pb-8">
         <Placeholder className="max-h-60 min-h-20 w-full flex-1" />
         <Placeholder className="mt-3 h-8 w-3/4" />
         {/* The controls' share of the height, so the photo lands at the size it keeps. */}

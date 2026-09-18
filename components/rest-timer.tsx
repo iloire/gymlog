@@ -113,7 +113,7 @@ export function RestBar({ rest, remaining, link = false }: RestState & { link?: 
         aria-valuemin={0}
         aria-valuemax={rest.totalSec}
       />
-      <div className="mx-auto flex max-w-lg items-stretch justify-between">
+      <div className="mx-auto flex max-w-page items-stretch justify-between">
         {link ? (
           <Link href={`/session?id=${rest.sessionId}`} className={labelClass}>
             {label}

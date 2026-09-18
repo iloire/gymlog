@@ -169,7 +169,7 @@ export default function TodayPage() {
 
     return (
       <>
-        <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
+        <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
           <header className="mb-6">
             <p className="text-sm text-ink-dim">{weekday}</p>
             <h1 className="figure mt-1 text-4xl leading-[1.05]">Today</h1>
@@ -223,7 +223,7 @@ export default function TodayPage() {
 
   return (
     <>
-      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
+      <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
         <header className="mb-6">
           <p className="text-sm text-ink-dim">{weekday}</p>
           <h1 className="figure mt-1 text-4xl leading-[1.05]">
@@ -347,7 +347,7 @@ function MissedNote({ missed, disabled, onStart }: { missed: Missed; disabled: b
 function Welcome() {
   return (
     <>
-      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-6">
+      <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
         <header>
           <p className="text-sm text-ink-dim">Welcome to gymlog</p>
           <h1 className="figure mt-1 text-4xl leading-[1.05]">Start with a plan</h1>

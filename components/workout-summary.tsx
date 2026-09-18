@@ -81,7 +81,7 @@ export function WorkoutSummary({
 
   if (!data.entry) {
     return (
-      <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-8">
+      <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-8">
         <h1 className="figure text-4xl leading-[1.05]">Workout finished</h1>
         <p className="mt-2 text-[15px] text-ink-dim">No sets were logged, so there is nothing to compare.</p>
         <Buttons onDone={onDone} onReopen={onReopen} />
@@ -98,7 +98,7 @@ export function WorkoutSummary({
   const firsts = records.filter((record) => record.first)
 
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-5 pt-8 pb-8">
+    <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-8">
       <p className="text-sm text-ink-dim">
         {session.templateName} · {formatDay(session.scheduledFor)}
       </p>

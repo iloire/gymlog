@@ -314,7 +314,21 @@
   --ring: var(--plate-blue-lift);
 }
 
+/* Page width — every screen's column, and the bars that align with it. A phone
+   column on a phone; from a tablet in landscape it grows to a desk-sized column
+   so a workout list is not a strip down the middle of a wide screen. Sheets and
+   dialogs keep their own width: they are centred over the page, not part of it. */
+:root {
+  --page-width: 32rem;
+}
+@media (min-width: 48rem) {
+  :root {
+    --page-width: 56rem;
+  }
+}
+
 @theme inline {
+  --container-page: var(--page-width);
   --color-ground: var(--ground);
   --color-surface: var(--surface);
   --color-surface-high: var(--surface-high);
