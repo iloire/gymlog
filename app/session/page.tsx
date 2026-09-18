@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronDown, ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
 import { EffortChips } from '@/components/effort-chips'
 import { ExerciseDialog } from '@/components/exercise-dialog'
@@ -18,6 +18,7 @@ import { RestBar, RestTakeover, useRest } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
 import { SetSquares } from '@/components/set-squares'
 import { Stepper } from '@/components/stepper'
+import { UndoToast } from '@/components/undo-toast'
 import { WorkoutSheet } from '@/components/workout-sheet'
 import { WorkoutSummary } from '@/components/workout-summary'
 import { isCardio } from '@/lib/cardio'
@@ -30,10 +31,12 @@ import { heavierThanLastTime } from '@/lib/records'
 import { startRest } from '@/lib/rest'
 import {
   activeSet as pickActiveSet,
+  addSet,
   finishSession,
   logSet,
   removeFromSession,
   reopenSession,
+  skipSet,
   unlogSet,
 } from '@/lib/sessions'
 import { useWakeLock } from '@/lib/use-wake-lock'
@@ -70,6 +73,10 @@ function Session() {
   // one rather than something every visit to a past session has to scroll past.
   const [finished, setFinished] = useState(false)
   const [overview, setOverview] = useState(false)
+  // The one-tap change on offer to take back for six seconds — a set added.
+  const [undoable, setUndoable] = useState<{ key: number; message: string; onUndo: () => void } | null>(null)
+  const dismissUndoable = useCallback(() => setUndoable(null), [])
+  const undoCount = useRef(0)
   const swipe = useRef<{ x: number; y: number } | null>(null)
   // The set just logged, so the rest can ask how it felt — even once the
   // screen has moved on to the next exercise.
@@ -260,6 +267,23 @@ function Session() {
   // The set to take back from the menu: the last one logged for this exercise.
   const lastDone = groupLogs.filter((log) => log.completedAt !== null).at(-1)
 
+  // One more set than the template said. Undo takes it out again while the
+  // bar shows, unless it has been logged in the meantime — then it stands.
+  async function addOneSet() {
+    if (!userId) return
+    const added = await addSet(userId, groupLogs)
+    undoCount.current += 1
+    setUndoable({
+      key: undoCount.current,
+      message: `Set ${added.setIndex} added`,
+      onUndo: async () => {
+        setUndoable(null)
+        const row = await getDb(userId).setLogs.get(added.id)
+        if (row && row.completedAt === null) await skipSet(userId, row)
+      },
+    })
+  }
+
   const previousNote = previous?.sets.find((set) => set.notes)?.notes
 
   // The suggestion first, then the weights already lifted this session and
@@ -444,6 +468,7 @@ function Session() {
             setSelectedId(logId)
             setDraft(null)
           }}
+          onAdd={data.session.completedAt === null ? () => void addOneSet() : undefined}
         />
 
         {activeSet && takeover ? (
@@ -623,11 +648,17 @@ function Session() {
         </div>
       </main>
 
-      {!takeover && (
-        <div className="sticky bottom-0 pb-[env(safe-area-inset-bottom)]">
-          <RestBar rest={rest} remaining={remaining} />
-        </div>
-      )}
+      <div className="sticky bottom-0 pb-[env(safe-area-inset-bottom)]">
+        {undoable && (
+          <UndoToast
+            key={undoable.key}
+            message={undoable.message}
+            onUndo={undoable.onUndo}
+            onDismiss={dismissUndoable}
+          />
+        )}
+        {!takeover && <RestBar rest={rest} remaining={remaining} />}
+      </div>
     </div>
   )
 }

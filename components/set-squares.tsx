@@ -1,5 +1,7 @@
 'use client'
 
+import { Plus } from 'lucide-react'
+
 import type { LocalSetLog } from '@/lib/db/dexie'
 import { formatSet } from '@/lib/format'
 import { heavierThanLastTime } from '@/lib/records'
@@ -17,7 +19,8 @@ import { canSelectSet } from '@/lib/sessions'
  *
  * Tapping a square selects that set, so a mistyped set can be fixed after
  * you have moved on to the next one. Sets further ahead than the next one to
- * do cannot be tapped: they are logged in order.
+ * do cannot be tapped: they are logged in order. A dashed + after the last
+ * square, while the workout is open, adds a set the template did not ask for.
  *
  * A set logged heavier than the best set last time keeps a red edge for the
  * rest of the workout. The line under the steppers only says so until you log;
@@ -31,6 +34,7 @@ export function SetSquares({
   previousLabel = 'Last time',
   justLoggedId = null,
   onSelect,
+  onAdd,
 }: {
   logs: LocalSetLog[]
   activeId?: string
@@ -43,11 +47,13 @@ export function SetSquares({
   /** The set just logged: its square plays the fill animation once. */
   justLoggedId?: string | null
   onSelect: (id: string) => void
+  /** With this, a dashed + square follows the last set: one more than the template said. */
+  onAdd?: () => void
 }) {
   if (logs.length === 0) return null
 
   const ghosts = previous ?? []
-  const columns = Math.max(logs.length, ghosts.length)
+  const columns = Math.max(logs.length + (onAdd ? 1 : 0), ghosts.length)
   // One grid for both rows, so set 3 sits under set 3 whatever each row holds.
   const grid = { gridTemplateColumns: `repeat(${columns}, minmax(3rem, max-content))` }
 
@@ -102,6 +108,18 @@ export function SetSquares({
             </li>
           )
         })}
+        {onAdd && (
+          <li>
+            <button
+              type="button"
+              onClick={onAdd}
+              aria-label="Add a set"
+              className="flex h-12 w-full min-w-12 items-center justify-center rounded-sm border border-dashed border-line text-ink-dim"
+            >
+              <Plus size={18} aria-hidden />
+            </button>
+          </li>
+        )}
       </ol>
     </div>
   )

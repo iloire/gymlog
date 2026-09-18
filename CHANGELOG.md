@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-18 07:15
+
+- **One more set mid-workout.** The template said three and there was nothing to tap for a
+  fourth. A dashed + square now follows the last set while the workout is open; a tap adds a
+  set with the last set's prescription and rest, under the deterministic id so two devices
+  merge it, and a "Set 4 added · Undo" bar at the bottom edge takes it out again for six
+  seconds unless it has been logged by then (`addSet()` and `skipSet()` in `lib/sessions.ts`,
+  with tests).
+
 ## 2026-09-18 07:13
 
 - **Undo a logged set.** Log tapped before the set was done, or on the wrong set, could only

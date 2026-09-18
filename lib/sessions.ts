@@ -144,6 +144,58 @@ export async function unlogSet(userId: string, log: LocalSetLog): Promise<void> 
 }
 
 /**
+ * One more set of an exercise mid-workout — the template said three and there
+ * is a fourth in you. `logs` are the exercise's sets in the session, in order.
+ * The new set takes the prescription and rest of the last one, and the usual
+ * deterministic id, so a set added on the phone and on the laptop is one row
+ * and a set added, taken back and added again comes back as the same row.
+ */
+export async function addSet(userId: string, logs: LocalSetLog[]): Promise<LocalSetLog> {
+  const last = logs.at(-1)
+  if (!last) throw new Error('addSet needs the exercise\'s sets')
+  const setIndex = last.setIndex + 1
+  return (await writeRow(userId, 'setLogs', {
+    id: setLogId(last.sessionId, last.exerciseId, setIndex),
+    sessionId: last.sessionId,
+    exerciseId: last.exerciseId,
+    exerciseName: last.exerciseName,
+    position: last.position,
+    setIndex,
+    targetReps: last.targetReps,
+    targetRepsMax: last.targetRepsMax,
+    targetWeightKg: last.targetWeightKg,
+    targetDurationSec: last.targetDurationSec ?? null,
+    restSec: last.restSec,
+    weightKg: null,
+    reps: null,
+    durationSec: null,
+    effort: null,
+    isWarmup: false,
+    completedAt: null,
+    performedAt: last.performedAt,
+    notes: null,
+    deletedAt: null,
+  })) as LocalSetLog
+}
+
+/**
+ * Take a set still to do out of the workout — skipped, or added by mistake.
+ * Soft-deleted like everything else, so the other phone learns of it and
+ * re-opening the workout does not bring it back. A rest running for the
+ * session ends if that was the last set to do: there is nothing to rest for.
+ */
+export async function skipSet(userId: string, log: LocalSetLog): Promise<void> {
+  await deleteRow(userId, 'setLogs', log.id)
+  const db = getDb(userId)
+  const left = await db.setLogs
+    .where('sessionId')
+    .equals(log.sessionId)
+    .filter((row) => row.deletedAt === null && row.completedAt === null)
+    .count()
+  if (left === 0 && (await currentRest(userId))?.sessionId === log.sessionId) await clearRest(userId)
+}
+
+/**
  * Add an exercise to a session that is already under way — the stair machine
  * you warmed up on, which is not in the workout. It goes last, as one timed
  * set for cardio or three sets otherwise, and returns its position. The

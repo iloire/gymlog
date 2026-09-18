@@ -7,6 +7,7 @@ import { dateToEpoch } from '@/lib/queries'
 import { currentRest, startRest } from '@/lib/rest'
 import {
   activeSet,
+  addSet,
   addToSession,
   canSelectSet,
   deleteSession,
@@ -17,6 +18,7 @@ import {
   removeFromSession,
   reopenSession,
   rescheduleSession,
+  skipSet,
   startSession,
   unlogSet,
 } from '@/lib/sessions'
@@ -289,6 +291,69 @@ describe('cardio', () => {
 
     const added = (await logsFor(id)).filter((log) => log.exerciseId === 'Row')
     expect(added.map((log) => [log.setIndex, log.restSec])).toEqual([[1, 90], [2, 90], [3, 90]])
+  })
+})
+
+describe('addSet', () => {
+  it('adds a fourth set after the third, with its prescription and a deterministic id', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const squats = (await logsFor(id)).filter((log) => log.exerciseId === 'Squat')
+
+    const added = await addSet(USER, squats)
+
+    expect(added.id).toBe(setLogId(id, 'Squat', 4))
+    expect(added).toMatchObject({
+      setIndex: 4,
+      position: 1,
+      exerciseName: 'Barbell Squat',
+      targetReps: 5,
+      targetWeightKg: 60,
+      restSec: 180,
+      completedAt: null,
+      performedAt: squats[0]!.performedAt,
+    })
+    expect((await logsFor(id)).filter((log) => log.exerciseId === 'Squat')).toHaveLength(4)
+    expect(await getDb(USER).outbox.get(mutationKey('setLogs', added.id))).toBeDefined()
+  })
+
+  it('takes an added set back, and brings the same row back when it is added again', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const squats = (await logsFor(id)).filter((log) => log.exerciseId === 'Squat')
+    const added = await addSet(USER, squats)
+
+    await skipSet(USER, added)
+    expect((await getDb(USER).setLogs.get(added.id))?.deletedAt).toBeTypeOf('number')
+
+    const again = await addSet(USER, squats)
+    expect(again.id).toBe(added.id)
+    expect(again.deletedAt).toBeNull()
+  })
+})
+
+describe('skipSet', () => {
+  it('soft-deletes the set and keeps the rest running while sets are left', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const [first, second] = await logsFor(id)
+    await logSet(USER, first!, { weightKg: 60, reps: 5 })
+    await startRest(USER, id, 180)
+
+    await skipSet(USER, second!)
+
+    expect((await getDb(USER).setLogs.get(second!.id))?.deletedAt).toBeTypeOf('number')
+    expect(await currentRest(USER)).not.toBeNull()
+    expect(activeSet(await logsFor(id).then((logs) => logs.filter((log) => log.deletedAt === null)), null)?.setIndex).toBe(3)
+  })
+
+  it('ends the rest once the skipped set was the last one to do', async () => {
+    const id = await startSession(USER, 'tpl', null, DATE)
+    const logs = await logsFor(id)
+    for (const log of logs.slice(0, -1)) await logSet(USER, log!, { weightKg: 60, reps: 5 })
+    await startRest(USER, id, 180)
+    expect(await currentRest(USER)).not.toBeNull()
+
+    await skipSet(USER, logs.at(-1)!)
+
+    expect(await currentRest(USER)).toBeNull()
   })
 })
 
