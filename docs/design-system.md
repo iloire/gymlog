@@ -97,8 +97,9 @@ change. No all-caps labels, no monospace for data.
   the one flex child that grows: its height is whatever the screen has left once the name, the
   squares, the steppers and the button have theirs, between a floor of 5rem and a cap of 15rem. A
   short phone gets a letterbox of the movement and a tall one nearer the whole frame, and the width
-  never gives, only the crop. A long name under it steps down a size rather than taking a third
-  line, and each stepper carries its label inside the field. Tapping the photo opens cues and instructions in
+  never gives, only the crop. The name under it is one line, always: a long one steps down a size
+  and then ends in an ellipsis rather than wrapping, so the squares and the steppers sit at the
+  same height whatever the exercise is called. Each stepper carries its label inside the field. Tapping the photo opens cues and instructions in
   a dialog, never a new page. The workout's name in the header carries
   "2/3" and opens a sheet of every exercise with its squares, a tap on any to jump; a sideways
   swipe moves to the next or previous exercise. There is no Previous / Next row at the bottom:

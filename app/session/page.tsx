@@ -433,10 +433,13 @@ function Session() {
         ) : null}
 
         <div className="mt-3 flex items-start gap-3">
-          {/* A long name steps down a size so it holds to two lines on a narrow
-              phone instead of stacking a third under the photo. */}
+          {/* One line, always: a long name steps down a size and then ends in an
+              ellipsis rather than wrapping under the photo, so the squares and
+              the steppers sit at the same height whatever the exercise is called.
+              The full name is a tap away: the photo opens it, ⋮ is labelled with it. */}
           <h1
-            className={`figure min-w-0 flex-1 text-balance leading-tight ${exerciseName.length > 26 ? 'text-xl' : 'text-2xl'}`}
+            title={exerciseName}
+            className={`figure min-w-0 flex-1 truncate leading-tight ${exerciseName.length > 26 ? 'text-xl' : 'text-2xl'}`}
           >
             {exerciseName}
           </h1>
