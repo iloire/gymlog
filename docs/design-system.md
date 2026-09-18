@@ -107,8 +107,12 @@ change. No all-caps labels, no monospace for data.
   *Heavier than last time* line under the steppers is a nudge before the lift and goes as soon as
   one of this exercise's sets banks it; the square is what still says so four exercises later.
   Both ask `heavierThanLastTime()` (`lib/records.ts`), so they can never disagree.
-- **The rest timer is a rule that drains** across the bottom edge, above the thumb, rather than a
-  number in a box. Yellow while running, gone when it ends. *+30 s* and *Skip* sit on the bar
+- **The rest is the screen's state.** On the session screen, the block where the steppers were
+  becomes the clock while the rest runs: the time set huge and draining, the next set's numbers
+  under it, and Skip rest where Log set was. Between sets you look at the phone for the time and
+  then for what the next set asks, so that is what the most-viewed state shows. At zero the
+  steppers return. Elsewhere **the rest timer is a rule that drains** across the bottom edge,
+  above the thumb, rather than a number in a box. Yellow while running, gone when it ends. *+30 s* and *Skip* sit on the bar
   beside the clock, because that is where the thumb already is. Off the session screen it sits
   above the tabs and its label is a link back to the workout. The last set of the workout starts
   no rest: there is nothing to rest for, and *Finish workout* is what the screen offers instead

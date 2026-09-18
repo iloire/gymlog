@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 02:05
+
+- **Rest takes the screen.** While the rest runs, the block where the steppers were becomes the
+  clock, set huge and draining, with the next set's numbers under it and Skip rest where Log set
+  was (`RestTakeover` in `components/rest-timer.tsx`). At zero the steppers return. Tapping a done
+  square to fix it mid-rest brings the steppers back with the bar at the bottom. One `useRest()`
+  hook per screen owns the beep, so two views can never both fire it.
+
 ## 2026-09-18 00:45
 
 - **Profile is a list of rows again.** The four style tiles and the equipment chips sat inline
