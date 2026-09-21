@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-21 16:28
+
+- **Every screen reads in Spanish.** Phases 2 and 3 of `docs/i18n.md`, one commit per screen: Today,
+  the session, Plan and the workout editor, the premade programmes, the Exercises library, Progress
+  and Bodyweight, the Profile pages, sign in and sign up, the API tokens page and the admin panel,
+  each from its own `messages/<locale>/<screen>.json`. Plurals are ICU, dates and weights format
+  per language, and the message parity test parses each message as ICU so a plural branch's text is
+  never mistaken for a placeholder. The library's 873 exercises have Spanish names
+  (`data/exercise-names.es.json`, applied at display time by id, so set logs and records read in
+  Spanish too and a user's own exercise shows as typed); search matches both names. The library's
+  body parts, muscles, equipment, levels and categories have names in both languages keyed by their
+  unchanged ids; equipment presets and the premade programmes carry `{ en, es }` names in `data/`
+  and are adopted under the adopter's language. Token errors and backup errors are codes the page
+  puts into words; `/api/v1/profile` reports `language`. The library's how-to steps are in
+  Spanish too (`data/exercise-instructions.es.json`, 868 exercises step for step, a chunk fetched
+  the first time the dialog opens). Verified on a production build at phone
+  width in Spanish: onboarding, programme adoption, Today, a session with a logged set and the rest
+  timer, the exercise dialog, Progress, the library and both searches, Profile and Bodyweight.
+
 ## 2026-09-21 16:02
 
 - **The app can read in Spanish.** Profile gains a Language page, English or Español, saved to the

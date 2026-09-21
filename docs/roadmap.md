@@ -338,9 +338,9 @@ force-downgrading; add Dependabot for npm and GitHub Actions.
 
 ---
 
-## 7. Two languages — L
+## ~~7. Two languages — L~~ ✅
 
-English and Spanish, as an account setting that syncs like the unit, with no locale in the URL and
+**Shipped 2026-09-21.** English and Spanish, as an account setting that syncs like the unit, with no locale in the URL and
 the exercise library translated as a bundled overlay so it all still works with no signal. The full
 plan, decisions and per-screen checklist: `docs/i18n.md`.
 

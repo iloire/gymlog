@@ -110,8 +110,14 @@ Components never fetch. The sync engine is the only network caller, and it runs 
   by English before the first sync. Both message bundles (`messages/<locale>/<screen>.json`,
   assembled in `messages/index.ts`) are on the device, so switching never needs the network and a
   key Spanish lacks reads in English; `tests/i18n.test.ts` fails the build on that gap. Nothing is
-  in the URL: the service worker, the deep links and the redirects assume one path per screen. The
-  full plan and what stays English: `docs/i18n.md`.
+  in the URL: the service worker, the deep links and the redirects assume one path per screen.
+  The library's 873 English rows are not translated in the database: `lib/exercise-i18n.ts` overlays
+  `data/exercise-names.es.json` at display time by exercise id (set logs carry the English name
+  from the day they were logged and are looked up the same way), and the Spanish how-to is a chunk
+  fetched on first use. Names in `data/` (equipment, presets, premade programmes) are
+  `{ en, es }` objects read through `localize()`. The library's own words (body parts, muscles,
+  equipment values) are message keys under `messages/*/data.json`, keyed by their unchanged ids.
+  The full plan and what stays English: `docs/i18n.md`.
 
 ## Deterministic ids
 
