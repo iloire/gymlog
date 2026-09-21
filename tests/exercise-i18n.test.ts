@@ -22,7 +22,8 @@ describe('data/exercise-instructions.es.json', () => {
       const source = library.get(id)
       expect(source, id).toBeDefined()
       expect(steps.length, id).toBe(source?.instructions.length)
-      for (const step of steps) expect(step.trim(), id).not.toBe('')
+      // A step is empty only where the library's own step is (one exercise ships one).
+      steps.forEach((step, i) => expect(step.trim() === '', `${id} #${i}`).toBe(source?.instructions[i]?.trim() === ''))
     }
   })
 })
