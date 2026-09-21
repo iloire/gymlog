@@ -66,7 +66,7 @@ export default async function ApiAccessPage() {
                       <span className="font-mono">{token.prefix}…</span> ·{' '}
                       {t('created', { date: formatDay(token.createdAt, locale) })} ·{' '}
                       {token.lastUsedAt
-                        ? t('used', { ago: formatAgo(token.lastUsedAt, undefined, locale) ?? '' })
+                        ? t('used', { ago: formatAgo(token.lastUsedAt, locale) ?? '' })
                         : t('neverUsed')}
                     </p>
                   </div>

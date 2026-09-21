@@ -87,7 +87,7 @@ export default async function AdminPage() {
                   </td>
                   <td className="figure py-3 pr-4 text-right">{user.workouts}</td>
                   <td className="figure py-3 pr-4 text-right">{user.sets}</td>
-                  <td className="py-3 pr-4 text-ink-dim">{formatAgo(user.lastActiveAt, undefined, locale) ?? t('never')}</td>
+                  <td className="py-3 pr-4 text-ink-dim">{formatAgo(user.lastActiveAt, locale) ?? t('never')}</td>
                   <td className="py-3 text-ink-dim">{formatDay(user.createdAt, locale)}</td>
                 </tr>
               ))}

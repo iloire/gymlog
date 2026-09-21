@@ -56,7 +56,7 @@ export default function ProfilePage() {
       ? t('values.notSet')
       : (presetFor(equipment)?.name ?? t('values.items', { count: equipment.length }))
   const bodyweight = latestWeight
-    ? `${formatWeight(latestWeight.weightKg, unit, locale)} · ${daysAgo(latestWeight.measuredOn)}`
+    ? `${formatWeight(latestWeight.weightKg, unit, locale)} · ${daysAgo(latestWeight.measuredOn, undefined, locale)}`
     : t('values.noReadings')
 
   return (

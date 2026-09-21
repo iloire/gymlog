@@ -8,6 +8,7 @@
  */
 import type { LocalSetLog } from '@/lib/db/dexie'
 import { formatMinutes } from '@/lib/format'
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n'
 import type { HistoryExercise } from '@/lib/session-summary'
 import { formatWeight, type Unit } from '@/lib/units'
 
@@ -105,11 +106,17 @@ export function compareExercise(exercise: HistoryExercise, previous: Previous | 
  * reps beats total work. Null when it did not beat last time — which is what
  * keeps the summary's red list honest.
  */
-export function recordHeadline(record: ExerciseRecord, unit: Unit = 'kg'): string | null {
-  if (record.weightUpKg !== null) return `+${formatWeight(record.weightUpKg, unit)}`
-  if (record.repsUp !== null) return `+${record.repsUp} ${record.repsUp === 1 ? 'rep' : 'reps'}`
+const HEADLINE_WORDS: Record<Locale, { rep: string; reps: string; total: string }> = {
+  en: { rep: 'rep', reps: 'reps', total: 'total' },
+  es: { rep: 'rep', reps: 'reps', total: 'en total' },
+}
+
+export function recordHeadline(record: ExerciseRecord, unit: Unit = 'kg', locale: Locale = DEFAULT_LOCALE): string | null {
+  const words = HEADLINE_WORDS[locale]
+  if (record.weightUpKg !== null) return `+${formatWeight(record.weightUpKg, unit, locale)}`
+  if (record.repsUp !== null) return `+${record.repsUp} ${record.repsUp === 1 ? words.rep : words.reps}`
   if (record.timeUpSec !== null) return `+${formatMinutes(record.timeUpSec)}`
-  if (record.volumeUpKg !== null) return `+${formatWeight(record.volumeUpKg, unit)} total`
+  if (record.volumeUpKg !== null) return `+${formatWeight(record.volumeUpKg, unit, locale)} ${words.total}`
   return null
 }
 

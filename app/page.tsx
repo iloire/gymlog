@@ -104,7 +104,7 @@ export default function TodayPage() {
             day: week.missed,
             templateId: missedId,
             programId: schedule.programId,
-            preview: await planPreview(userId, missedId),
+            preview: await planPreview(userId, missedId, locale),
           }
         : null
 
@@ -132,7 +132,7 @@ export default function TodayPage() {
 
     return {
       scheduled: { ...scheduled, name: template?.name ?? workoutFallback },
-      preview: await planPreview(userId, scheduled.templateId),
+      preview: await planPreview(userId, scheduled.templateId, locale),
       week: week.days,
       missed,
       templates,
@@ -235,7 +235,7 @@ export default function TodayPage() {
             {plan?.scheduled?.name ?? catchUp?.day.name ?? t('restDay')}
           </h1>
           {plan?.scheduled && plan.preview ? (
-            <p className="mt-1.5 text-sm text-ink-dim">{planSummary(plan.preview.lines.length, plan.preview.estimateMs)}</p>
+            <p className="mt-1.5 text-sm text-ink-dim">{planSummary(plan.preview.lines.length, plan.preview.estimateMs, locale)}</p>
           ) : catchUp ? (
             <p className="mt-1.5 text-[15px] text-ink-dim">
               {t('missedQuestion', { weekday: weekdayName(catchUp.day.weekday, locale) })}
@@ -271,7 +271,7 @@ export default function TodayPage() {
           </section>
         ) : catchUp ? (
           <section className="mt-6">
-            <p className="mb-3 text-sm text-ink-dim">{planSummary(catchUp.preview.lines.length, catchUp.preview.estimateMs)}</p>
+            <p className="mb-3 text-sm text-ink-dim">{planSummary(catchUp.preview.lines.length, catchUp.preview.estimateMs, locale)}</p>
             <PlanList lines={catchUp.preview.lines} />
 
             <button
@@ -345,7 +345,7 @@ function MissedNote({ missed, disabled, onStart }: { missed: Missed; disabled: b
           b: (chunks) => <span className="font-semibold">{chunks}</span>,
         })}
       </p>
-      <p className="mt-0.5 text-sm text-ink-dim">{planSummary(missed.preview.lines.length, missed.preview.estimateMs)}</p>
+      <p className="mt-0.5 text-sm text-ink-dim">{planSummary(missed.preview.lines.length, missed.preview.estimateMs, locale)}</p>
       <button
         type="button"
         onClick={onStart}
@@ -413,6 +413,7 @@ function WorkoutList({
   onStart: (templateId: string, programId: string | null) => void
 }) {
   const t = useTranslations('today.list')
+  const locale = useLocale()
   return (
     <ul className="mt-5 divide-y divide-line border-y border-line">
       {templates.map(({ template, lastDone, programId, hint }) => (
@@ -425,7 +426,7 @@ function WorkoutList({
             <span className="min-w-0">
               <span className="block text-[15px]">{template.name}</span>
               <span className="block text-sm text-ink-dim">
-                {[hint, lastDone ? t('lastDone', { when: daysAgo(lastDone) }) : t('notDone')].filter(Boolean).join(' · ')}
+                {[hint, lastDone ? t('lastDone', { when: daysAgo(lastDone, undefined, locale) }) : t('notDone')].filter(Boolean).join(' · ')}
               </span>
             </span>
             <span className="shrink-0 text-sm text-ink-dim">{t('start')}</span>

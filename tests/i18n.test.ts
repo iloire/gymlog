@@ -132,11 +132,11 @@ describe('formatting in Spanish', () => {
 
   it('says how long ago in Spanish', () => {
     const now = Date.UTC(2026, 8, 21, 12)
-    expect(formatAgo(now, now, 'es')).toBe('hoy')
-    expect(formatAgo(now - 86_400_000, now, 'es')).toBe('ayer')
-    expect(formatAgo(now - 3 * 86_400_000, now, 'es')).toBe('hace 3 días')
-    expect(formatAgo(now - 90 * 86_400_000, now, 'es')).toBe('23 jun 2026')
-    expect(formatAgo(now - 3 * 86_400_000, now)).toBe('3 days ago')
+    expect(formatAgo(now, 'es', now)).toBe('hoy')
+    expect(formatAgo(now - 86_400_000, 'es', now)).toBe('ayer')
+    expect(formatAgo(now - 3 * 86_400_000, 'es', now)).toBe('hace 3 días')
+    expect(formatAgo(now - 90 * 86_400_000, 'es', now)).toBe('23 jun 2026')
+    expect(formatAgo(now - 3 * 86_400_000, 'en', now)).toBe('3 days ago')
   })
 
   it('uses a decimal comma and a thousands point', () => {

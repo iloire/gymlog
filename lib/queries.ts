@@ -1,6 +1,8 @@
 'use client'
 
 import { getDb, type LocalProgram, type LocalSetLog, type LocalTemplateItem } from '@/lib/db/dexie'
+import { exerciseName } from '@/lib/exercise-i18n'
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n'
 import { estimateWorkoutMs, formatLast, formatTarget, type PlanLine } from '@/lib/plan'
 import { readUnit } from '@/lib/sync/client'
 
@@ -87,7 +89,7 @@ export type PlanPreview = { lines: PlanLine[]; estimateMs: number }
  * One `lastPerformance` scan per exercise, all of it against IndexedDB — this
  * is read standing in the doorway of a gym with no signal.
  */
-export async function planPreview(userId: string, templateId: string): Promise<PlanPreview> {
+export async function planPreview(userId: string, templateId: string, locale: Locale = DEFAULT_LOCALE): Promise<PlanPreview> {
   const db = getDb(userId)
   const items = await templateItems(userId, templateId)
   const unit = await readUnit(userId)
@@ -98,9 +100,9 @@ export async function planPreview(userId: string, templateId: string): Promise<P
       const last = await lastPerformance(userId, item.exerciseId)
       return {
         exerciseId: item.exerciseId,
-        name: exercise?.name ?? 'Exercise',
+        name: exercise ? exerciseName(exercise, locale) : 'Exercise',
         target: formatTarget(item),
-        last: last ? formatLast(last.topSet, unit) : null,
+        last: last ? formatLast(last.topSet, unit, locale) : null,
       }
     }),
   )

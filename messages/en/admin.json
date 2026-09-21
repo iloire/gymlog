@@ -32,7 +32,14 @@
       "copy": "Copy",
       "copied": "Copied",
       "pastePrompt": "Or paste this into an assistant that can make web requests:",
-      "copyPrompt": "Copy prompt"
+      "copyPrompt": "Copy prompt",
+      "errors": {
+        "signedOut": "You are signed out.",
+        "nameMissing": "Give the token a name.",
+        "nameTooLong": "Keep the name under 60 characters.",
+        "badScope": "Choose read only or read and write.",
+        "tooMany": "You have {max} tokens. Revoke one first."
+      }
     },
     "revoke": {
       "revoke": "Revoke",

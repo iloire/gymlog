@@ -50,6 +50,7 @@ describe('compareExercise', () => {
 
     expect(record.weightUpKg).toBe(2.5)
     expect(recordHeadline(record)).toBe('+2.5 kg')
+    expect(recordHeadline(record, 'kg', 'es')).toBe('+2,5 kg')
     expect(record.previousBest?.weightKg).toBe(80)
   })
 

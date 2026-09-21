@@ -93,7 +93,7 @@ export function CreateToken({ apiBase }: { apiBase: string }) {
           </button>
         </div>
       </form>
-      {result && !result.ok && <p className="mt-2 text-sm text-plate-red">{result.error}</p>}
+      {result && !result.ok && <p className="mt-2 text-sm text-plate-red">{t(`errors.${result.error}`, { max: result.max ?? 0 })}</p>}
 
       {token && (
         <div className="mt-4 rounded-md border border-plate-blue-lift bg-surface p-4">

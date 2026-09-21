@@ -163,7 +163,7 @@ describe('tokens', () => {
   })
 
   it('needs a signed-in user, a name and a known scope to create one', async () => {
-    expect(await createApiToken('ChatGPT')).toEqual({ ok: false, error: 'You are signed out.' })
+    expect(await createApiToken('ChatGPT')).toEqual({ ok: false, error: 'signedOut' })
     state.userId = ALICE
     expect((await createApiToken('   ')).ok).toBe(false)
     expect((await createApiToken('Sneaky', 'admin' as TokenScope)).ok).toBe(false)

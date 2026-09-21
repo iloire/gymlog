@@ -113,7 +113,7 @@ export function ExerciseDetail({
       {last && lastTop ? (
         <section className="mt-6 grid grid-cols-2 gap-3" aria-label={t('tilesLabel')}>
           <div className="rounded-md border border-line p-4">
-            <p className="text-sm text-ink-dim">{t('lastTime', { when: formatAgo(lastTop.performedAt, undefined, locale) ?? '' })}</p>
+            <p className="text-sm text-ink-dim">{t('lastTime', { when: formatAgo(lastTop.performedAt, locale) ?? '' })}</p>
             {/* Red when last time was your best: the same red the summary uses for beating it. */}
             <SetFigure set={lastTop} unit={unit} locale={locale} className={best && lastTop.id === best.id ? 'text-plate-red' : ''} />
             <p className="figure mt-1 truncate text-xs text-ink-dim">{last.map((set) => formatSet(set, unit, locale)).join('  ')}</p>

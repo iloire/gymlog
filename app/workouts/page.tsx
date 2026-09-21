@@ -183,7 +183,7 @@ export default function WorkoutsPage() {
                         ? workout.scheduledOn.map((day) => weekdayName(day, locale).slice(0, 3)).join(' · ')
                         : t('workout.noSetDay')}
                       {' · '}
-                      {workout.lastDone ? t('workout.lastDone', { when: daysAgo(workout.lastDone) }) : t('workout.notDoneYet')}
+                      {workout.lastDone ? t('workout.lastDone', { when: daysAgo(workout.lastDone, undefined, locale) }) : t('workout.notDoneYet')}
                     </span>
                     <span className="block text-sm text-ink-dim">
                       {t('workout.exercises', { count: workout.exerciseCount })}

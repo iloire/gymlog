@@ -7,7 +7,7 @@ import { useLocale } from '@/components/locale-provider'
 import { Loading, Placeholder } from '@/components/loading'
 import { SessionSets } from '@/components/session-sets'
 import { useUnit } from '@/components/use-unit'
-import { streakMessage, weekStreak } from '@/lib/calendar'
+import { streakHint, weekStreak, type Streak } from '@/lib/calendar'
 import { formatDay, formatDuration, formatMinutes, formatSet } from '@/lib/format'
 import { sessionHistory } from '@/lib/history'
 import { lastPerformance, today } from '@/lib/queries'
@@ -99,7 +99,7 @@ export function WorkoutSummary({
   const cardioOnly = volumeKg === 0 && cardioSec > 0
   const volumeUpKg = previousVolumeKg !== null && volumeKg > previousVolumeKg ? volumeKg - previousVolumeKg : null
 
-  const beaten = records.filter((record) => recordHeadline(record, unit) !== null)
+  const beaten = records.filter((record) => recordHeadline(record, unit, locale) !== null)
   const firsts = records.filter((record) => record.first)
 
   return (
@@ -133,7 +133,7 @@ export function WorkoutSummary({
               <li key={record.exerciseId} className="flex items-baseline justify-between gap-3 py-3">
                 <span className="min-w-0 truncate text-[15px]">{record.name}</span>
                 <span className="shrink-0 text-right">
-                  <span className="figure block text-[15px] text-plate-red">{recordHeadline(record, unit)}</span>
+                  <span className="figure block text-[15px] text-plate-red">{recordHeadline(record, unit, locale)}</span>
                   <span className="figure block text-sm text-ink-dim">
                     {comparison(record, unit, locale, t)}
                   </span>
@@ -153,7 +153,7 @@ export function WorkoutSummary({
       <p className="mt-6 text-[15px]">
         {t.rich('weeksInRow', { count: streak.current, figure: (chunks) => <span className="figure text-ink">{chunks}</span> })}
         <span className="text-ink-dim"> {t('daysThisWeek', { count: streak.thisWeek })}</span>
-        <span className="block text-sm text-ink-dim">{streakMessage(streak)}</span>
+        <StreakHintLine streak={streak} />
       </p>
 
       <section className="mt-8">
@@ -197,4 +197,11 @@ function Buttons({ onDone, onReopen }: { onDone: () => void; onReopen: () => voi
       </button>
     </>
   )
+}
+
+/** The one-line nudge under the streak, in the Progress tab's words so the two screens agree. */
+function StreakHintLine({ streak }: { streak: Streak }) {
+  const t = useTranslations('history.streak.hint')
+  const { key, count } = streakHint(streak)
+  return <span className="block text-sm text-ink-dim">{t(key, { count })}</span>
 }

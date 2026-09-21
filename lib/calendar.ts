@@ -85,23 +85,6 @@ export function weekStreak(dates: Iterable<string>, today: string): Streak {
  */
 export type StreakHint = { key: 'newStreak' | 'nextMakes' | 'started' | 'bestYet' | 'bestIs'; count: number }
 
-/**
- * English only. Kept until components/workout-summary.tsx (the session
- * screen's translation) reads `streakHint` and `history.streak.hint`; then
- * delete this.
- */
-export function streakMessage(streak: Streak): string {
-  const { key, count } = streakHint(streak)
-  const words: Record<StreakHint['key'], string> = {
-    newStreak: 'One workout this week starts a new streak.',
-    nextMakes: `One workout this week makes it ${count}.`,
-    started: 'Streak started. Train next week to keep it going.',
-    bestYet: 'Your best run yet.',
-    bestIs: `Your best is ${count} weeks.`,
-  }
-  return words[key]
-}
-
 export function streakHint({ current, best, thisWeek }: Streak): StreakHint {
   if (thisWeek === 0) {
     return current === 0 ? { key: 'newStreak', count: 0 } : { key: 'nextMakes', count: current + 1 }

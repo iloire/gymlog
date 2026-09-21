@@ -65,9 +65,12 @@ export async function listApiTokens(): Promise<TokenSummary[]> {
     .orderBy(desc(apiTokens.createdAt))
 }
 
+/** Why a token was not made; the page puts it into words in its language. */
+export type CreateTokenError = 'signedOut' | 'nameMissing' | 'nameTooLong' | 'badScope' | 'tooMany'
+
 export type CreateTokenResult =
   | { ok: true; token: string; summary: TokenSummary }
-  | { ok: false; error: string }
+  | { ok: false; error: CreateTokenError; max?: number }
 
 /** Mint a token for the signed-in user. The secret is in the result and nowhere else. */
 export async function createApiToken(
@@ -75,19 +78,19 @@ export async function createApiToken(
   scope: TokenScope = 'read',
 ): Promise<CreateTokenResult> {
   const userId = await currentUserId()
-  if (!userId) return { ok: false, error: 'You are signed out.' }
+  if (!userId) return { ok: false, error: 'signedOut' }
 
   const name = rawName.trim()
-  if (!name) return { ok: false, error: 'Give the token a name.' }
-  if (name.length > 60) return { ok: false, error: 'Keep the name under 60 characters.' }
-  if (!TOKEN_SCOPES.includes(scope)) return { ok: false, error: 'Choose read only or read and write.' }
+  if (!name) return { ok: false, error: 'nameMissing' }
+  if (name.length > 60) return { ok: false, error: 'nameTooLong' }
+  if (!TOKEN_SCOPES.includes(scope)) return { ok: false, error: 'badScope' }
 
   const [tally] = await db
     .select({ active: count() })
     .from(apiTokens)
     .where(and(eq(apiTokens.userId, userId), isNull(apiTokens.revokedAt)))
   if ((tally?.active ?? 0) >= MAX_ACTIVE_TOKENS) {
-    return { ok: false, error: `You have ${MAX_ACTIVE_TOKENS} tokens. Revoke one first.` }
+    return { ok: false, error: 'tooMany', max: MAX_ACTIVE_TOKENS }
   }
 
   const token = generateToken()

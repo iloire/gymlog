@@ -506,7 +506,7 @@ function Session() {
           previousTopKg={previousTopKg}
           previous={previous?.sets ?? null}
           previousLabel={
-            previous ? t('lastTimeAgo', { ago: formatAgo(previous.performedAt, undefined, locale) ?? '' }) : t('lastTime')
+            previous ? t('lastTimeAgo', { ago: formatAgo(previous.performedAt, locale) ?? '' }) : t('lastTime')
           }
           justLoggedId={lastLoggedId}
           onSelect={(logId) => {

@@ -13,6 +13,7 @@ import {
   filterExercises,
   NO_FILTER,
   bodyPartOptions,
+  useLibraryLabel,
 } from '@/components/exercise-filters'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
@@ -29,6 +30,7 @@ export function ExercisePicker({
 }) {
   const userId = useUserId()
   const t = useTranslations('plan.picker')
+  const label = useLibraryLabel()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState(NO_FILTER)
   const equipment = useEquipment()
@@ -97,7 +99,7 @@ export function ExercisePicker({
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[15px]">{exercise.name}</span>
                 <span className="block truncate text-sm capitalize text-ink-dim">
-                  {exerciseEquipment(exercise)}
+                  {label('equipment', exerciseEquipment(exercise))}
                 </span>
               </span>
               {favorites.has(exercise.id) && (

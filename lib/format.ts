@@ -34,7 +34,7 @@ const AGO: Record<Locale, { today: string; yesterday: string; days: (n: number) 
 }
 
 /** '3 days ago', 'today', or null for no timestamp. */
-export function formatAgo(epochMs: number | null, now = Date.now(), locale: Locale = DEFAULT_LOCALE): string | null {
+export function formatAgo(epochMs: number | null, locale: Locale = DEFAULT_LOCALE, now = Date.now()): string | null {
   if (epochMs === null) return null
   const days = Math.floor((now - epochMs) / 86_400_000)
   const words = AGO[locale]

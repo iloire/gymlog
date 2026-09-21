@@ -32,7 +32,14 @@
       "copy": "Copiar",
       "copied": "Copiado",
       "pastePrompt": "O pega esto en un asistente que pueda hacer peticiones web:",
-      "copyPrompt": "Copiar prompt"
+      "copyPrompt": "Copiar prompt",
+      "errors": {
+        "signedOut": "Has cerrado sesión.",
+        "nameMissing": "Ponle un nombre al token.",
+        "nameTooLong": "El nombre debe tener menos de 60 caracteres.",
+        "badScope": "Elige solo lectura o lectura y escritura.",
+        "tooMany": "Ya tienes {max} tokens. Revoca uno primero."
+      }
     },
     "revoke": {
       "revoke": "Revocar",
