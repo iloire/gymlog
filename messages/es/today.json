@@ -35,7 +35,6 @@
     "cardio": "{minutes} cardio",
     "continue": "Continuar {name}",
     "addExercise": "Añadir ejercicio",
-    "showSets": "Ver las series",
     "finished": "Terminado · abrir para corregir una serie"
   },
   "weekStrip": {

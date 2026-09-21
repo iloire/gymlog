@@ -496,14 +496,11 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
         </>
       ) : (
         <>
-          {/* Done is done: the totals say enough, and every set is a tap away for
-              the glance back — or for spotting the one that needs fixing. */}
-          <details className="mt-3">
-            <summary className="cursor-pointer text-sm text-ink-dim">{t('showSets')}</summary>
-            <div className="mt-3">
-              <SessionSets exercises={exercises} />
-            </div>
-          </details>
+          {/* Done is done, and the sets stay in view: the glance back at what was
+              lifted, and the one set that needs fixing, cost no tap. */}
+          <div className="mt-3">
+            <SessionSets exercises={exercises} />
+          </div>
           <Link
             href={`/session?id=${session.id}`}
             className="mt-3 inline-block text-sm text-ink-dim underline underline-offset-4"
