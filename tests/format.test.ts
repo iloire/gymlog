@@ -26,13 +26,13 @@ describe('formatSet', () => {
   it('shows time for cardio, weight × reps, or reps alone for bodyweight', () => {
     expect(formatSet({ weightKg: null, reps: null, durationSec: 480 })).toBe('8 min')
     expect(formatSet({ weightKg: null, reps: null, durationSec: 450 })).toBe('7.5 min')
-    expect(formatSet({ weightKg: 80, reps: 5 })).toBe('80×5')
+    expect(formatSet({ weightKg: 80, reps: 5 })).toBe('80 kg × 5')
     expect(formatSet({ weightKg: null, reps: 12, durationSec: null })).toBe('12 reps')
   })
 
   it('shows the weight in pounds when asked, still from the stored kilograms', () => {
-    expect(formatSet({ weightKg: 61.235, reps: 5 }, 'lb')).toBe('135×5')
-    expect(formatSet({ weightKg: 80, reps: 5 }, 'lb')).toBe('176.4×5')
+    expect(formatSet({ weightKg: 61.235, reps: 5 }, 'lb')).toBe('135 lb × 5')
+    expect(formatSet({ weightKg: 80, reps: 5 }, 'lb')).toBe('176.4 lb × 5')
     expect(formatSet({ weightKg: null, reps: 12 }, 'lb')).toBe('12 reps')
   })
 })

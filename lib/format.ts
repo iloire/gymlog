@@ -58,8 +58,9 @@ export function formatMinutes(seconds: number): string {
 }
 
 /**
- * One logged set: '8 min' when timed, '80×5' with a weight in the unit, '12 reps'
- * without — a bodyweight set, not a 0 kg one.
+ * One logged set: '8 min' when timed, '80 kg × 5' with a weight in the unit,
+ * '12 reps' without — a bodyweight set, not a 0 kg one. The unit sits on the
+ * weight so '30 × 20' never has to be read twice to tell which number is reps.
  */
 export function formatSet(
   set: { weightKg: number | null; reps: number | null; durationSec?: number | null },
@@ -68,7 +69,7 @@ export function formatSet(
 ): string {
   if (set.durationSec != null) return formatMinutes(set.durationSec)
   return set.weightKg
-    ? `${displayWeight(set.weightKg, unit).toLocaleString(INTL_TAG[locale])}×${set.reps ?? 0}`
+    ? `${displayWeight(set.weightKg, unit).toLocaleString(INTL_TAG[locale])} ${unit} × ${set.reps ?? 0}`
     : `${set.reps ?? 0} reps`
 }
 

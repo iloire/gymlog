@@ -143,6 +143,6 @@ describe('formatting in Spanish', () => {
     expect(formatWeight(77.5, 'kg', 'es')).toBe('77,5 kg')
     expect(formatWeight(4250, 'kg', 'es')).toBe('4250 kg')
     expect(formatWeight(4250, 'kg')).toBe('4,250 kg')
-    expect(formatSet({ weightKg: 77.5, reps: 5 }, 'kg', 'es')).toBe('77,5×5')
+    expect(formatSet({ weightKg: 77.5, reps: 5 }, 'kg', 'es')).toBe('77,5 kg × 5')
   })
 })

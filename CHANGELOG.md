@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-21 22:35
+
+- **A logged set carries its unit.** `formatSet` wrote '30×20', which had to be read twice to
+  tell the weight from the reps; it now writes '30 kg × 20' ('66 lb × 20' in pounds), the way
+  the session screen's set squares already did. Every set list, record and summary picks it up.
+
 ## 2026-09-21 22:34
 
 - **Today's workout in the past list says "Today".** The row for a session dated today printed
