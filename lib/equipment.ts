@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import config from '@/data/equipment.json'
 import type { LocalExercise } from '@/lib/db/dexie'
+import { DEFAULT_LOCALE, type Locale, localize, localizedSchema } from '@/lib/i18n'
 
 /**
  * What you can train with, and what an exercise needs.
@@ -16,8 +17,8 @@ import type { LocalExercise } from '@/lib/db/dexie'
  */
 
 const Config = z.object({
-  items: z.array(z.object({ id: z.string(), name: z.string() })).min(1),
-  presets: z.array(z.object({ id: z.string(), name: z.string(), items: z.array(z.string()) })),
+  items: z.array(z.object({ id: z.string(), name: localizedSchema })).min(1),
+  presets: z.array(z.object({ id: z.string(), name: localizedSchema, items: z.array(z.string()) })),
   needs: z.record(z.string(), z.array(z.string())),
 })
 
@@ -50,8 +51,9 @@ export function exerciseEquipment(exercise: Pick<LocalExercise, 'equipment'>): s
   return !exercise.equipment || exercise.equipment === 'body only' ? 'bodyweight' : exercise.equipment
 }
 
-export function equipmentName(id: string): string {
-  return EQUIPMENT.items.find((item) => item.id === id)?.name ?? id
+export function equipmentName(id: string, locale: Locale = DEFAULT_LOCALE): string {
+  const name = EQUIPMENT.items.find((item) => item.id === id)?.name
+  return name ? localize(name, locale) : id
 }
 
 /** The preset that is exactly this selection, if any. */

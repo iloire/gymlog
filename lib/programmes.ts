@@ -8,6 +8,7 @@ import upperLower4Day from '@/data/programmes/upper-lower-4-day.json'
 import { getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
 import { missingEquipment, type EquipmentExercise } from '@/lib/equipment'
+import { DEFAULT_LOCALE, type Locale, localize, localizedSchema } from '@/lib/i18n'
 import { newId } from '@/lib/id'
 import { activeProgram, today } from '@/lib/queries'
 
@@ -35,12 +36,12 @@ const Slot = z.object({
 const Programme = z
   .object({
     id: z.string(),
-    name: z.string(),
+    name: localizedSchema,
     level: z.enum(['beginner', 'novice', 'intermediate']),
-    summary: z.string(),
+    summary: localizedSchema,
     /** Monday … Sunday: a workout key, or null for a rest day. */
     week: z.array(z.string().nullable()).length(7),
-    workouts: z.record(z.string(), z.object({ name: z.string(), exercises: z.array(Slot).min(1) })),
+    workouts: z.record(z.string(), z.object({ name: localizedSchema, exercises: z.array(Slot).min(1) })),
   })
   .refine((p) => p.week.every((key) => key === null || key in p.workouts), {
     message: 'week names a workout that does not exist',
@@ -118,10 +119,12 @@ export function fitProgramme(
   programme: Programme,
   have: ReadonlySet<string>,
   library: ReadonlyMap<string, EquipmentExercise>,
+  /** The workouts are copied under their names in this language. */
+  locale: Locale = DEFAULT_LOCALE,
 ): Fit {
   const workouts = Object.entries(programme.workouts).map(([key, workout]) => ({
     key,
-    name: workout.name,
+    name: localize(workout.name, locale),
     choices: workout.exercises.map((slot) => chooseExercise(slot, have, library)),
   }))
   const choices = workouts.flatMap((workout) => workout.choices)
@@ -146,7 +149,12 @@ export async function adoptProgramme(
   userId: string,
   programme: Programme,
   fit: Fit,
-  { schedule, shift = 0, startedOn = today() }: { schedule: boolean; shift?: number; startedOn?: string },
+  {
+    schedule,
+    shift = 0,
+    startedOn = today(),
+    locale = DEFAULT_LOCALE,
+  }: { schedule: boolean; shift?: number; startedOn?: string; locale?: Locale },
 ): Promise<{ programId: string | null; templateIds: Record<string, string> }> {
   const db = getDb(userId)
   const templateIds: Record<string, string> = {}
@@ -192,7 +200,7 @@ export async function adoptProgramme(
       programId = newId()
       await writeRow(userId, 'programs', {
         id: programId,
-        name: programme.name,
+        name: localize(programme.name, locale),
         stage: programme.level,
         startedOn,
         endedOn: null,

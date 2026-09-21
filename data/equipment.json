@@ -1,48 +1,190 @@
 {
   "$comment": "What you can train with, and what each exercise needs beyond the library's own `equipment` field. Schema: data/README.md.",
   "items": [
-    { "id": "barbell", "name": "Barbell" },
-    { "id": "rack", "name": "Squat rack" },
-    { "id": "bench", "name": "Bench" },
-    { "id": "dumbbell", "name": "Dumbbells" },
-    { "id": "pull-up-bar", "name": "Pull-up bar" },
-    { "id": "cable", "name": "Cable station" },
-    { "id": "machine", "name": "Weight machines" },
-    { "id": "e-z curl bar", "name": "EZ curl bar" },
-    { "id": "kettlebells", "name": "Kettlebells" },
-    { "id": "bands", "name": "Resistance bands" },
-    { "id": "exercise ball", "name": "Exercise ball" },
-    { "id": "medicine ball", "name": "Medicine ball" },
-    { "id": "foam roll", "name": "Foam roller" }
+    {
+      "id": "barbell",
+      "name": {
+        "en": "Barbell",
+        "es": "Barra"
+      }
+    },
+    {
+      "id": "rack",
+      "name": {
+        "en": "Squat rack",
+        "es": "Rack de sentadillas"
+      }
+    },
+    {
+      "id": "bench",
+      "name": {
+        "en": "Bench",
+        "es": "Banco"
+      }
+    },
+    {
+      "id": "dumbbell",
+      "name": {
+        "en": "Dumbbells",
+        "es": "Mancuernas"
+      }
+    },
+    {
+      "id": "pull-up-bar",
+      "name": {
+        "en": "Pull-up bar",
+        "es": "Barra de dominadas"
+      }
+    },
+    {
+      "id": "cable",
+      "name": {
+        "en": "Cable station",
+        "es": "Polea"
+      }
+    },
+    {
+      "id": "machine",
+      "name": {
+        "en": "Weight machines",
+        "es": "Máquinas"
+      }
+    },
+    {
+      "id": "e-z curl bar",
+      "name": {
+        "en": "EZ curl bar",
+        "es": "Barra EZ"
+      }
+    },
+    {
+      "id": "kettlebells",
+      "name": {
+        "en": "Kettlebells",
+        "es": "Kettlebells"
+      }
+    },
+    {
+      "id": "bands",
+      "name": {
+        "en": "Resistance bands",
+        "es": "Bandas elásticas"
+      }
+    },
+    {
+      "id": "exercise ball",
+      "name": {
+        "en": "Exercise ball",
+        "es": "Fitball"
+      }
+    },
+    {
+      "id": "medicine ball",
+      "name": {
+        "en": "Medicine ball",
+        "es": "Balón medicinal"
+      }
+    },
+    {
+      "id": "foam roll",
+      "name": {
+        "en": "Foam roller",
+        "es": "Rodillo de espuma"
+      }
+    }
   ],
   "presets": [
     {
       "id": "full-gym",
-      "name": "Full gym",
+      "name": {
+        "en": "Full gym",
+        "es": "Gimnasio completo"
+      },
       "items": [
-        "barbell", "rack", "bench", "dumbbell", "pull-up-bar", "cable", "machine",
-        "e-z curl bar", "kettlebells", "bands", "exercise ball", "medicine ball", "foam roll"
+        "barbell",
+        "rack",
+        "bench",
+        "dumbbell",
+        "pull-up-bar",
+        "cable",
+        "machine",
+        "e-z curl bar",
+        "kettlebells",
+        "bands",
+        "exercise ball",
+        "medicine ball",
+        "foam roll"
       ]
     },
     {
       "id": "home-rack",
-      "name": "Home rack",
-      "items": ["barbell", "rack", "bench", "dumbbell", "pull-up-bar"]
+      "name": {
+        "en": "Home rack",
+        "es": "Rack en casa"
+      },
+      "items": [
+        "barbell",
+        "rack",
+        "bench",
+        "dumbbell",
+        "pull-up-bar"
+      ]
     },
-    { "id": "dumbbells", "name": "Dumbbells and a bench", "items": ["dumbbell", "bench"] },
-    { "id": "nothing", "name": "No equipment", "items": [] }
+    {
+      "id": "dumbbells",
+      "name": {
+        "en": "Dumbbells and a bench",
+        "es": "Mancuernas y banco"
+      },
+      "items": [
+        "dumbbell",
+        "bench"
+      ]
+    },
+    {
+      "id": "nothing",
+      "name": {
+        "en": "No equipment",
+        "es": "Sin material"
+      },
+      "items": []
+    }
   ],
   "needs": {
-    "Barbell_Squat": ["rack"],
-    "Standing_Military_Press": ["rack"],
-    "Standing_Barbell_Calf_Raise": ["rack"],
-    "Barbell_Bench_Press_-_Medium_Grip": ["bench", "rack"],
-    "Barbell_Incline_Bench_Press_-_Medium_Grip": ["bench", "rack"],
-    "Dumbbell_Bench_Press": ["bench"],
-    "Hammer_Grip_Incline_DB_Bench_Press": ["bench"],
-    "One-Arm_Dumbbell_Row": ["bench"],
-    "Bench_Dips": ["bench"],
-    "Chin-Up": ["pull-up-bar"],
-    "Pullups": ["pull-up-bar"]
+    "Barbell_Squat": [
+      "rack"
+    ],
+    "Standing_Military_Press": [
+      "rack"
+    ],
+    "Standing_Barbell_Calf_Raise": [
+      "rack"
+    ],
+    "Barbell_Bench_Press_-_Medium_Grip": [
+      "bench",
+      "rack"
+    ],
+    "Barbell_Incline_Bench_Press_-_Medium_Grip": [
+      "bench",
+      "rack"
+    ],
+    "Dumbbell_Bench_Press": [
+      "bench"
+    ],
+    "Hammer_Grip_Incline_DB_Bench_Press": [
+      "bench"
+    ],
+    "One-Arm_Dumbbell_Row": [
+      "bench"
+    ],
+    "Bench_Dips": [
+      "bench"
+    ],
+    "Chin-Up": [
+      "pull-up-bar"
+    ],
+    "Pullups": [
+      "pull-up-bar"
+    ]
   }
 }

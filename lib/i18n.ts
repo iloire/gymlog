@@ -11,6 +11,8 @@
  * Pure, so the negotiation and the parsing are unit tests.
  */
 
+import { z } from 'zod'
+
 export const LOCALES = ['en', 'es'] as const
 export type Locale = (typeof LOCALES)[number]
 
@@ -60,4 +62,16 @@ export const LOCALE_COOKIE_ATTRIBUTES = { path: '/', maxAge: LOCALE_COOKIE_MAX_A
 export function writeLocaleCookie(locale: Locale): void {
   if (typeof document === 'undefined') return
   document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; samesite=lax`
+}
+
+/**
+ * A name in a data file (`data/`): a plain string is English, or one string
+ * per language. Both are required when it is an object, so a file cannot
+ * ship half translated.
+ */
+export const localizedSchema = z.union([z.string(), z.object({ en: z.string(), es: z.string() })])
+export type Localized = z.infer<typeof localizedSchema>
+
+export function localize(value: Localized, locale: Locale): string {
+  return typeof value === 'string' ? value : value[locale]
 }

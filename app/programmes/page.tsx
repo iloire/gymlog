@@ -17,6 +17,7 @@ import { useUserId } from '@/components/session-boot'
 import { exerciseName } from '@/lib/exercise-i18n'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
 import { equipmentName, presetFor } from '@/lib/equipment'
+import { localize } from '@/lib/i18n'
 import {
   adoptProgramme,
   fitProgramme,
@@ -111,17 +112,18 @@ function ProgrammesLoading({ detail = false }: { detail?: boolean }) {
 
 function Catalogue({ have, library }: { have: string[] | null; library: Library }) {
   const t = useTranslations('plan')
+  const locale = useLocale()
   const [editing, setEditing] = useState(false)
 
   const entries = useMemo(() => {
     const owned = new Set(have ?? [])
-    return PROGRAMMES.map((programme) => ({ programme, fit: fitProgramme(programme, owned, library) }))
+    return PROGRAMMES.map((programme) => ({ programme, fit: fitProgramme(programme, owned, library, locale) }))
       // Best match first: doable, then fewest swaps. Stable, so ties keep catalogue order.
       .sort((a, b) => Number(b.fit.doable) - Number(a.fit.doable) || a.fit.swaps - b.fit.swaps)
-  }, [have, library])
+  }, [have, library, locale])
 
   const summary = have
-    ? (presetFor(have)?.name ?? (have.map(equipmentName).join(', ') || t('programmes.noEquipment')))
+    ? (localize(presetFor(have)?.name ?? '', locale) || have.map((id) => equipmentName(id, locale)).join(', ') || t('programmes.noEquipment'))
     : null
 
   return (
@@ -169,10 +171,10 @@ function Catalogue({ have, library }: { have: string[] | null; library: Library 
             <li key={programme.id}>
               <Link href={`/programmes?id=${programme.id}`} className="block py-4">
                 <span className="flex items-baseline justify-between gap-3">
-                  <span className="text-[17px] font-semibold">{programme.name}</span>
+                  <span className="text-[17px] font-semibold">{localize(programme.name, locale)}</span>
                   <span className="shrink-0 text-sm text-ink-dim">{t(`programmes.level.${programme.level}`)}</span>
                 </span>
-                <span className="mt-1 block text-sm text-ink-dim">{programme.summary}</span>
+                <span className="mt-1 block text-sm text-ink-dim">{localize(programme.summary, locale)}</span>
                 <FitLine fit={fit} />
               </Link>
             </li>
@@ -185,10 +187,11 @@ function Catalogue({ have, library }: { have: string[] | null; library: Library 
 
 function FitLine({ fit }: { fit: Fit }) {
   const t = useTranslations('plan.programmes')
+  const locale = useLocale()
   if (!fit.doable) {
     return (
       <span className="mt-2 block text-sm text-ink-dim">
-        {t('needs', { items: fit.missing.map(equipmentName).join(', ') })}
+        {t('needs', { items: fit.missing.map((id) => equipmentName(id, locale)).join(', ') })}
       </span>
     )
   }
@@ -219,7 +222,7 @@ function ProgrammeDetail({
   const [adopting, setAdopting] = useState(false)
 
   const current = useLiveQuery(() => activeProgram(userId), [userId])
-  const fit = useMemo(() => fitProgramme(programme, new Set(have ?? []), library), [programme, have, library])
+  const fit = useMemo(() => fitProgramme(programme, new Set(have ?? []), library, locale), [programme, have, library, locale])
 
   const names = Object.fromEntries(fit.workouts.map((workout) => [workout.key, workout.name]))
   const week = shiftWeek(programme.week, shift)
@@ -237,7 +240,7 @@ function ProgrammeDetail({
   async function adopt(schedule: boolean) {
     if (adopting) return
     setAdopting(true)
-    await adoptProgramme(userId, programme, fit, { schedule, shift })
+    await adoptProgramme(userId, programme, fit, { schedule, shift, locale })
     router.push('/workouts')
   }
 
@@ -256,11 +259,11 @@ function ProgrammeDetail({
         {t('back')}
       </Link>
 
-      <h1 className="figure mt-4 text-4xl leading-[1.05]">{programme.name}</h1>
+      <h1 className="figure mt-4 text-4xl leading-[1.05]">{localize(programme.name, locale)}</h1>
       <p className="mt-2 text-sm text-ink-dim">
         {t('daysAWeek', { level: t(`level.${programme.level}`), count: trainingDays(programme.week) })}
       </p>
-      <p className="mt-3 text-[15px]">{programme.summary}</p>
+      <p className="mt-3 text-[15px]">{localize(programme.summary, locale)}</p>
 
       {have === null && (
         <section className="mt-7 border-y border-line py-5">
@@ -324,7 +327,7 @@ function ProgrammeDetail({
                       <span className="block text-[15px]">{name}</span>
                       {!choice.doable ? (
                         <span className="block text-xs text-ink-dim">
-                          {t('needs', { items: choice.missing.map(equipmentName).join(', ') })}
+                          {t('needs', { items: choice.missing.map((id) => equipmentName(id, locale)).join(', ') })}
                         </span>
                       ) : (
                         choice.swapped && (

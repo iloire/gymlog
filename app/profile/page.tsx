@@ -16,7 +16,7 @@ import { SignOutButton } from '@/components/sign-out-button'
 import { useUnit } from '@/components/use-unit'
 import { publicEnv } from '@/lib/env.public'
 import { presetFor } from '@/lib/equipment'
-import { LOCALE_NAMES } from '@/lib/i18n'
+import { LOCALE_NAMES, localize } from '@/lib/i18n'
 import { daysAgo } from '@/lib/history'
 import { bodyWeightSeries } from '@/lib/queries'
 import { readStyle, readTheme, subscribeTheme } from '@/lib/theme'
@@ -54,7 +54,7 @@ export default function ProfilePage() {
   const gym =
     equipment === null
       ? t('values.notSet')
-      : (presetFor(equipment)?.name ?? t('values.items', { count: equipment.length }))
+      : (localize(presetFor(equipment)?.name ?? '', locale) || t('values.items', { count: equipment.length }))
   const bodyweight = latestWeight
     ? `${formatWeight(latestWeight.weightKg, unit, locale)} · ${daysAgo(latestWeight.measuredOn, undefined, locale)}`
     : t('values.noReadings')

@@ -1,16 +1,37 @@
 {
   "id": "full-body-3-day",
-  "name": "Full body, 3 days",
+  "name": {
+    "en": "Full body, 3 days",
+    "es": "Cuerpo entero, 3 días"
+  },
   "level": "beginner",
-  "summary": "Two short workouts of the big lifts, three days a week. Start with the empty bar and add weight every session you get all your reps.",
-  "week": ["a", null, "b", null, "a", null, null],
+  "summary": {
+    "en": "Two short workouts of the big lifts, three days a week. Start with the empty bar and add weight every session you get all your reps.",
+    "es": "Dos entrenamientos cortos con los grandes levantamientos, tres días por semana. Empieza con la barra vacía y sube peso cada sesión en la que completes todas las repeticiones."
+  },
+  "week": [
+    "a",
+    null,
+    "b",
+    null,
+    "a",
+    null,
+    null
+  ],
   "workouts": {
     "a": {
-      "name": "Full body A",
+      "name": {
+        "en": "Full body A",
+        "es": "Cuerpo entero A"
+      },
       "exercises": [
         {
           "exercise": "Barbell_Squat",
-          "alternatives": ["Leg_Press", "Split_Squat_with_Dumbbells", "Bodyweight_Squat"],
+          "alternatives": [
+            "Leg_Press",
+            "Split_Squat_with_Dumbbells",
+            "Bodyweight_Squat"
+          ],
           "sets": 3,
           "reps": 5,
           "restSec": 180,
@@ -18,7 +39,11 @@
         },
         {
           "exercise": "Barbell_Bench_Press_-_Medium_Grip",
-          "alternatives": ["Dumbbell_Bench_Press", "Machine_Bench_Press", "Pushups"],
+          "alternatives": [
+            "Dumbbell_Bench_Press",
+            "Machine_Bench_Press",
+            "Pushups"
+          ],
           "sets": 3,
           "reps": 5,
           "restSec": 180,
@@ -26,7 +51,11 @@
         },
         {
           "exercise": "Bent_Over_Barbell_Row",
-          "alternatives": ["Seated_Cable_Rows", "One-Arm_Dumbbell_Row", "Bent_Over_Two-Dumbbell_Row"],
+          "alternatives": [
+            "Seated_Cable_Rows",
+            "One-Arm_Dumbbell_Row",
+            "Bent_Over_Two-Dumbbell_Row"
+          ],
           "sets": 3,
           "reps": 5,
           "restSec": 120,
@@ -35,11 +64,18 @@
       ]
     },
     "b": {
-      "name": "Full body B",
+      "name": {
+        "en": "Full body B",
+        "es": "Cuerpo entero B"
+      },
       "exercises": [
         {
           "exercise": "Barbell_Squat",
-          "alternatives": ["Leg_Press", "Split_Squat_with_Dumbbells", "Bodyweight_Squat"],
+          "alternatives": [
+            "Leg_Press",
+            "Split_Squat_with_Dumbbells",
+            "Bodyweight_Squat"
+          ],
           "sets": 3,
           "reps": 5,
           "restSec": 180,
@@ -47,7 +83,11 @@
         },
         {
           "exercise": "Standing_Military_Press",
-          "alternatives": ["Dumbbell_Shoulder_Press", "Machine_Shoulder_Military_Press", "Seated_Cable_Shoulder_Press"],
+          "alternatives": [
+            "Dumbbell_Shoulder_Press",
+            "Machine_Shoulder_Military_Press",
+            "Seated_Cable_Shoulder_Press"
+          ],
           "sets": 3,
           "reps": 5,
           "restSec": 180,
@@ -55,7 +95,11 @@
         },
         {
           "exercise": "Barbell_Deadlift",
-          "alternatives": ["Stiff-Legged_Dumbbell_Deadlift", "Cable_Deadlifts", "Butt_Lift_Bridge"],
+          "alternatives": [
+            "Stiff-Legged_Dumbbell_Deadlift",
+            "Cable_Deadlifts",
+            "Butt_Lift_Bridge"
+          ],
           "sets": 1,
           "reps": 5,
           "restSec": 180,
@@ -63,7 +107,10 @@
         },
         {
           "exercise": "Chin-Up",
-          "alternatives": ["Wide-Grip_Lat_Pulldown", "One-Arm_Dumbbell_Row"],
+          "alternatives": [
+            "Wide-Grip_Lat_Pulldown",
+            "One-Arm_Dumbbell_Row"
+          ],
           "sets": 3,
           "reps": 5,
           "restSec": 120

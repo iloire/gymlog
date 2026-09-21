@@ -21,13 +21,13 @@ already adopted it.
 ```jsonc
 {
   "id": "full-body-3-day",          // must equal the file name
-  "name": "Full body, 3 days",
+  "name": { "en": "Full body, 3 days", "es": "Cuerpo entero, 3 días" },   // or a plain English string
   "level": "beginner",              // beginner | novice | intermediate
-  "summary": "One or two sentences shown in the catalogue.",
+  "summary": { "en": "One or two sentences shown in the catalogue.", "es": "…" },
   "week": ["a", null, "b", null, "a", null, null],   // Monday … Sunday: workout key or null (rest)
   "workouts": {
     "a": {
-      "name": "Full body A",        // becomes the workout's name
+      "name": { "en": "Full body A", "es": "Cuerpo entero A" },   // becomes the workout's name, in the adopter's language
       "exercises": [
         {
           "exercise": "Barbell_Squat",                        // library id (db/seed-exercises.json)
@@ -44,6 +44,9 @@ already adopted it.
 }
 ```
 
+- **Names are per language**: `name`, `summary` and each workout's `name` are either a plain string
+  (English) or `{ "en": …, "es": … }` with both languages; a file with one missing fails to load.
+  The same goes for `items[].name` and `presets[].name` in `equipment.json`.
 - **Every workout must appear in `week`**, and every key in `week` must be a workout.
 - The user can move the whole week to other days (Mon/Wed/Fri → Tue/Thu/Sat) before adopting.
 - Reps are a single target: the editor and the gym screen do not show rep ranges yet.

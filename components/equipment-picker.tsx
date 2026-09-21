@@ -2,6 +2,8 @@
 
 import { useTranslations } from 'next-intl'
 import { useMemo, useSyncExternalStore } from 'react'
+import { useLocale } from '@/components/locale-provider'
+import { localize } from '@/lib/i18n'
 
 import {
   EQUIPMENT,
@@ -26,6 +28,7 @@ const chip = (active: boolean) =>
 export function EquipmentPicker() {
   const t = useTranslations('exercises.equipmentPicker')
   const items = useEquipment()
+  const locale = useLocale()
   const selected = new Set(items ?? [])
   const preset = items ? presetFor(items) : undefined
 
@@ -53,7 +56,7 @@ export function EquipmentPicker() {
                 : 'border-line bg-surface text-ink-dim'
             }`}
           >
-            {option.name}
+            {localize(option.name, locale)}
           </button>
         ))}
       </div>
@@ -68,7 +71,7 @@ export function EquipmentPicker() {
             onClick={() => toggle(item.id)}
             className={chip(selected.has(item.id))}
           >
-            {item.name}
+            {localize(item.name, locale)}
           </button>
         ))}
       </div>
