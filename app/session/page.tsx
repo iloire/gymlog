@@ -15,7 +15,7 @@ import { ExerciseFrames } from '@/components/exercise-frames'
 import { Placeholder } from '@/components/loading'
 import { OverflowMenu } from '@/components/overflow-menu'
 import { RemoveExercise } from '@/components/remove-exercise'
-import { RestBar, RestTakeover, useRest } from '@/components/rest-timer'
+import { RestBar, RestCarried, RestTakeover, useRest } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
 import { libraryName } from '@/lib/exercise-i18n'
 import { SetSquares } from '@/components/set-squares'
@@ -329,10 +329,8 @@ function Session() {
     .sort((a, b) => b - a)
     .slice(0, 4)
 
-  // Between sets the clock takes the steppers' place. Tapping a done square to
-  // fix it mid-rest brings the steppers back, with the bar at the bottom.
   const resting = rest?.sessionId === id && remaining > 0
-  const takeover = resting && selectedId === null && activeSet !== undefined && activeSet.completedAt === null
+  const restingBeforeSet = resting && selectedId === null && activeSet !== undefined && activeSet.completedAt === null
   const nextSet = activeSet
     ? timed
       ? `${values.durationSec ? formatMinutes(values.durationSec) : t('time')}`
@@ -344,11 +342,17 @@ function Session() {
   const allDone = data.logs.every((log) => log.completedAt !== null)
   const lastLogged = data.logs.find((log) => log.id === lastLoggedId && log.completedAt !== null) ?? null
   // The last set of an exercise moves the screen on to the next one while its
-  // rest still runs, so the clock, the chips, the rest control and the note
-  // under it are about the exercise just done, not the one now at the top;
-  // each says so by name. Null while the rest is this exercise's own.
-  const carried = takeover && lastLogged && lastLogged.exerciseId !== exerciseId ? lastLogged : null
-  const restLog = carried ?? activeSet
+  // rest still runs, so the clock, the chips and the note under it are about
+  // the exercise just done, not the one now at the top; each says so by name.
+  // Null while the rest is this exercise's own.
+  const carried = restingBeforeSet && lastLogged && lastLogged.exerciseId !== exerciseId ? lastLogged : null
+  const carriedName = carried ? libraryName(carried.exerciseId, carried.exerciseName, locale) : undefined
+  // Between sets the clock takes the steppers' place. Tapping a done square to
+  // fix it mid-rest brings the steppers back, with the bar at the bottom. So
+  // does a rest carried over from the exercise before: the new exercise's
+  // weight and reps are what the rest is for looking at, so the clock shrinks
+  // to a strip above them rather than standing in their place.
+  const takeover = restingBeforeSet && !carried
   const noteLog = carried
     ? (data.logs.find((log) => log.position === carried.position) ?? carried)
     : groupLogs[0]
@@ -520,19 +524,15 @@ function Session() {
           <RestTakeover
             rest={rest}
             remaining={remaining}
-            after={carried?.exerciseName}
-            restSec={restLog?.restSec}
-            onRestSec={(restSec) => void changeRest(userId, restLog ?? activeSet, restSec)}
-            next={t.rich(carried ? 'nextAfter' : 'next', {
-              exercise: exerciseName,
+            restSec={activeSet.restSec}
+            onRestSec={(restSec) => void changeRest(userId, activeSet, restSec)}
+            next={t.rich('next', {
               n: activeSet.setIndex,
               next: nextSet ?? '',
               figure: (chunks) => <span className="figure">{chunks}</span>,
             })}
           >
-            {lastLogged && (
-              <EffortChips userId={userId} log={lastLogged} exerciseName={carried?.exerciseName} className="mt-5" />
-            )}
+            {lastLogged && <EffortChips userId={userId} log={lastLogged} className="mt-5" />}
           </RestTakeover>
         ) : activeSet && finishing ? (
           // The last set is logged and there is no rest to start: the Log
@@ -553,6 +553,11 @@ function Session() {
           </section>
         ) : activeSet ? (
           <section className="mt-4">
+            {carried && carriedName && (
+              <RestCarried rest={rest} remaining={remaining} after={carriedName}>
+                <EffortChips userId={userId} log={carried} exerciseName={carriedName} className="mt-3" />
+              </RestCarried>
+            )}
             {/* Stacked, not side by side: two steppers across a phone leave ~58px for
                 the number, which truncates 77.5 and anything over 100 kg. */}
             <div className="flex flex-col gap-2">
@@ -666,7 +671,7 @@ function Session() {
             when there is time to write how the set went, and the note was only
             offered once the clock had gone. It stays mounted across the switch, so
             a note begun mid-rest survives the rest ending under it. */}
-        {noteLog && <ExerciseNote key={noteLog.id} userId={userId} log={noteLog} exerciseName={carried?.exerciseName} />}
+        {noteLog && <ExerciseNote key={noteLog.id} userId={userId} log={noteLog} exerciseName={carriedName} />}
 
         {/* The way between exercises is the swipe and the sheet behind the
             workout's name in the header; no Previous / Next row, so the height

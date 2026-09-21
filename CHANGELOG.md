@@ -1,11 +1,24 @@
 # Changelog
 
+## 2026-09-21 21:55
+
+- **A rest carried over from the exercise before no longer hides the next exercise's weight and
+  reps.** Logging the last set of an exercise moves the screen on to the next one while its rest
+  runs, and the clock took the steppers' place there, so the only word on what came next was one
+  "Next" line with the first set. The rest now sits in a strip above the steppers, named after the
+  exercise it follows ("Rest after Barbell Squat"), with the clock, the drain and the how-it-felt
+  chips; the weight and reps steppers, the quick weights and the Log button show under it, and
+  +30 s and Skip stay in the bar at the bottom. The full-screen clock is unchanged between sets of
+  the same exercise. The takeover no longer carries an exercise name, so its "Kept for {name}" and
+  "{exercise} · Set {n}" strings go in both languages.
+
 ## 2026-09-21 21:38
 
 - **The exercise library is credited in the app.** Under every library exercise's how-to and in the
   Profile footer: text and photos from free-exercise-db, public domain, with a link. In Spanish the
   how-to also says the text is a machine translation of the English original.
 
+||||||| parent of 22d822f (fix: a rest carried over from the exercise before no longer hides the next exercise's weight and reps - logging the last set moved the screen on while the clock took the steppers' place, so all it said of what came next was one Next line; the rest is now a strip above the steppers, named after the exercise it follows, with the clock, the drain and the effort chips, and +30 s and Skip stay in the bottom bar. Between sets of the same exercise the full-screen clock is as before, so its after prop and the keptFor and nextAfter strings go in both languages)
 ## 2026-09-21 21:35
 
 - **The plate rail is gone.** Under the weight on a barbell lift sat a "20 bar" chip, coloured

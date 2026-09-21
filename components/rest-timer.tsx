@@ -168,19 +168,12 @@ export function RestTakeover({
   rest,
   remaining,
   next,
-  after,
   restSec,
   onRestSec,
   children,
 }: RestState & {
   /** What comes after the rest — 'Set 3 · 77.5 kg × 10'. */
   next: React.ReactNode
-  /**
-   * The exercise the rest follows when it is not the one on screen: the last
-   * set of an exercise moves the screen on while its rest runs, and the clock,
-   * the chips and the rest control are still about that exercise.
-   */
-  after?: string
   /** The exercise's rest between sets, and where a change goes. */
   restSec?: number | null
   onRestSec?: (restSec: number) => void
@@ -195,7 +188,7 @@ export function RestTakeover({
 
   return (
     <section className="mt-4" aria-label={t('rest')}>
-      <p className="text-sm text-ink-dim">{after ? t('restAfter', { name: after }) : t('rest')}</p>
+      <p className="text-sm text-ink-dim">{t('rest')}</p>
       <p
         className="figure mt-1 text-[5.5rem] leading-none text-plate-yellow"
         role="timer"
@@ -220,7 +213,7 @@ export function RestTakeover({
         <div className="mt-4 flex items-center justify-between gap-3">
           <span className="text-sm text-ink-dim">
             {t('betweenSets')}
-            <span className="block text-xs">{after ? t('keptFor', { name: after }) : t('keptForThis')}</span>
+            <span className="block text-xs">{t('keptForThis')}</span>
           </span>
           <div className="flex items-stretch overflow-hidden rounded-md border border-line">
             <button
@@ -263,6 +256,53 @@ export function RestTakeover({
           {t('skipRest')}
         </button>
       </div>
+    </section>
+  )
+}
+
+/**
+ * The rest carried over from the exercise before. Its last set moves the
+ * screen on to the next exercise while the clock runs, and what the rest is
+ * for looking at is that exercise's weight and reps; so the clock sits in a
+ * strip above the steppers, named after the exercise it follows, instead of
+ * taking their place. +30 s and Skip stay in the bar at the bottom.
+ */
+export function RestCarried({
+  rest,
+  remaining,
+  after,
+  children,
+}: RestState & {
+  /** The exercise the rest follows — the one just finished, not the one on screen. */
+  after: string
+  /** About the set just done — how it felt — under the clock. */
+  children?: React.ReactNode
+}) {
+  const t = useTranslations('session.restTimer')
+  if (!rest || remaining === 0) return null
+
+  const progress = Math.min(1, remaining / rest.totalSec)
+
+  return (
+    <section className="mb-5" aria-label={t('restAfter', { name: after })}>
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="min-w-0 truncate text-sm text-ink-dim">{t('restAfter', { name: after })}</p>
+        <p
+          className="figure shrink-0 text-4xl leading-none text-plate-yellow"
+          role="timer"
+          aria-live="off"
+          aria-label={t('secondsLeft', { count: remaining })}
+        >
+          {formatRest(remaining)}
+        </p>
+      </div>
+      <div className="mt-2 h-1 w-full rounded-full bg-line" aria-hidden>
+        <div
+          className="h-full rounded-full bg-plate-yellow transition-[width] duration-200 ease-linear"
+          style={{ width: `${progress * 100}%` }}
+        />
+      </div>
+      {children}
     </section>
   )
 }
