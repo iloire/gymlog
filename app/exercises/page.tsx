@@ -3,6 +3,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Search } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useEquipment } from '@/components/equipment-picker'
@@ -16,6 +17,7 @@ import {
   isFiltered,
   NO_FILTER,
   rankTier,
+  useLibraryLabel,
 } from '@/components/exercise-filters'
 import { FavoriteButton } from '@/components/favorite-button'
 import { Nav } from '@/components/nav'
@@ -33,6 +35,8 @@ import { exerciseRank, NO_RANK } from '@/lib/queries'
 const PAGE = 60
 
 export default function ExercisesPage() {
+  const t = useTranslations('exercises')
+  const label = useLibraryLabel()
   const userId = useUserId()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState(NO_FILTER)
@@ -53,12 +57,12 @@ export default function ExercisesPage() {
   const rank = useLiveQuery(async () => (userId ? exerciseRank(userId) : NO_RANK), [userId], NO_RANK)
 
   const parts = useMemo(() => bodyPartOptions(exercises), [exercises])
-  const options = useMemo(() => facetOptions(exercises), [exercises])
+  const options = useMemo(() => facetOptions(exercises, label), [exercises, label])
   const have = useMemo(() => (equipment ? new Set(equipment) : null), [equipment])
 
   const results = useMemo(
-    () => filterExercises(exercises, filter, query, favorites, have, rank),
-    [exercises, filter, query, favorites, have, rank],
+    () => filterExercises(exercises, filter, query, favorites, have, rank, (part) => label('bodyPart', part)),
+    [exercises, filter, query, favorites, have, rank, label],
   )
   const narrowed = isFiltered(filter) || query.trim() !== ''
 
@@ -67,6 +71,7 @@ export default function ExercisesPage() {
 
   // Unnarrowed, the grid is sections: your exercises first, then the rest of
   // the library under the body part each is mostly about. Narrowed, one grid.
+  // A title is the section's id — 'Yours' or a body part — named at render.
   const sections = useMemo(() => {
     if (narrowed) return [{ title: null, exercises: results }]
     const yours = results.filter((exercise) => rankTier(exercise, favorites, rank) < 3)
@@ -124,11 +129,9 @@ export default function ExercisesPage() {
   return (
     <>
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
-        <h1 className="figure text-4xl">Exercises</h1>
+        <h1 className="figure text-4xl">{t('title')}</h1>
         <p className="mt-2 text-sm text-ink-dim">
-          {exercises.length
-            ? `${exercises.length} exercises. Search, or start from a body part.`
-            : 'Fetching the library…'}
+          {exercises.length ? t('intro', { count: exercises.length }) : t('fetching')}
         </p>
 
         <div className="mt-6 flex h-12 items-center gap-2 rounded-md border border-line bg-surface px-3">
@@ -136,8 +139,8 @@ export default function ExercisesPage() {
           <input
             value={query}
             onChange={(event) => search(event.target.value)}
-            placeholder="Search"
-            aria-label="Search exercises"
+            placeholder={t('search')}
+            aria-label={t('searchLabel')}
             className="w-full bg-transparent outline-none"
           />
         </div>
@@ -154,10 +157,10 @@ export default function ExercisesPage() {
 
         {narrowed && exercises.length > 0 && (
           <p className="mt-4 flex items-baseline justify-between text-sm text-ink-dim">
-            {results.length === 1 ? '1 exercise' : `${results.length} exercises`}
+            {t('count', { count: results.length })}
             {isFiltered(filter) && (
               <button type="button" onClick={() => narrow(NO_FILTER)} className="text-ink underline">
-                Clear filters
+                {t('clearFilters')}
               </button>
             )}
           </p>
@@ -165,9 +168,7 @@ export default function ExercisesPage() {
 
         {results.length === 0 && exercises.length > 0 && (
           <p className="mt-6 border-y border-line py-6 text-[15px] text-ink-dim">
-            {filter.favoritesOnly && favorites.size === 0
-              ? 'Tap the star on an exercise to keep it here, and in the picker when you build a workout.'
-              : 'Nothing matches. Try fewer filters.'}
+            {filter.favoritesOnly && favorites.size === 0 ? t('noFavorites') : t('noMatch')}
           </p>
         )}
 
@@ -175,7 +176,9 @@ export default function ExercisesPage() {
           <section key={section.title ?? 'all'} className="mt-5">
             {section.title && (
               <h2 className="mb-3 flex items-baseline gap-2 text-sm text-ink-dim">
-                <span className="text-ink">{section.title}</span>
+                <span className="text-ink">
+                  {section.title === 'Yours' ? t('yours') : label('bodyPart', section.title)}
+                </span>
                 <span className="figure">{section.exercises.length}</span>
               </h2>
             )}
@@ -194,8 +197,8 @@ export default function ExercisesPage() {
                   <Link href={`/exercises/${exercise.id}`} className="block">
                     <ExerciseFrames exercise={exercise} className="aspect-square w-full" />
                     <span className="mt-2 block text-sm leading-snug">{exercise.name}</span>
-                    <span className="block text-xs capitalize text-ink-dim">
-                      {exerciseEquipment(exercise)}
+                    <span className="block text-xs text-ink-dim">
+                      {label('equipment', exerciseEquipment(exercise))}
                     </span>
                   </Link>
                 </li>
@@ -211,7 +214,7 @@ export default function ExercisesPage() {
             onClick={() => setShown((n) => n + PAGE)}
             className="mt-5 flex h-12 w-full items-center justify-center rounded-md border border-line bg-surface text-sm text-ink-dim"
           >
-            Show more — {shown} of {results.length}
+            {t('showMore', { shown, total: results.length })}
           </button>
         )}
       </main>

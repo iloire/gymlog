@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useMemo, useSyncExternalStore } from 'react'
 
 import {
@@ -23,6 +24,7 @@ const chip = (active: boolean) =>
   `rounded-full px-3.5 py-2 text-sm ${active ? 'bg-ink text-ground' : 'border border-line text-ink-dim'}`
 
 export function EquipmentPicker() {
+  const t = useTranslations('exercises.equipmentPicker')
   const items = useEquipment()
   const selected = new Set(items ?? [])
   const preset = items ? presetFor(items) : undefined
@@ -37,7 +39,7 @@ export function EquipmentPicker() {
 
   return (
     <div>
-      <p className="mb-2 text-sm text-ink-dim">Start from</p>
+      <p className="mb-2 text-sm text-ink-dim">{t('startFrom')}</p>
       <div className="grid grid-cols-2 gap-2">
         {EQUIPMENT.presets.map((option) => (
           <button
@@ -56,7 +58,7 @@ export function EquipmentPicker() {
         ))}
       </div>
 
-      <p className="mt-5 mb-2 text-sm text-ink-dim">What you have</p>
+      <p className="mt-5 mb-2 text-sm text-ink-dim">{t('whatYouHave')}</p>
       <div className="flex flex-wrap gap-2">
         {EQUIPMENT.items.map((item) => (
           <button
@@ -70,9 +72,7 @@ export function EquipmentPicker() {
           </button>
         ))}
       </div>
-      <p className="mt-3 text-xs text-ink-dim">
-        Saved on this device only. Bodyweight exercises need nothing.
-      </p>
+      <p className="mt-3 text-xs text-ink-dim">{t('note')}</p>
     </div>
   )
 }

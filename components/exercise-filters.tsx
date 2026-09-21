@@ -1,34 +1,47 @@
 import { SlidersHorizontal, Star } from 'lucide-react'
-import { useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { useCallback, useState } from 'react'
 
-import { BODY_PARTS, bodyPartsOf } from '@/lib/body-parts'
+import { BODY_PARTS, bodyPartsOf, labelKey } from '@/lib/body-parts'
 import type { LocalExercise } from '@/lib/db/dexie'
-import { equipmentName, exerciseEquipment, missingEquipment } from '@/lib/equipment'
+import { exerciseEquipment, missingEquipment } from '@/lib/equipment'
 import { type ExerciseRank, NO_RANK } from '@/lib/queries'
 
 /**
  * One facet of the library a filter panel group narrows on. Several values in
  * a group match any of them; groups combine, so "barbell or dumbbell, compound".
+ * Values are the library's own ids; their names are in `data.json`.
  */
 const FACETS = [
-  {
-    key: 'equipment',
-    label: 'Equipment',
-    value: exerciseEquipment,
-    name: (value: string) => (value === 'bodyweight' ? 'Bodyweight' : equipmentName(value)),
-  },
-  { key: 'category', label: 'Type', value: (exercise: LocalExercise) => exercise.category },
+  { key: 'equipment', value: exerciseEquipment },
+  { key: 'category', value: (exercise: LocalExercise) => exercise.category },
   {
     key: 'level',
-    label: 'Level',
     value: (exercise: LocalExercise) => exercise.level,
     order: ['beginner', 'intermediate', 'expert'],
   },
-  { key: 'mechanic', label: 'Movement', value: (exercise: LocalExercise) => exercise.mechanic },
-  { key: 'force', label: 'Push or pull', value: (exercise: LocalExercise) => exercise.force },
+  { key: 'mechanic', value: (exercise: LocalExercise) => exercise.mechanic },
+  { key: 'force', value: (exercise: LocalExercise) => exercise.force },
 ] as const
 
 type FacetKey = (typeof FACETS)[number]['key']
+
+/** The library's enumerated fields that have a display name per language. */
+export type LibraryFacet = FacetKey | 'bodyPart' | 'muscle'
+
+/** A library id's name in the current language, or the id itself for one `data.json` lacks. */
+export type LibraryLabel = (facet: LibraryFacet, value: string) => string
+
+export function useLibraryLabel(): LibraryLabel {
+  const t = useTranslations('data')
+  return useCallback(
+    (facet, value) => {
+      const key = `${facet}.${labelKey(value)}` as Parameters<typeof t>[0]
+      return t.has(key) ? t(key) : value
+    },
+    [t],
+  )
+}
 
 export type ExerciseFilter = {
   /** One of BODY_PARTS — Legs, Chest, Back… — or null for every part. */
@@ -73,6 +86,8 @@ export function filterExercises(
   favorites: ReadonlySet<string>,
   have: ReadonlySet<string> | null = null,
   rank: ExerciseRank = NO_RANK,
+  /** A body part's name in the current language, so "piernas" finds the legs too. */
+  partLabel: (part: string) => string = (part) => part,
 ): LocalExercise[] {
   const tier = (exercise: LocalExercise) => rankTier(exercise, favorites, rank)
   const recency = (exercise: LocalExercise) => rank.lastDone.get(exercise.id) ?? 0
@@ -93,7 +108,7 @@ export function filterExercises(
     .filter((exercise) => {
       // A body part counts as a word of the name: "abs" finds every Abs exercise.
       const name = exercise.name.toLowerCase()
-      const parts = bodyPartsOf(exercise).map((part) => part.toLowerCase())
+      const parts = bodyPartsOf(exercise).flatMap((part) => [part.toLowerCase(), partLabel(part).toLowerCase()])
       return words.every((word) => word.some((form) => name.includes(form) || parts.includes(form)))
     })
     .sort((a, b) => {
@@ -118,14 +133,13 @@ export function bodyPartOptions(exercises: LocalExercise[]): string[] {
   return BODY_PARTS.filter((part) => present.has(part))
 }
 
-function valueName(facet: (typeof FACETS)[number], value: string): string {
-  return 'name' in facet ? facet.name(value) : value
-}
-
 export type FacetOptions = Record<FacetKey, string[]>
 
-/** The values each panel group offers, taken from the library so a new one shows up by itself. */
-export function facetOptions(exercises: LocalExercise[]): FacetOptions {
+/**
+ * The values each panel group offers, taken from the library so a new one
+ * shows up by itself, in the order of their names in the current language.
+ */
+export function facetOptions(exercises: LocalExercise[], label: LibraryLabel = (_, value) => value): FacetOptions {
   const live = exercises.filter((exercise) => exercise.deletedAt === null)
   return Object.fromEntries(
     FACETS.map((facet) => {
@@ -136,7 +150,7 @@ export function facetOptions(exercises: LocalExercise[]): FacetOptions {
       const rank = (value: string) => (order.includes(value) ? order.indexOf(value) : order.length)
       return [
         facet.key,
-        values.sort((a, b) => rank(a) - rank(b) || valueName(facet, a).localeCompare(valueName(facet, b))),
+        values.sort((a, b) => rank(a) - rank(b) || label(facet.key, a).localeCompare(label(facet.key, b))),
       ]
     }),
   ) as FacetOptions
@@ -180,6 +194,8 @@ export function ExerciseFilterChips({
   className?: string
   panelClassName?: string
 }) {
+  const t = useTranslations('exercises.filters')
+  const label = useLibraryLabel()
   const [open, setOpen] = useState(false)
   const count = panelFilterCount(filter)
 
@@ -201,14 +217,14 @@ export function ExerciseFilterChips({
           className={chip(open || count > 0)}
         >
           <SlidersHorizontal size={14} aria-hidden />
-          Filters{count > 0 && ` · ${count}`}
+          {count > 0 ? t('panelCount', { count }) : t('panel')}
         </button>
         <button
           type="button"
           onClick={() => onChange(NO_FILTER)}
           className={chip(!isFiltered(filter))}
         >
-          All
+          {t('all')}
         </button>
         <button
           type="button"
@@ -217,7 +233,7 @@ export function ExerciseFilterChips({
           className={chip(filter.favoritesOnly)}
         >
           <Star size={14} aria-hidden className={filter.favoritesOnly ? 'fill-current' : ''} />
-          Favourites
+          {t('favorites')}
         </button>
         {hasEquipment && (
           <button
@@ -226,7 +242,7 @@ export function ExerciseFilterChips({
             onClick={() => onChange({ ...filter, myEquipment: !filter.myEquipment })}
             className={chip(filter.myEquipment)}
           >
-            My equipment
+            {t('myEquipment')}
           </button>
         )}
         {parts.map((name) => (
@@ -237,7 +253,7 @@ export function ExerciseFilterChips({
             onClick={() => onChange({ ...filter, part: name === filter.part ? null : name })}
             className={chip(filter.part === name)}
           >
-            {name}
+            {label('bodyPart', name)}
           </button>
         ))}
       </div>
@@ -247,7 +263,7 @@ export function ExerciseFilterChips({
           {FACETS.map((facet) =>
             options[facet.key].length === 0 ? null : (
               <fieldset key={facet.key} className="mb-4 last:mb-0">
-                <legend className="mb-2 text-sm text-ink-dim">{facet.label}</legend>
+                <legend className="mb-2 text-sm text-ink-dim">{t(`facet.${facet.key}`)}</legend>
                 <div className="flex flex-wrap gap-2">
                   {options[facet.key].map((value) => {
                     const active = filter[facet.key].includes(value)
@@ -259,7 +275,7 @@ export function ExerciseFilterChips({
                         onClick={() => toggle(facet.key, value)}
                         className={chip(active)}
                       >
-                        {valueName(facet, value)}
+                        {label(facet.key, value)}
                       </button>
                     )
                   })}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { bodyParts } from '@/lib/body-parts'
+import { bodyParts, labelKey } from '@/lib/body-parts'
 
 const lift = (primaryMuscles: string[] | null, sets = 3, category = 'strength') => ({
   exercise: { category, primaryMuscles },
@@ -31,5 +31,15 @@ describe('bodyParts', () => {
     expect(
       bodyParts([lift(['quadriceps'], 1, 'cardio'), lift(null), lift([]), { exercise: undefined, sets: 5 }]),
     ).toEqual(['Cardio'])
+  })
+})
+
+describe('labelKey', () => {
+  it('turns a library value into the camelCase key its display name lives under', () => {
+    expect(labelKey('Legs')).toBe('legs')
+    expect(labelKey('middle back')).toBe('middleBack')
+    expect(labelKey('e-z curl bar')).toBe('eZCurlBar')
+    expect(labelKey('olympic weightlifting')).toBe('olympicWeightlifting')
+    expect(labelKey('body only')).toBe('bodyOnly')
   })
 })

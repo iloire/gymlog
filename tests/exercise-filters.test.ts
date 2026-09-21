@@ -61,9 +61,15 @@ describe('filterExercises', () => {
     expect(names({}, 'abs')).toEqual([])
   })
 
-  it('finds exercises by their body part', () => {
+  it('finds exercises by their body part, in English and in the language shown', () => {
     expect(names({}, 'back')).toEqual(['Barbell Row'])
     expect(names({}, 'chest press')).toEqual(['Barbell Bench Press'])
+    const spanish = (part: string) => ({ Back: 'Espalda', Chest: 'Pecho' })[part] ?? part
+    const enEs = (query: string) =>
+      filterExercises(library, NO_FILTER, query, new Set(), null, undefined, spanish).map((e) => e.name)
+    expect(enEs('espalda')).toEqual(['Barbell Row'])
+    expect(enEs('pecho press')).toEqual(['Barbell Bench Press'])
+    expect(enEs('back')).toEqual(['Barbell Row'])
   })
 
   it('finds every word of a search in any order', () => {
@@ -96,9 +102,10 @@ describe('facetOptions', () => {
   it('offers the values in the library, levels easiest first, deleted exercises left out', () => {
     const options = facetOptions(library)
     expect(options.level).toEqual(['beginner', 'intermediate', 'expert'])
-    // By the name shown, so "bands" would sort as Resistance bands.
     expect(options.equipment).toEqual(['barbell', 'bodyweight', 'dumbbell'])
-    expect(facetOptions([...library, exercise('Band Pull Apart', { equipment: 'bands' })]).equipment).toEqual([
+    // By the name shown in the current language, so "bands" sorts as Resistance bands.
+    const shown = (_: string, value: string) => (value === 'bands' ? 'Resistance bands' : value)
+    expect(facetOptions([...library, exercise('Band Pull Apart', { equipment: 'bands' })], shown).equipment).toEqual([
       'barbell',
       'bodyweight',
       'dumbbell',

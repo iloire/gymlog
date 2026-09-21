@@ -1,1 +1,69 @@
-{}
+{
+  "bodyPart": {
+    "legs": "Legs",
+    "chest": "Chest",
+    "back": "Back",
+    "shoulders": "Shoulders",
+    "arms": "Arms",
+    "abs": "Abs",
+    "cardio": "Cardio",
+    "other": "Other"
+  },
+  "muscle": {
+    "quadriceps": "Quadriceps",
+    "hamstrings": "Hamstrings",
+    "glutes": "Glutes",
+    "calves": "Calves",
+    "adductors": "Adductors",
+    "abductors": "Abductors",
+    "chest": "Chest",
+    "lats": "Lats",
+    "middleBack": "Middle back",
+    "lowerBack": "Lower back",
+    "traps": "Traps",
+    "shoulders": "Shoulders",
+    "neck": "Neck",
+    "biceps": "Biceps",
+    "triceps": "Triceps",
+    "forearms": "Forearms",
+    "abdominals": "Abdominals"
+  },
+  "equipment": {
+    "bands": "Bands",
+    "barbell": "Barbell",
+    "bodyOnly": "Bodyweight",
+    "bodyweight": "Bodyweight",
+    "cable": "Cable",
+    "dumbbell": "Dumbbell",
+    "eZCurlBar": "E-Z curl bar",
+    "exerciseBall": "Exercise ball",
+    "foamRoll": "Foam roll",
+    "kettlebells": "Kettlebells",
+    "machine": "Machine",
+    "medicineBall": "Medicine ball",
+    "other": "Other"
+  },
+  "level": {
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "expert": "Expert"
+  },
+  "force": {
+    "push": "Push",
+    "pull": "Pull",
+    "static": "Static"
+  },
+  "mechanic": {
+    "compound": "Compound",
+    "isolation": "Isolation"
+  },
+  "category": {
+    "cardio": "Cardio",
+    "olympicWeightlifting": "Olympic weightlifting",
+    "plyometrics": "Plyometrics",
+    "powerlifting": "Powerlifting",
+    "strength": "Strength",
+    "stretching": "Stretching",
+    "strongman": "Strongman"
+  }
+}

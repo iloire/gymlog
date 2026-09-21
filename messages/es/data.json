@@ -1,1 +1,69 @@
-{}
+{
+  "bodyPart": {
+    "legs": "Piernas",
+    "chest": "Pecho",
+    "back": "Espalda",
+    "shoulders": "Hombros",
+    "arms": "Brazos",
+    "abs": "Abdominales",
+    "cardio": "Cardio",
+    "other": "Otros"
+  },
+  "muscle": {
+    "quadriceps": "Cuádriceps",
+    "hamstrings": "Isquiotibiales",
+    "glutes": "Glúteos",
+    "calves": "Gemelos",
+    "adductors": "Aductores",
+    "abductors": "Abductores",
+    "chest": "Pecho",
+    "lats": "Dorsales",
+    "middleBack": "Espalda media",
+    "lowerBack": "Lumbares",
+    "traps": "Trapecios",
+    "shoulders": "Hombros",
+    "neck": "Cuello",
+    "biceps": "Bíceps",
+    "triceps": "Tríceps",
+    "forearms": "Antebrazos",
+    "abdominals": "Abdominales"
+  },
+  "equipment": {
+    "bands": "Bandas",
+    "barbell": "Barra",
+    "bodyOnly": "Peso corporal",
+    "bodyweight": "Peso corporal",
+    "cable": "Polea",
+    "dumbbell": "Mancuerna",
+    "eZCurlBar": "Barra Z",
+    "exerciseBall": "Fitball",
+    "foamRoll": "Rodillo",
+    "kettlebells": "Kettlebells",
+    "machine": "Máquina",
+    "medicineBall": "Balón medicinal",
+    "other": "Otro"
+  },
+  "level": {
+    "beginner": "Principiante",
+    "intermediate": "Intermedio",
+    "expert": "Avanzado"
+  },
+  "force": {
+    "push": "Empuje",
+    "pull": "Tirón",
+    "static": "Estático"
+  },
+  "mechanic": {
+    "compound": "Multiarticular",
+    "isolation": "Aislamiento"
+  },
+  "category": {
+    "cardio": "Cardio",
+    "olympicWeightlifting": "Halterofilia",
+    "plyometrics": "Pliometría",
+    "powerlifting": "Powerlifting",
+    "strength": "Fuerza",
+    "stretching": "Estiramientos",
+    "strongman": "Strongman"
+  }
+}

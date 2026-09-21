@@ -28,6 +28,20 @@ const BODY_PART: Record<string, string> = {
 export const BODY_PARTS = ['Legs', 'Chest', 'Back', 'Shoulders', 'Arms', 'Abs', 'Cardio'] as const
 
 /**
+ * The message key a library value is named under in `messages/<locale>/data.json`:
+ * 'middle back' → 'middleBack', 'e-z curl bar' → 'eZCurlBar', 'Legs' → 'legs'.
+ * The ids themselves never change; only their display names are translated.
+ */
+export function labelKey(value: string): string {
+  return value
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)
+    .map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+    .join('')
+}
+
+/**
  * The body parts one exercise works, by its primary muscles — its first
  * muscle first, so the part it files under is the one it is mostly about.
  * Cardio is its own part. An untagged exercise belongs to none.

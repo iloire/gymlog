@@ -1,1 +1,41 @@
-{}
+{
+  "title": "Exercises",
+  "back": "Exercises",
+  "count": "{count, plural, one {# exercise} other {# exercises}}",
+  "intro": "{count, plural, one {# exercise} other {# exercises}}. Search, or start from a body part.",
+  "fetching": "Fetching the library…",
+  "search": "Search",
+  "searchLabel": "Search exercises",
+  "clearFilters": "Clear filters",
+  "noFavorites": "Tap the star on an exercise to keep it here, and in the picker when you build a workout.",
+  "noMatch": "Nothing matches. Try fewer filters.",
+  "yours": "Yours",
+  "showMore": "Show more — {shown} of {total}",
+  "doNow": "Do this now",
+  "favorite": {
+    "add": "Favourite {name}",
+    "remove": "Unfavourite {name}"
+  },
+  "badges": {
+    "label": "Body parts"
+  },
+  "filters": {
+    "panel": "Filters",
+    "panelCount": "Filters · {count}",
+    "all": "All",
+    "favorites": "Favourites",
+    "myEquipment": "My equipment",
+    "facet": {
+      "equipment": "Equipment",
+      "category": "Type",
+      "level": "Level",
+      "mechanic": "Movement",
+      "force": "Push or pull"
+    }
+  },
+  "equipmentPicker": {
+    "startFrom": "Start from",
+    "whatYouHave": "What you have",
+    "note": "Saved on this device only. Bodyweight exercises need nothing."
+  }
+}

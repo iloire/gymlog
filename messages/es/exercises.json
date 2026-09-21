@@ -1,1 +1,41 @@
-{}
+{
+  "title": "Ejercicios",
+  "back": "Ejercicios",
+  "count": "{count, plural, one {# ejercicio} other {# ejercicios}}",
+  "intro": "{count, plural, one {# ejercicio} other {# ejercicios}}. Busca, o empieza por una parte del cuerpo.",
+  "fetching": "Cargando la biblioteca…",
+  "search": "Buscar",
+  "searchLabel": "Buscar ejercicios",
+  "clearFilters": "Quitar filtros",
+  "noFavorites": "Toca la estrella de un ejercicio para tenerlo aquí, y en el selector cuando montes un entrenamiento.",
+  "noMatch": "Nada coincide. Prueba con menos filtros.",
+  "yours": "Tuyos",
+  "showMore": "Ver más — {shown} de {total}",
+  "doNow": "Hacer ahora",
+  "favorite": {
+    "add": "Añadir {name} a favoritos",
+    "remove": "Quitar {name} de favoritos"
+  },
+  "badges": {
+    "label": "Partes del cuerpo"
+  },
+  "filters": {
+    "panel": "Filtros",
+    "panelCount": "Filtros · {count}",
+    "all": "Todos",
+    "favorites": "Favoritos",
+    "myEquipment": "Mi material",
+    "facet": {
+      "equipment": "Material",
+      "category": "Tipo",
+      "level": "Nivel",
+      "mechanic": "Movimiento",
+      "force": "Empuje o tirón"
+    }
+  },
+  "equipmentPicker": {
+    "startFrom": "Empieza desde",
+    "whatYouHave": "Lo que tienes",
+    "note": "Se guarda solo en este dispositivo. Los ejercicios de peso corporal no necesitan nada."
+  }
+}
