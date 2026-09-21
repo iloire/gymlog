@@ -10,5 +10,31 @@
     "tagline": "Tu programa, tus números, con o sin cobertura.",
     "working": "Un momento…",
     "language": "Idioma"
+  },
+  "meta": {
+    "description": "Monta tus entrenamientos y apunta lo que has levantado de verdad, con o sin cobertura."
+  },
+  "syncBadge": {
+    "waiting": "{count, plural, one {# cambio} other {# cambios}} sin sincronizar",
+    "waitingRefused": "{count, plural, one {# cambio} other {# cambios}} sin sincronizar · el servidor no los ha aceptado",
+    "offline": "Sin conexión: tu registro está guardado en este teléfono",
+    "stale": "Tu copia del plan tiene más de un día",
+    "syncing": "Sincronizando…",
+    "tryAgain": "Reintentar",
+    "syncNow": "Sincronizar ahora",
+    "overwritten": "{count, plural, one {# cambio sobrescrito} other {# cambios sobrescritos}} por otro dispositivo",
+    "unsaved": "{count, plural, one {# cambio no se ha podido guardar} other {# cambios no se han podido guardar}}",
+    "dismiss": "Descartar"
+  },
+  "undoToast": {
+    "undo": "Deshacer"
+  },
+  "signOut": {
+    "pending": "{count, plural, one {# cambio sin sincronizar} other {# cambios sin sincronizar}} todavía.",
+    "pendingHint": "Cerrar sesión los borra de este teléfono. Espera a tener cobertura y vuelve a intentarlo, o cierra sesión igualmente y piérdelos.",
+    "wait": "Esperar",
+    "anyway": "Cerrar sesión igualmente",
+    "syncing": "Sincronizando…",
+    "signOut": "Cerrar sesión"
   }
 }

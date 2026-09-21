@@ -10,5 +10,31 @@
     "tagline": "Your programme, your numbers, signal or no signal.",
     "working": "Working…",
     "language": "Language"
+  },
+  "meta": {
+    "description": "Build your workouts, then log what you actually lifted — with or without signal."
+  },
+  "syncBadge": {
+    "waiting": "{count, plural, one {# change} other {# changes}} waiting to sync",
+    "waitingRefused": "{count, plural, one {# change} other {# changes}} waiting to sync · the server could not take them",
+    "offline": "Offline — your log is saved on this phone",
+    "stale": "Your copy of the plan is over a day old",
+    "syncing": "Syncing…",
+    "tryAgain": "Try again",
+    "syncNow": "Sync now",
+    "overwritten": "{count, plural, one {# change was} other {# changes were}} overwritten by another device",
+    "unsaved": "{count, plural, one {# change} other {# changes}} could not be saved",
+    "dismiss": "Dismiss"
+  },
+  "undoToast": {
+    "undo": "Undo"
+  },
+  "signOut": {
+    "pending": "{count, plural, one {# change has} other {# changes have}} not synced yet.",
+    "pendingHint": "Signing out deletes them from this phone. Wait for signal and try again, or sign out anyway and lose them.",
+    "wait": "Wait",
+    "anyway": "Sign out anyway",
+    "syncing": "Syncing…",
+    "signOut": "Sign out"
   }
 }

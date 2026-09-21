@@ -1,6 +1,7 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useTranslations } from 'next-intl'
 
 import { useSync } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
@@ -18,6 +19,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
  * go of and would otherwise never mention.
  */
 export function SyncBadge() {
+  const t = useTranslations('common.syncBadge')
   const { userId, status, lastSyncAt, syncNow } = useSync()
 
   // The clock is read inside the query rather than during render — render has
@@ -39,16 +41,15 @@ export function SyncBadge() {
 
   // A push the server could not take is not "waiting": tapping Sync now again
   // changes nothing, and the badge has to say so or it reads as a flaky link.
-  const waiting = `${pending} ${pending === 1 ? 'change' : 'changes'} waiting to sync`
   const message =
     pending > 0
       ? status === 'error'
-        ? `${waiting} · the server could not take them`
-        : waiting
+        ? t('waitingRefused', { count: pending })
+        : t('waiting', { count: pending })
       : status === 'offline'
-        ? 'Offline — your log is saved on this phone'
+        ? t('offline')
         : stale
-          ? 'Your copy of the plan is over a day old'
+          ? t('stale')
           : null
 
   if (!message && refused.length === 0) return null
@@ -63,7 +64,7 @@ export function SyncBadge() {
         >
           <span>{message}</span>
           <span className="shrink-0 text-ink-dim">
-            {status === 'syncing' ? 'Syncing…' : status === 'error' ? 'Try again' : 'Sync now'}
+            {status === 'syncing' ? t('syncing') : status === 'error' ? t('tryAgain') : t('syncNow')}
           </span>
         </button>
       )}
@@ -73,12 +74,12 @@ export function SyncBadge() {
           className={`flex items-center justify-between gap-3 border-l-2 border-line bg-surface px-4 py-3 text-sm ${message ? 'mt-px' : ''}`}
         >
           <span>
-            {overwritten > 0 && `${overwritten} ${overwritten === 1 ? 'change was' : 'changes were'} overwritten by another device`}
+            {overwritten > 0 && t('overwritten', { count: overwritten })}
             {overwritten > 0 && unsaved > 0 && ' · '}
-            {unsaved > 0 && `${unsaved} ${unsaved === 1 ? 'change' : 'changes'} could not be saved`}
+            {unsaved > 0 && t('unsaved', { count: unsaved })}
           </span>
           <button type="button" onClick={() => void clearRejections(userId)} className="shrink-0 text-ink-dim">
-            Dismiss
+            {t('dismiss')}
           </button>
         </div>
       )}

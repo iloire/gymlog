@@ -1,6 +1,7 @@
 'use client'
 
 import { signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { useSync } from '@/components/session-boot'
@@ -17,6 +18,7 @@ import { destroyDb, getDb } from '@/lib/db/dexie'
  * how many, so losing them is a choice and never an accident.
  */
 export function SignOutButton() {
+  const t = useTranslations('common.signOut')
   const { userId, syncNow } = useSync()
   const [pending, setPending] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
@@ -55,12 +57,9 @@ export function SignOutButton() {
     return (
       <div role="alertdialog" aria-labelledby="sign-out-pending" className="w-full rounded-md border border-line p-4">
         <p id="sign-out-pending" className="text-[15px]">
-          {pending} {pending === 1 ? 'change has' : 'changes have'} not synced yet.
+          {t('pending', { count: pending })}
         </p>
-        <p className="mt-1 text-sm text-ink-dim">
-          Signing out deletes them from this phone. Wait for signal and try again, or sign out
-          anyway and lose them.
-        </p>
+        <p className="mt-1 text-sm text-ink-dim">{t('pendingHint')}</p>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -68,14 +67,14 @@ export function SignOutButton() {
             onClick={() => setPending(null)}
             className="h-12 rounded-md border border-line text-sm"
           >
-            Wait
+            {t('wait')}
           </button>
           <button
             type="button"
             onClick={() => void wipeAndSignOut()}
             className="h-12 rounded-md bg-plate-red text-sm font-semibold text-white"
           >
-            Sign out anyway
+            {t('anyway')}
           </button>
         </div>
       </div>
@@ -89,7 +88,7 @@ export function SignOutButton() {
       disabled={busy}
       className="h-12 w-full rounded-md border border-line text-sm text-ink-dim disabled:opacity-60"
     >
-      {busy ? 'Syncing…' : 'Sign out'}
+      {busy ? t('syncing') : t('signOut')}
     </button>
   )
 }

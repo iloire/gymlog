@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Archivo, Big_Shoulders, Kalam, Nunito } from 'next/font/google'
-import { getLocale } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 
 import { LocaleProvider } from '@/components/locale-provider'
 import { SessionBoot } from '@/components/session-boot'
@@ -28,11 +28,14 @@ const bigShoulders = Big_Shoulders({
 const nunito = Nunito({ variable: '--font-nunito', subsets: ['latin'], preload: false })
 const fontVariables = [archivo, kalam, bigShoulders, nunito].map((font) => font.variable).join(' ')
 
-export const metadata: Metadata = {
-  title: publicEnv.appName,
-  description: 'Build your workouts, then log what you actually lifted — with or without signal.',
-  manifest: '/manifest.json',
-  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: publicEnv.appName },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('common.meta')
+  return {
+    title: publicEnv.appName,
+    description: t('description'),
+    manifest: '/manifest.json',
+    appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: publicEnv.appName },
+  }
 }
 
 export const viewport: Viewport = {

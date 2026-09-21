@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useEffect } from 'react'
 
 const VISIBLE_MS = 6000
@@ -18,6 +19,7 @@ export function UndoToast({
   onUndo: () => void
   onDismiss: () => void
 }) {
+  const t = useTranslations('common.undoToast')
   useEffect(() => {
     const timer = window.setTimeout(onDismiss, VISIBLE_MS)
     return () => window.clearTimeout(timer)
@@ -32,7 +34,7 @@ export function UndoToast({
           onClick={onUndo}
           className="h-11 shrink-0 px-3 text-sm font-semibold text-plate-blue-lift"
         >
-          Undo
+          {t('undo')}
         </button>
       </div>
     </div>
