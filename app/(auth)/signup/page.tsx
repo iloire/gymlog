@@ -3,11 +3,13 @@
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { AuthShell, Field, SubmitButton } from '@/components/auth-shell'
 
 export default function SignupPage() {
+  const t = useTranslations('auth')
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -29,11 +31,7 @@ export default function SignupPage() {
 
     if (!response.ok) {
       const body = await response.json().catch(() => ({}))
-      setError(
-        body.error === 'email_taken'
-          ? 'That email already has an account. Sign in instead.'
-          : 'Passwords need at least 8 characters, and the email has to be a real address.',
-      )
+      setError(body.error === 'email_taken' ? t('signup.emailTaken') : t('signup.invalid'))
       setBusy(false)
       return
     }
@@ -44,25 +42,28 @@ export default function SignupPage() {
   }
 
   return (
-    <AuthShell title="Create an account" error={error}>
+    <AuthShell title={t('signup.title')} error={error}>
       <form onSubmit={onSubmit} className="space-y-4">
-        <Field label="Name" name="name" autoComplete="name" />
-        <Field label="Email" name="email" type="email" autoComplete="email" required />
+        <Field label={t('fields.name')} name="name" autoComplete="name" />
+        <Field label={t('fields.email')} name="email" type="email" autoComplete="email" required />
         <Field
-          label="Password"
+          label={t('fields.password')}
           name="password"
           type="password"
           autoComplete="new-password"
           minLength={8}
           required
         />
-        <SubmitButton busy={busy}>Create account</SubmitButton>
+        <SubmitButton busy={busy}>{t('signup.submit')}</SubmitButton>
       </form>
       <p className="mt-6 text-sm text-ink-dim">
-        Already have one?{' '}
-        <Link href="/login" className="text-ink underline underline-offset-4">
-          Sign in
-        </Link>
+        {t.rich('signup.haveAccount', {
+          link: (chunks) => (
+            <Link href="/login" className="text-ink underline underline-offset-4">
+              {chunks}
+            </Link>
+          ),
+        })}
       </p>
     </AuthShell>
   )

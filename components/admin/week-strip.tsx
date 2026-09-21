@@ -1,3 +1,5 @@
+import { getTranslations } from 'next-intl/server'
+
 import type { WeekActivity } from '@/lib/admin'
 
 /**
@@ -5,19 +7,20 @@ import type { WeekActivity } from '@/lib/admin'
  * screen, read at the scale of a training block. Outlined = no training that
  * week; filled = trained, full plate blue from three days up.
  */
-export function WeekStrip({ weeks, size = 'sm' }: { weeks: WeekActivity[]; size?: 'sm' | 'lg' }) {
+export async function WeekStrip({ weeks, size = 'sm' }: { weeks: WeekActivity[]; size?: 'sm' | 'lg' }) {
+  const t = await getTranslations('admin.weekStrip')
   const trained = weeks.filter((week) => week.days > 0).length
   const square = size === 'lg' ? 'size-5' : 'size-3'
 
   return (
     <ol
       className={`flex ${size === 'lg' ? 'gap-1.5' : 'gap-1'}`}
-      aria-label={`Trained ${trained} of the last ${weeks.length} weeks`}
+      aria-label={t('trained', { trained, total: weeks.length })}
     >
       {weeks.map((week) => (
         <li
           key={week.weekOf}
-          title={`Week of ${week.weekOf}: ${week.days} ${week.days === 1 ? 'day' : 'days'}`}
+          title={t('week', { week: week.weekOf, count: week.days })}
           className={`${square} shrink-0 rounded-[2px] ${
             week.days === 0
               ? 'border border-line'

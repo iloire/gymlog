@@ -1,16 +1,20 @@
 import { ChevronLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getLocale, getTranslations } from 'next-intl/server'
 import type { ReactNode } from 'react'
 
 import { WeekStrip } from '@/components/admin/week-strip'
 import { adminUserDetail, type AdminUserDetail } from '@/lib/admin'
 import { formatDay, formatSet } from '@/lib/format'
+import type { Locale } from '@/lib/i18n'
 import { formatWeight } from '@/lib/units'
+import { weekdayName } from '@/lib/week'
 
-export const metadata: Metadata = { title: 'Admin' }
-
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('admin.user')
+  return { title: t('title') }
+}
 
 function Section({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) {
   return (
@@ -30,6 +34,8 @@ function Empty({ children }: { children: ReactNode }) {
 
 export default async function AdminUserPage({ params }: PageProps<'/admin/users/[id]'>) {
   const { id } = await params
+  const t = await getTranslations('admin.user')
+  const locale = await getLocale()
   const detail = await adminUserDetail(id)
   const { user } = detail
   const trainedWeeks = detail.weeks.filter((week) => week.days > 0).length
@@ -38,15 +44,14 @@ export default async function AdminUserPage({ params }: PageProps<'/admin/users/
     <main className="mx-auto w-full max-w-5xl flex-1 px-5 pt-8 pb-16">
       <Link href="/admin" className="flex items-center gap-1 text-sm text-ink-dim">
         <ChevronLeft size={18} aria-hidden />
-        All accounts
+        {t('allAccounts')}
       </Link>
 
       <header className="mt-4">
         <h1 className="figure text-4xl leading-[1.05] break-words">{user.name ?? user.email}</h1>
         <p className="mt-2 text-[15px] text-ink-dim">
           {user.name && <>{user.email}, </>}
-          {user.role === 'admin' ? 'admin' : 'regular account'}, joined {formatDay(user.createdAt)}.
-          Displays {user.unit}; sync revision {user.syncRev}.
+          {t('summary', { role: user.role, joined: formatDay(user.createdAt, locale), unit: user.unit, rev: user.syncRev })}
         </p>
       </header>
 
@@ -54,83 +59,81 @@ export default async function AdminUserPage({ params }: PageProps<'/admin/users/
         <WeekStrip weeks={detail.weeks} size="lg" />
       </div>
       <p className="mt-2 text-sm text-ink-dim">
-        Trained {trainedWeeks} of the last {detail.weeks.length} weeks
+        {t('trainedWeeks', { trained: trainedWeeks, total: detail.weeks.length })}
       </p>
 
       <div className="grid gap-x-12 lg:grid-cols-2">
-        <Section title="Current programme" aside={detail.program?.stage ?? undefined}>
+        <Section title={t('programme')} aside={detail.program?.stage ?? undefined}>
           {detail.program ? (
             <>
               <p className="pt-3 text-[15px]">
                 {detail.program.name}
-                <span className="text-ink-dim">, since {formatDay(detail.program.startedOn)}</span>
+                <span className="text-ink-dim">{t('since', { date: formatDay(detail.program.startedOn, locale) })}</span>
               </p>
               <ol className="mt-3 divide-y divide-line">
-                {WEEKDAYS.map((day, index) => (
-                  <li key={day} className="flex gap-4 py-2 text-[15px]">
-                    <span className="w-10 text-ink-dim">{day}</span>
+                {Array.from({ length: 7 }, (_, index) => (
+                  <li key={index} className="flex gap-4 py-2 text-[15px]">
+                    <span className="w-10 text-ink-dim">{weekdayName(index, locale).slice(0, 3)}</span>
                     <span className={detail.program?.week.find((d) => d.dayOfWeek === index) ? '' : 'text-ink-dim'}>
-                      {detail.program?.week.find((d) => d.dayOfWeek === index)?.template ?? 'Rest'}
+                      {detail.program?.week.find((d) => d.dayOfWeek === index)?.template ?? t('rest')}
                     </span>
                   </li>
                 ))}
               </ol>
             </>
           ) : (
-            <Empty>No active programme.</Empty>
+            <Empty>{t('noProgramme')}</Empty>
           )}
         </Section>
 
-        <Section title="Workouts" aside={`${detail.templates.length}`}>
+        <Section title={t('workouts')} aside={`${detail.templates.length}`}>
           {detail.templates.length ? (
             <ul className="divide-y divide-line">
               {detail.templates.map((template) => (
                 <li key={template.id} className="flex items-baseline justify-between gap-4 py-2 text-[15px]">
                   <span className={template.archivedAt ? 'text-ink-dim' : ''}>
                     {template.name}
-                    {template.archivedAt && ' (archived)'}
+                    {template.archivedAt && t('archived')}
                   </span>
-                  <span className="text-sm text-ink-dim">
-                    {template.exercises} {template.exercises === 1 ? 'exercise' : 'exercises'}
-                  </span>
+                  <span className="text-sm text-ink-dim">{t('exercises', { count: template.exercises })}</span>
                 </li>
               ))}
             </ul>
           ) : (
-            <Empty>No workouts built yet.</Empty>
+            <Empty>{t('noWorkouts')}</Empty>
           )}
         </Section>
       </div>
 
-      <Section title="Recent sessions" aside={detail.sessions.length ? `Latest ${detail.sessions.length}` : undefined}>
+      <Section title={t('recentSessions')} aside={detail.sessions.length ? t('latest', { count: detail.sessions.length }) : undefined}>
         {detail.sessions.length ? (
           <ul className="divide-y divide-line">
             {detail.sessions.map((session) => (
-              <SessionRow key={session.id} session={session} />
+              <SessionRow key={session.id} session={session} locale={locale} labels={{ sets: t('sets'), notDone: t('notDone'), warmup: t('warmupMark') }} />
             ))}
           </ul>
         ) : (
-          <Empty>No sessions logged.</Empty>
+          <Empty>{t('noSessions')}</Empty>
         )}
       </Section>
 
       <div className="grid gap-x-12 lg:grid-cols-2">
-        <Section title="Bodyweight">
+        <Section title={t('bodyweight')}>
           {detail.weights.length ? (
             <ul className="divide-y divide-line">
               {detail.weights.map((entry) => (
                 <li key={entry.measuredOn} className="flex justify-between py-2 text-[15px]">
-                  <span className="text-ink-dim">{formatDay(entry.measuredOn)}</span>
-                  <span className="figure">{formatWeight(entry.weightKg, 'kg')}</span>
+                  <span className="text-ink-dim">{formatDay(entry.measuredOn, locale)}</span>
+                  <span className="figure">{formatWeight(entry.weightKg, 'kg', locale)}</span>
                 </li>
               ))}
             </ul>
           ) : (
-            <Empty>No bodyweight entries.</Empty>
+            <Empty>{t('noBodyweight')}</Empty>
           )}
         </Section>
 
-        <Section title="Their own exercises" aside={`${detail.ownExercises.length}`}>
+        <Section title={t('ownExercises')} aside={`${detail.ownExercises.length}`}>
           {detail.ownExercises.length ? (
             <ul className="divide-y divide-line">
               {detail.ownExercises.map((exercise) => (
@@ -141,7 +144,7 @@ export default async function AdminUserPage({ params }: PageProps<'/admin/users/
               ))}
             </ul>
           ) : (
-            <Empty>Only uses the shared library.</Empty>
+            <Empty>{t('libraryOnly')}</Empty>
           )}
         </Section>
       </div>
@@ -149,21 +152,29 @@ export default async function AdminUserPage({ params }: PageProps<'/admin/users/
   )
 }
 
-function SessionRow({ session }: { session: AdminUserDetail['sessions'][number] }) {
+function SessionRow({
+  session,
+  locale,
+  labels,
+}: {
+  session: AdminUserDetail['sessions'][number]
+  locale: Locale
+  labels: { sets: string; notDone: string; warmup: string }
+}) {
   const exercises = Map.groupBy(session.sets, (set) => `${set.position}:${set.exerciseName}`)
 
   return (
     <li>
       <details className="group">
         <summary className="flex cursor-pointer list-none flex-wrap items-baseline gap-x-4 gap-y-1 rounded-sm py-3 outline-none focus-visible:ring-2 focus-visible:ring-plate-blue-lift [&::-webkit-details-marker]:hidden">
-          <span className="w-28 text-sm text-ink-dim">{formatDay(session.scheduledFor)}</span>
+          <span className="w-28 text-sm text-ink-dim">{formatDay(session.scheduledFor, locale)}</span>
           <span className="flex-1 text-[15px]">{session.templateName}</span>
           <span className="figure text-[15px]">
             {session.setsDone}/{session.sets.length}
-            <span className="ml-1 font-normal text-ink-dim [font-variation-settings:'wdth'_100]">sets</span>
+            <span className="ml-1 font-normal text-ink-dim [font-variation-settings:'wdth'_100]">{labels.sets}</span>
           </span>
           <span className="figure w-28 text-right text-[15px]">
-            {session.volumeKg > 0 ? formatWeight(session.volumeKg, 'kg') : <span className="text-ink-dim">—</span>}
+            {session.volumeKg > 0 ? formatWeight(session.volumeKg, 'kg', locale) : <span className="text-ink-dim">—</span>}
           </span>
         </summary>
 
@@ -183,8 +194,8 @@ function SessionRow({ session }: { session: AdminUserDetail['sessions'][number] 
                           className={`figure font-semibold ${set.completedAt === null ? 'text-ink-dim' : ''}`}
                         >
                           {set.completedAt === null
-                            ? 'not done'
-                            : `${formatSet(set)}${set.isWarmup ? ' w' : ''}`}
+                            ? labels.notDone
+                            : `${formatSet(set, 'kg', locale)}${set.isWarmup ? ` ${labels.warmup}` : ''}`}
                         </li>
                       ))}
                     </ol>

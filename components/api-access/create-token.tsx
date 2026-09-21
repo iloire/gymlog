@@ -1,17 +1,19 @@
 'use client'
 
 import { Check, Copy } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useActionState, useState } from 'react'
 
 import { createTokenAction } from '@/app/profile/api/actions'
 import type { TokenScope } from '@/lib/api-tokens'
 
-const scopes: { value: TokenScope; label: string; detail: string }[] = [
-  { value: 'read', label: 'Read only', detail: 'Workouts, history, bodyweight' },
-  { value: 'write', label: 'Read and write', detail: 'Also edit workouts, your week and bodyweight' },
-]
+const scopes = [
+  { value: 'read', label: 'readLabel', detail: 'readDetail' },
+  { value: 'write', label: 'writeLabel', detail: 'writeDetail' },
+] as const satisfies readonly { value: TokenScope; label: string; detail: string }[]
 
 function CopyButton({ text, label }: { text: string; label: string }) {
+  const t = useTranslations('admin.tokens.create')
   const [copied, setCopied] = useState(false)
 
   return (
@@ -25,7 +27,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       className="flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-line px-3 text-sm"
     >
       {copied ? <Check size={16} aria-hidden /> : <Copy size={16} aria-hidden />}
-      {copied ? 'Copied' : label}
+      {copied ? t('copied') : label}
     </button>
   )
 }
@@ -36,6 +38,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
  * which is the point.
  */
 export function CreateToken({ apiBase }: { apiBase: string }) {
+  const t = useTranslations('admin.tokens.create')
   const [result, action, pending] = useActionState(createTokenAction, null)
   const token = result?.ok ? result.token : null
 
@@ -52,7 +55,7 @@ export function CreateToken({ apiBase }: { apiBase: string }) {
     <div>
       <form action={action}>
         <fieldset>
-          <legend className="mb-2 text-sm text-ink-dim">What it can do</legend>
+          <legend className="mb-2 text-sm text-ink-dim">{t('what')}</legend>
           <div className="grid grid-cols-2 gap-2">
             {scopes.map(({ value, label, detail }) => (
               <label
@@ -66,8 +69,8 @@ export function CreateToken({ apiBase }: { apiBase: string }) {
                   defaultChecked={value === 'read'}
                   className="sr-only"
                 />
-                <span className="font-semibold">{label}</span>
-                <span className="text-xs text-ink-dim">{detail}</span>
+                <span className="font-semibold">{t(label)}</span>
+                <span className="text-xs text-ink-dim">{t(detail)}</span>
               </label>
             ))}
           </div>
@@ -77,8 +80,8 @@ export function CreateToken({ apiBase }: { apiBase: string }) {
             name="name"
             required
             maxLength={60}
-            placeholder="ChatGPT"
-            aria-label="Token name"
+            placeholder={t('namePlaceholder')}
+            aria-label={t('nameLabel')}
             className="h-12 min-w-0 flex-1 rounded-md border border-line bg-surface px-3 outline-none focus-visible:border-plate-blue-lift"
           />
           <button
@@ -86,7 +89,7 @@ export function CreateToken({ apiBase }: { apiBase: string }) {
             disabled={pending}
             className="h-12 shrink-0 rounded-md bg-plate-blue px-4 text-sm font-semibold text-white disabled:opacity-60"
           >
-            {pending ? 'Creating…' : 'Create token'}
+            {pending ? t('creating') : t('submit')}
           </button>
         </div>
       </form>
@@ -94,21 +97,19 @@ export function CreateToken({ apiBase }: { apiBase: string }) {
 
       {token && (
         <div className="mt-4 rounded-md border border-plate-blue-lift bg-surface p-4">
-          <p className="text-sm font-semibold">Copy it now — it will not be shown again.</p>
+          <p className="text-sm font-semibold">{t('copyNow')}</p>
           <div className="mt-3 flex items-center gap-2">
             <code className="min-w-0 flex-1 truncate rounded-sm bg-ground px-2 py-2 font-mono text-[13px]">
               {token}
             </code>
-            <CopyButton text={token} label="Copy" />
+            <CopyButton text={token} label={t('copy')} />
           </div>
-          <p className="mt-4 text-sm text-ink-dim">
-            Or paste this into an assistant that can make web requests:
-          </p>
+          <p className="mt-4 text-sm text-ink-dim">{t('pastePrompt')}</p>
           <p className="mt-2 rounded-sm bg-ground px-2 py-2 font-mono text-[13px] [overflow-wrap:anywhere]">
             {prompt}
           </p>
           <div className="mt-2 flex justify-end">
-            <CopyButton text={prompt} label="Copy prompt" />
+            <CopyButton text={prompt} label={t('copyPrompt')} />
           </div>
         </div>
       )}

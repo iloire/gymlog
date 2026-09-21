@@ -1,11 +1,13 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState, useTransition } from 'react'
 
 import { revokeTokenAction } from '@/app/profile/api/actions'
 
 /** Two taps, because a revoked token cannot be brought back. */
 export function RevokeToken({ id, name }: { id: string; name: string }) {
+  const t = useTranslations('admin.tokens.revoke')
   const [armed, setArmed] = useState(false)
   const [pending, startTransition] = useTransition()
 
@@ -16,7 +18,7 @@ export function RevokeToken({ id, name }: { id: string; name: string }) {
         onClick={() => setArmed(true)}
         className="h-10 shrink-0 rounded-md border border-line px-3 text-sm text-ink-dim"
       >
-        Revoke
+        {t('revoke')}
       </button>
     )
   }
@@ -28,16 +30,16 @@ export function RevokeToken({ id, name }: { id: string; name: string }) {
         onClick={() => setArmed(false)}
         className="h-10 rounded-md border border-line px-3 text-sm text-ink-dim"
       >
-        Keep
+        {t('keep')}
       </button>
       <button
         type="button"
         disabled={pending}
-        aria-label={`Revoke ${name}`}
+        aria-label={t('revokeNamed', { name })}
         onClick={() => startTransition(() => revokeTokenAction(id))}
         className="h-10 rounded-md bg-plate-red px-3 text-sm font-semibold text-white disabled:opacity-60"
       >
-        {pending ? 'Revoking…' : 'Revoke'}
+        {pending ? t('revoking') : t('revoke')}
       </button>
     </div>
   )
