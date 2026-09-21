@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-21 22:34
+
+- **A past set says how it felt.** The effort logged between sets, easy, hard or failed, was
+  written to the row and never shown again; the set lists in History, on Today and on the finish
+  screen, and an exercise's own history, now put the word after the figure. Easy is dim ink, hard
+  is the word in plate yellow, and a failed set turns the whole figure yellow, so a weight that was
+  too much is found by colour. Red stays for records. `EffortMark` and `effortTone` in
+  `components/effort-mark.tsx`; design-system.md records yellow's second meaning.
+
 ## 2026-09-21 22:17
 
 - **Every exercise row starts with its picture.** The set lists on Today, in History and on the

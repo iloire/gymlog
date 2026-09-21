@@ -20,7 +20,7 @@ meaning from the sport rather than from UI convention.
 | `--ink-dim` | `#8A98A6` | Labels, units, secondary figures |
 | `--plate-blue` | `#0057B8` | The 20 kg plate. **Primary action** — log the set |
 | `--plate-red` | `#D22630` | The 25 kg plate. **You beat last time.** Never used for errors |
-| `--plate-yellow` | `#F2C300` | The 15 kg plate. **Rest running** |
+| `--plate-yellow` | `#F2C300` | The 15 kg plate. **Rest running**, and a set that was hard or failed when read back |
 
 ### Light theme
 

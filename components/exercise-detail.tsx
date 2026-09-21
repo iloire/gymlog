@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
+import { EffortMark, effortTone } from '@/components/effort-mark'
 import { useLibraryLabel } from '@/components/exercise-filters'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { FavoriteButton } from '@/components/favorite-button'
@@ -159,7 +160,14 @@ export function ExerciseDetail({
                   <span className="text-sm text-ink-dim">
                     {formatDay(epochToDate(sets[0]?.performedAt ?? 0), locale)}
                   </span>
-                  <span className="figure text-right text-[15px]">{sets.map((set) => formatSet(set, unit, locale)).join('  ')}</span>
+                  <span className="figure flex flex-wrap justify-end gap-x-3 text-right text-[15px]">
+                    {sets.map((set) => (
+                      <span key={set.id} className={effortTone(set.effort)}>
+                        {formatSet(set, unit, locale)}
+                        <EffortMark effort={set.effort} />
+                      </span>
+                    ))}
+                  </span>
                 </span>
                 {sets.find((set) => set.notes) && (
                   <span className="mt-1 block text-sm italic text-ink-dim">“{sets.find((set) => set.notes)?.notes}”</span>
