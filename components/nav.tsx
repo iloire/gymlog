@@ -23,10 +23,12 @@ const parents: Record<string, string> = {
   '/programmes': '/workouts',
 }
 
-export function Nav({ children }: { children?: React.ReactNode }) {
+// `tab` names the tab to light when a screen is reached from more than one,
+// such as an exercise opened from Progress.
+export function Nav({ children, tab }: { children?: React.ReactNode; tab?: string }) {
   const t = useTranslations('common.nav')
   const path = usePathname()
-  const pathname = parents[path] ?? path
+  const pathname = tab ?? parents[path] ?? path
   const rest = useRest()
   const resting = rest.rest !== null && rest.remaining > 0
 

@@ -1,6 +1,5 @@
 {
   "title": "Exercises",
-  "back": "Exercises",
   "count": "{count, plural, one {# exercise} other {# exercises}}",
   "intro": "{count, plural, one {# exercise} other {# exercises}}. Search, or start from a body part.",
   "fetching": "Fetching the library…",

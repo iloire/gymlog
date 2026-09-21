@@ -1,6 +1,5 @@
 {
   "title": "Ejercicios",
-  "back": "Ejercicios",
   "count": "{count, plural, one {# ejercicio} other {# ejercicios}}",
   "intro": "{count, plural, one {# ejercicio} other {# ejercicios}}. Busca, o empieza por una parte del cuerpo.",
   "fetching": "Cargando la biblioteca…",

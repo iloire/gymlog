@@ -159,7 +159,7 @@ export default function ProgressPage() {
                 </ul>
                 <StrengthChart series={series} className="mt-3" />
                 <Link
-                  href={`/exercises/${shownLift.exerciseId}`}
+                  href={`/exercises/${shownLift.exerciseId}?from=history`}
                   className="mt-2 inline-block text-sm text-ink-dim underline underline-offset-4"
                 >
                   {t('lifts.everySet', { name: shownLift.name })}
@@ -238,7 +238,7 @@ function RecordRow({ record, images }: { record: PersonalRecord; images: string[
     <li className="flex items-center gap-3 py-3">
       <ExerciseThumb exercise={{ id: record.exerciseId, name: record.name, images }} />
       <span className="min-w-0 flex-1">
-        <Link href={`/exercises/${record.exerciseId}`} className="block truncate text-[15px]">
+        <Link href={`/exercises/${record.exerciseId}?from=history`} className="block truncate text-[15px]">
           {libraryName(record.exerciseId, record.name, locale)}
         </Link>
         <span className="block text-sm text-ink-dim">{formatDay(epochToDate(record.performedAt), locale)}</span>
