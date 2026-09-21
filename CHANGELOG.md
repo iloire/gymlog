@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-21 15:40
+
+- **Plan for English and Spanish** in `docs/i18n.md`: the language is an account setting synced
+  like the unit and mirrored to a cookie, no locale in the URL, `next-intl` without its routing and
+  with both bundles on the device so switching works offline, one messages file per screen so
+  parallel agents do not collide, and the exercise library translated as a bundled overlay rather
+  than new columns. Roadmap gains §7 pointing at it.
+
 ## 2026-09-18 09:28
 
 - **Sync never loses a row, and a fresh copy never blanks a logged set.** After the outage the
