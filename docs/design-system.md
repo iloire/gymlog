@@ -100,18 +100,35 @@ change. No all-caps labels, no monospace for data.
   four times the width: the movement reads from the row without a tap. Sheets keep the single
   frame. The library grid goes from two tiles across to four for the same reason.
 - **No card kit.** The session screen is a full-bleed stack: one exercise fills the viewport.
+  Lists are rows on hairlines, never boxes. Where something has to read as a control or a raised
+  thing — a stepper, a weigh-in field, a quiet button, a note — it sits on `--surface` with no
+  outline; a hairline outline is for a pending set square and nothing else, so an outlined square
+  always means "still to do".
+- **Three buttons.** `btn-primary`, `btn-quiet` and `btn-text` in `globals.css` are the only
+  button styles: the one tap the screen wants, in plate blue at 56px; an outline on a raised
+  surface for the second thing; a line of dim words for the third. A screen never hand-rolls a
+  fourth. Two quiet buttons may share a row (Add exercise / Finish workout on Today); a primary
+  never does.
+- **The headline is the content.** The tab bar already says Plan, Progress and Profile, so the
+  screen's big figure line says what is on it — the programme's name, "11 workouts logged", your
+  own name — with the tab's name as the small line above, the way Today says Monday and then the
+  workout. A screen with nothing yet keeps its tab name as the headline.
 - **Logging fits the first screen.** Everything between opening an exercise and pressing *Log set*
   — the set squares, weight, reps and the button — sits above the fold on a 320 × 568 phone with the
   rest bar showing. So the exercise's library photos cross-fade in a full-width strip cropped wide,
   the one flex child that grows: its height is whatever the screen has left once the name, the
   squares, the steppers and the button have theirs, between a floor of 5rem and a cap of 15rem. A
   short phone gets a letterbox of the movement and a tall one nearer the whole frame, and the width
-  never gives, only the crop. The name under it is one line, always: a long one steps down a size
-  and then ends in an ellipsis rather than wrapping, so the squares and the steppers sit at the
-  same height whatever the exercise is called. Each stepper carries its label inside the field. Tapping the photo opens cues and instructions in
-  a dialog, never a new page. The workout's name in the header carries
-  "2/3" and opens a sheet of every exercise with its squares, a tap on any to jump; a sideways
-  swipe moves to the next or previous exercise. There is no Previous / Next row at the bottom:
+  never gives, only the crop. The name sits on the photo's lower edge in a scrim
+  (`photo-scrim`), up to two lines: it takes no height of its own, so the squares and the steppers
+  sit at the same height whatever the exercise is called, and a long name is read whole. The info
+  badge and the ⋮ sit in the photo's top corners. An exercise with no photo gets the name as a row,
+  one line with an ellipsis. Each stepper carries its label inside the field. Tapping the photo
+  opens cues and instructions in a dialog, never a new page. The workout's name in the header
+  carries "2/3" and, under it, a track with a segment per exercise filled by the sets logged in
+  it, the one on screen lit brighter: where you are in the workout is read from the top edge
+  without a tap. The name opens a sheet of every exercise with its squares, a tap on any to jump;
+  a sideways swipe moves to the next or previous exercise. There is no Previous / Next row at the bottom:
   the header and the swipe already move between exercises, and the row's height is better spent
   on the photo and the controls.
 - **Set squares carry information.** A row of squares per exercise — filled = done, outlined =
@@ -127,8 +144,9 @@ change. No all-caps labels, no monospace for data.
   Both ask `heavierThanLastTime()` (`lib/records.ts`), so they can never disagree.
 - **The rest is the screen's state.** On the session screen, the block where the steppers were
   becomes the clock while the rest runs: the time set huge and draining, the next set's numbers
-  under it, and Skip rest where Log set was. Between sets you look at the phone for the time and
-  then for what the next set asks, so that is what the most-viewed state shows. At zero the
+  straight under it, and Skip rest where Log set was. Between sets you look at the phone for the
+  time and then for what the next set asks, so that is what the most-viewed state shows, in that
+  order; how the last set felt and the rest length come after, for the second look. At zero the
   steppers return. Elsewhere **the rest timer is a rule that drains** across the bottom edge,
   above the thumb, rather than a number in a box. Yellow while running, gone when it ends. *+30 s* and *Skip* sit on the bar
   beside the clock, because that is where the thumb already is. Off the session screen it sits
@@ -138,7 +156,10 @@ change. No all-caps labels, no monospace for data.
 - **Thumb zone.** Primary actions sit in the bottom third; minimum 56px targets; weight and reps
   adjust with −/+ in one rep and one equipment step (2.5 kg on a barbell, 2 on dumbbells, 5 on
   a stack — `lib/weights.ts`), held to repeat, because typing with chalk on your hands is
-  miserable. Under the weight, chips for the weights within reach.
+  miserable. The − and + of a stepper sit together on the right as one control (`hold-pair`), so
+  the thumb changes a number without shifting its grip; the number takes the left of the row at
+  the largest size the controls allow, label above, unit beside. The rest-length control on the
+  clock is the same pair. Under the weight, chips for the weights within reach.
 - **Finishing a workout pays out.** *Finish workout* hands the screen to the summary
   (`components/workout-summary.tsx`): the kilos moved set at the largest size on the screen, then
   every exercise that beat last time with what it added and the set it beat, then the week streak

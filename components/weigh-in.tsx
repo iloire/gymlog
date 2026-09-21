@@ -48,8 +48,8 @@ export function WeighIn() {
   }
 
   return (
-    <form onSubmit={save} className="mt-6 flex items-center gap-2" aria-label={t('label')}>
-      <label className="flex min-w-0 flex-1 items-center gap-3 rounded-md border border-line bg-surface pl-4">
+    <form onSubmit={save} className="mt-5 flex items-stretch overflow-hidden rounded-md bg-surface" aria-label={t('label')}>
+      <label className="flex min-w-0 flex-1 items-center gap-3 pl-4">
         <span className="shrink-0 text-sm text-ink-dim">
           {t.rich('prompt', {
             link: (chunks) => (
@@ -65,14 +65,14 @@ export function WeighIn() {
           onChange={(event) => setValue(event.target.value)}
           placeholder={state.latest ? displayOneDecimal(state.latest.weightKg, unit, locale) : unit === 'lb' ? '165' : '75'}
           aria-label={t('input', { unit })}
-          className="figure h-12 w-full min-w-0 bg-transparent text-right text-xl outline-none"
+          className="figure h-12 w-full min-w-0 bg-transparent text-right text-xl outline-none placeholder:text-ink-dim"
         />
         <span className="pr-3 text-sm text-ink-dim">{unit}</span>
       </label>
       <button
         type="submit"
         disabled={parseNumber(value) === null}
-        className="h-12 shrink-0 rounded-md border border-line px-4 text-sm disabled:opacity-40"
+        className="shrink-0 border-l border-line px-4 text-sm font-medium text-plate-blue-lift transition-colors hover:bg-surface-high disabled:text-ink-dim disabled:opacity-60"
       >
         {t('save')}
       </button>

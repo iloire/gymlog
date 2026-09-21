@@ -50,7 +50,7 @@ export function DeleteSession({ session }: { session: LocalSession }) {
           type="button"
           autoFocus
           onClick={() => setConfirming(false)}
-          className="h-12 rounded-md border border-line text-sm"
+          className="btn-quiet"
         >
           {t('cancel')}
         </button>

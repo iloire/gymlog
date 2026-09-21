@@ -125,12 +125,22 @@ export default function WorkoutsPage() {
       )}
 
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
-        <h1 className="figure text-4xl">{t('title')}</h1>
-        <p className="mt-2 text-sm text-ink-dim">
-          {program
-            ? t('intro.programme', { name: program.name, days: trainingDays, since: formatDay(program.startedOn, locale) })
-            : t('intro.empty')}
-        </p>
+        {/* The programme is the headline and the tab's name the line above it:
+            the tab bar already says Plan, and what you are on is the news. */}
+        {program ? (
+          <header>
+            <p className="text-sm text-ink-dim">{t('title')}</p>
+            <h1 className="figure mt-1 text-4xl leading-[1.05]">{program.name}</h1>
+            <p className="mt-1.5 text-sm text-ink-dim">
+              {t('intro.programmeDetail', { days: trainingDays, since: formatDay(program.startedOn, locale) })}
+            </p>
+          </header>
+        ) : (
+          <header>
+            <h1 className="figure text-4xl">{t('title')}</h1>
+            <p className="mt-2 text-sm text-ink-dim">{t('intro.empty')}</p>
+          </header>
+        )}
 
         {/* The week: a cell per day wearing its workout's letter. */}
         <section className="mt-7" aria-label={t('week.label')}>
@@ -197,7 +207,7 @@ export default function WorkoutsPage() {
                   onClick={() => void start(workout.id, workout.programId)}
                   disabled={starting}
                   aria-label={t('workout.startLabel', { name: workout.name })}
-                  className="h-12 shrink-0 rounded-md border border-line px-4 text-sm disabled:opacity-60"
+                  className="btn-quiet w-auto shrink-0"
                 >
                   {t('workout.start')}
                 </button>
@@ -212,14 +222,14 @@ export default function WorkoutsPage() {
 
         <Link
           href="/workouts/new"
-          className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-md bg-plate-blue text-base font-semibold text-white"
+          className="btn-primary mt-6 text-base"
         >
           <Plus size={18} aria-hidden />
           {t('newWorkout')}
         </Link>
         <Link
           href="/programmes"
-          className="mt-3 flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
+          className="btn-quiet mt-3"
         >
           {t('browse')}
         </Link>
@@ -256,9 +266,9 @@ function NewStage({ onStart }: { onStart: (name: string) => Promise<unknown> }) 
           name="name"
           placeholder={t('placeholder')}
           aria-label={t('nameLabel')}
-          className="h-12 min-w-0 flex-1 rounded-md border border-line bg-surface px-3 outline-none focus-visible:border-plate-blue-lift"
+          className="h-12 min-w-0 flex-1 rounded-md bg-surface px-3 outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-plate-blue-lift"
         />
-        <button type="submit" className="h-12 shrink-0 rounded-md border border-line px-4 text-sm">
+        <button type="submit" className="btn-quiet w-auto shrink-0">
           {t('submit')}
         </button>
       </form>

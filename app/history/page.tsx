@@ -96,26 +96,38 @@ export default function ProgressPage() {
   return (
     <>
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
-        <h1 className="figure text-4xl">{t('title')}</h1>
-        <p className="mt-2 text-sm text-ink-dim">{count === 0 ? t('intro.empty') : t('intro.logged', { count })}</p>
+        {/* The log's size is the headline; the tab bar already says Progress. */}
+        {count === 0 ? (
+          <header>
+            <h1 className="figure text-4xl">{t('title')}</h1>
+            <p className="mt-2 text-sm text-ink-dim">{t('intro.empty')}</p>
+          </header>
+        ) : (
+          <header>
+            <p className="text-sm text-ink-dim">{t('title')}</p>
+            <h1 className="figure mt-1 text-4xl leading-[1.05]">{t('intro.logged', { count })}</h1>
+          </header>
+        )}
 
         {count > 0 && (
           <>
-            <section className="mt-7 grid grid-cols-2 gap-3" aria-label={t('week.label')}>
-              <div className="rounded-md border border-line p-4">
+            {/* This week's two numbers side by side on a hairline, not in boxes:
+                a figure with its label reads on its own. */}
+            <section className="mt-7 grid grid-cols-2 divide-x divide-line border-y border-line py-4" aria-label={t('week.label')}>
+              <div className="pr-4">
                 <p className="text-sm text-ink-dim">{t('week.label')}</p>
-                <p className="figure mt-1 text-3xl leading-none">
+                <p className="figure mt-1 text-4xl leading-none">
                   {week.done}
                   <span className="text-lg text-ink-dim">/{week.planned}</span>
                 </p>
-                <p className="mt-1 text-xs text-ink-dim">{t('week.daysOfPlanned')}</p>
+                <p className="mt-1.5 text-xs text-ink-dim">{t('week.daysOfPlanned')}</p>
               </div>
-              <div className="rounded-md border border-line p-4">
+              <div className="pl-4">
                 <p className="text-sm text-ink-dim">{t('week.moved')}</p>
-                <p className="figure mt-1 text-3xl leading-none">
+                <p className="figure mt-1 text-4xl leading-none">
                   {Math.round(displayWeight(week.volumeKg, unit)).toLocaleString(INTL_TAG[locale])}
                 </p>
-                <p className="mt-1 text-xs text-ink-dim">{t('week.unitThisWeek', { unit })}</p>
+                <p className="mt-1.5 text-xs text-ink-dim">{t('week.unitThisWeek', { unit })}</p>
               </div>
             </section>
 
@@ -131,8 +143,8 @@ export default function ProgressPage() {
                           type="button"
                           aria-pressed={active}
                           onClick={() => setLift(record.exerciseId)}
-                          className={`shrink-0 rounded-full px-3 py-1.5 text-sm whitespace-nowrap ${
-                            active ? 'bg-ink text-ground' : 'border border-line text-ink-dim'
+                          className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm whitespace-nowrap transition-colors ${
+                            active ? 'bg-ink text-ground' : 'bg-surface text-ink-dim hover:text-ink'
                           }`}
                         >
                           {libraryName(record.exerciseId, record.name, locale)}

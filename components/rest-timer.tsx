@@ -157,7 +157,9 @@ export function RestTimer({ link = false }: { link?: boolean }) {
  * The rest as the screen's state. Between sets you look at the phone for the
  * time, then at what the next set asks; so while the rest runs, the block
  * where the steppers were becomes the clock, set huge and draining, with the
- * next set under it and Skip where Log set was. At zero the steppers return.
+ * next set straight under it and Skip where Log set was. How the last set felt
+ * and the rest length come after: they are for the second look, not the first.
+ * At zero the steppers return.
  *
  * `restSec` is what the exercise rests between sets, with − and + beside it:
  * the moment you know 90 s is not enough for this lift is while you are
@@ -204,10 +206,12 @@ export function RestTakeover({
         />
       </div>
 
-      {children}
+      {/* What the next set asks, straight under the clock: the two things the
+          eye comes to the phone for between sets, one glance each. */}
+      <p className="mt-4 text-sm text-ink-dim">{t('next')}</p>
+      <p className="mt-0.5 text-lg">{next}</p>
 
-      <p className="mt-5 text-sm text-ink-dim">{t('next')}</p>
-      <p className="mt-0.5 text-[17px]">{next}</p>
+      {children}
 
       {restSec != null && onRestSec && (
         <div className="mt-4 flex items-center justify-between gap-3">
@@ -215,24 +219,24 @@ export function RestTakeover({
             {t('betweenSets')}
             <span className="block text-xs">{t('keptForThis')}</span>
           </span>
-          <div className="flex items-stretch overflow-hidden rounded-md border border-line">
+          <div className="hold-pair h-11">
             <button
               type="button"
               aria-label={t('less')}
               disabled={restSec < REST_STEP_SEC}
               onClick={() => onRestSec(restSec - REST_STEP_SEC)}
-              className="flex w-12 touch-manipulation items-center justify-center text-ink-dim active:bg-surface-high disabled:opacity-40"
+              className="hold-button w-11"
             >
               <Minus size={18} aria-hidden />
             </button>
-            <span className="figure flex min-w-16 items-center justify-center text-lg" aria-live="polite">
+            <span className="figure flex min-w-16 items-center justify-center text-base" aria-live="polite">
               {t('seconds', { seconds: restSec })}
             </span>
             <button
               type="button"
               aria-label={t('more')}
               onClick={() => onRestSec(restSec + REST_STEP_SEC)}
-              className="flex w-12 touch-manipulation items-center justify-center text-ink-dim active:bg-surface-high"
+              className="hold-button w-11"
             >
               <Plus size={18} aria-hidden />
             </button>
@@ -241,18 +245,10 @@ export function RestTakeover({
       )}
 
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => void extendRest(userId)}
-          className="figure h-14 rounded-md border border-line text-lg"
-        >
+        <button type="button" onClick={() => void extendRest(userId)} className="btn-quiet figure h-14 text-lg">
           {t('extend', { seconds: EXTEND_SEC })}
         </button>
-        <button
-          type="button"
-          onClick={() => void clearRest(userId)}
-          className="h-14 rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift"
-        >
+        <button type="button" onClick={() => void clearRest(userId)} className="btn-primary">
           {t('skipRest')}
         </button>
       </div>

@@ -45,8 +45,8 @@ export function EffortChips({
                 type="button"
                 aria-pressed={active}
                 onClick={() => void writeRow(userId, 'setLogs', { id: log.id, effort: active ? null : value })}
-                className={`h-9 rounded-full px-3 text-sm ${
-                  active ? 'bg-ink text-ground' : 'border border-line text-ink-dim'
+                className={`h-9 rounded-full px-3.5 text-sm transition-colors ${
+                  active ? 'bg-ink text-ground' : 'bg-surface text-ink-dim hover:text-ink'
                 }`}
               >
                 {t(value)}

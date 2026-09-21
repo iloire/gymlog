@@ -363,8 +363,10 @@ function Session() {
   return (
     <div className="flex flex-1 flex-col">
       {/* The way back, then the workout's name as the way to the whole of it:
-          a sheet with every exercise and its squares, and a tap to jump. The
-          count beside the name says where you are without a bar to hit. */}
+          a sheet with every exercise and its squares, and a tap to jump. Under
+          the name, a track with a segment per exercise, each filled by the sets
+          logged in it: where you are in the workout is read from the top of the
+          screen, and the one lit brighter is the exercise on screen. */}
       <header className="mx-auto flex w-full max-w-page items-center gap-1 px-4 pt-3 pb-1">
         <Link href="/" aria-label={t('back')} className="flex h-11 w-9 items-center text-ink-dim">
           <ChevronLeft size={20} aria-hidden />
@@ -373,15 +375,36 @@ function Session() {
           type="button"
           onClick={() => setOverview(true)}
           aria-haspopup="dialog"
-          className="flex min-w-0 flex-1 items-center gap-1.5 py-2 text-left text-sm text-ink-dim"
+          className="flex min-w-0 flex-1 flex-col gap-1.5 py-2 text-left"
         >
-          <span className="truncate">{data.session.templateName}</span>
+          <span className="flex items-center gap-1.5 text-sm">
+            <span className="truncate">{data.session.templateName}</span>
+            {positions.length > 0 && (
+              <span className="shrink-0 text-ink-dim">
+                <span className="figure text-ink">{Math.min(position + 1, positions.length)}</span>/{positions.length}
+              </span>
+            )}
+            <ChevronDown size={16} aria-hidden className="shrink-0 text-ink-dim" />
+          </span>
           {positions.length > 0 && (
-            <span className="shrink-0">
-              · <span className="figure text-ink">{Math.min(position + 1, positions.length)}</span>/{positions.length}
+            <span className="flex w-full gap-1" aria-hidden>
+              {positions.map((at, index) => {
+                const logs = data.logs.filter((log) => log.position === at)
+                const done = logs.filter((log) => log.completedAt !== null).length
+                return (
+                  <span
+                    key={at}
+                    className={`relative h-1 flex-1 overflow-hidden rounded-full ${index === position ? 'bg-surface-high' : 'bg-surface'}`}
+                  >
+                    <span
+                      className="absolute inset-y-0 left-0 bg-plate-blue-lift transition-[width] duration-300"
+                      style={{ width: `${logs.length ? (done / logs.length) * 100 : 0}%` }}
+                    />
+                  </span>
+                )
+              })}
             </span>
           )}
-          <ChevronDown size={16} aria-hidden className="shrink-0" />
         </button>
       </header>
 
@@ -438,10 +461,17 @@ function Session() {
             spare height beyond the cap pools under the controls. No viewport
             arithmetic to keep right; the width never gives, only the crop.
             Tapping it opens the cues and instructions without leaving. */}
+        {/* One line, always: a long name steps down a size and then ends in an
+            ellipsis rather than wrapping, so the squares and the steppers sit at
+            the same height whatever the exercise is called. The full name is a
+            tap away: the photo opens it, ⋮ is labelled with it. With a photo the
+            name sits on its lower edge, in the scrim, and the photo gets the
+            height the name row took; without one it is a row of its own. */}
         {exercise?.images?.length ? (
           // The div does the sizing; the button covers it, because a percentage
-          // height inside a flexed button resolves to nothing.
-          <div className="relative max-h-60 min-h-20 w-full flex-1">
+          // height inside a flexed button resolves to nothing. The name row
+          // floats over the button and lets taps through, except its ⋮.
+          <div className="relative max-h-64 min-h-24 w-full flex-1 overflow-hidden rounded-md">
             <button
               type="button"
               onClick={() => setViewingExercise(true)}
@@ -449,43 +479,58 @@ function Session() {
               className="absolute inset-0 block"
             >
               <ExerciseFrames exercise={exercise} className="h-full w-full" />
-              <span className="absolute right-1.5 bottom-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-ground/70 text-ink">
-                <Info size={13} aria-hidden />
+              <span className="absolute top-2 left-2 flex h-7 w-7 items-center justify-center rounded-full bg-ground/70 text-ink">
+                <Info size={14} aria-hidden />
               </span>
             </button>
+            {/* Over the photo the name may take two lines: nothing under the
+                photo moves, because the photo is the child that gives. */}
+            <div className="photo-scrim pointer-events-none absolute inset-x-0 bottom-0 px-3 pt-12 pb-2.5">
+              <h1 title={exerciseName} className="figure line-clamp-2 text-2xl leading-tight">
+                {exerciseName}
+              </h1>
+            </div>
+            {exerciseId && (
+              <div className="absolute top-1 right-1 rounded-full bg-ground/70">
+                <OverflowMenu
+                  label={t('moreFor', { name: exerciseName })}
+                  items={[
+                    ...(lastDone
+                      ? [{ label: t('undoSet', { n: lastDone.setIndex }), onSelect: () => void undoSet(lastDone) }]
+                      : []),
+                    { label: t('removeExercise'), onSelect: () => setRemoving(exerciseId) },
+                  ]}
+                />
+              </div>
+            )}
           </div>
-        ) : null}
-
-        <div className="mt-3 flex items-start gap-3">
-          {/* One line, always: a long name steps down a size and then ends in an
-              ellipsis rather than wrapping under the photo, so the squares and
-              the steppers sit at the same height whatever the exercise is called.
-              The full name is a tap away: the photo opens it, ⋮ is labelled with it. */}
-          <h1
-            title={exerciseName}
-            className={`figure min-w-0 flex-1 truncate leading-tight ${exerciseName.length > 26 ? 'text-xl' : 'text-2xl'}`}
-          >
-            {exerciseName}
-          </h1>
-
-          {/* Removing is the one thing you never want mid-set, so it is two taps
-              away behind ⋮ rather than a button under Next, and it takes no
-              height on the 320px phone where Log set already touches the bottom
-              edge. Undoing the set just logged sits with it: Log tapped before
-              the set was done is a regret about the set, not the exercise.
-              Swap exercise (roadmap §4.5) joins them here when it lands. */}
-          {exerciseId && (
-            <OverflowMenu
-              label={t('moreFor', { name: exerciseName })}
-              items={[
-                ...(lastDone
-                  ? [{ label: t('undoSet', { n: lastDone.setIndex }), onSelect: () => void undoSet(lastDone) }]
-                  : []),
-                { label: t('removeExercise'), onSelect: () => setRemoving(exerciseId) },
-              ]}
-            />
-          )}
-        </div>
+        ) : (
+          <div className="mt-3 flex items-start gap-3">
+            <h1
+              title={exerciseName}
+              className={`figure min-w-0 flex-1 truncate leading-tight ${exerciseName.length > 26 ? 'text-xl' : 'text-2xl'}`}
+            >
+              {exerciseName}
+            </h1>
+            {/* Removing is the one thing you never want mid-set, so it is two taps
+                away behind ⋮ rather than a button under Next, and it takes no
+                height on the 320px phone where Log set already touches the bottom
+                edge. Undoing the set just logged sits with it: Log tapped before
+                the set was done is a regret about the set, not the exercise.
+                Swap exercise (roadmap §4.5) joins them here when it lands. */}
+            {exerciseId && (
+              <OverflowMenu
+                label={t('moreFor', { name: exerciseName })}
+                items={[
+                  ...(lastDone
+                    ? [{ label: t('undoSet', { n: lastDone.setIndex }), onSelect: () => void undoSet(lastDone) }]
+                    : []),
+                  { label: t('removeExercise'), onSelect: () => setRemoving(exerciseId) },
+                ]}
+              />
+            )}
+          </div>
+        )}
 
         {exerciseId && removing === exerciseId && (
           <RemoveExercise
@@ -501,7 +546,7 @@ function Session() {
           />
         )}
 
-        {!previous && <p className="mt-2 text-sm text-ink-dim">{t('firstTime')}</p>}
+        {!previous && <p className="mt-3 text-sm text-ink-dim">{t('firstTime')}</p>}
         {previousNote && <p className="mt-1 text-sm italic text-ink-dim">“{previousNote}”</p>}
 
         <SetSquares
@@ -532,7 +577,7 @@ function Session() {
               figure: (chunks) => <span className="figure">{chunks}</span>,
             })}
           >
-            {lastLogged && <EffortChips userId={userId} log={lastLogged} className="mt-5" />}
+            {lastLogged && <EffortChips userId={userId} log={lastLogged} className="mt-4" />}
           </RestTakeover>
         ) : activeSet && finishing ? (
           // The last set is logged and there is no rest to start: the Log
@@ -546,7 +591,7 @@ function Session() {
                 await finishSession(userId, data.session)
                 setFinished(true)
               }}
-              className="mt-4 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift"
+              className="btn-primary mt-4 h-16"
             >
               {t('finish')}
             </button>
@@ -588,8 +633,8 @@ function Session() {
                             type="button"
                             aria-pressed={values.weightKg === weight}
                             onClick={() => setDraft({ ...values, weightKg: weight })}
-                            className={`figure h-9 rounded-full px-3 text-sm ${
-                              values.weightKg === weight ? 'bg-ink text-ground' : 'border border-line text-ink-dim'
+                            className={`figure h-9 rounded-full px-3.5 text-sm transition-colors ${
+                              values.weightKg === weight ? 'bg-ink text-ground' : 'bg-surface text-ink-dim hover:text-ink'
                             }`}
                           >
                             {displayWeight(weight, unit)}
@@ -624,7 +669,7 @@ function Session() {
             <button
               type="button"
               onClick={() => void completeSet()}
-              className="mt-3 h-14 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-[background-color,transform] hover:bg-plate-blue-lift motion-safe:active:scale-[0.98]"
+              className="btn-primary mt-3"
             >
               {timed && groupLogs.length === 1
                 ? t(activeSet.completedAt ? 'updateTime' : 'logTime', {
@@ -647,7 +692,7 @@ function Session() {
               <button
                 type="button"
                 onClick={() => void undoSet(activeSet)}
-                className="mt-3 h-11 w-full rounded-md text-sm text-ink-dim"
+                className="btn-text mt-3"
               >
                 {t('clearSet', { n: activeSet.setIndex })}
               </button>
@@ -656,7 +701,7 @@ function Session() {
                 <button
                   type="button"
                   onClick={() => void skipOneSet(activeSet)}
-                  className="mt-3 h-11 w-full rounded-md text-sm text-ink-dim"
+                  className="btn-text mt-3"
                 >
                   {t('skipSet', { n: activeSet.setIndex })}
                 </button>
@@ -684,7 +729,7 @@ function Session() {
             <button
               type="button"
               onClick={() => void reopenSession(userId, data.session)}
-              className="h-14 w-full rounded-md border border-line text-base font-semibold"
+              className="btn-quiet h-14 text-base font-semibold"
             >
               {t('reopen')}
             </button>
@@ -723,8 +768,8 @@ function SessionLoading() {
         <Placeholder className="h-4 w-24" />
       </header>
       <main className="mx-auto flex w-full max-w-page flex-1 flex-col px-5 pt-3 pb-8">
-        <Placeholder className="max-h-60 min-h-20 w-full flex-1" />
-        <Placeholder className="mt-3 h-8 w-3/4" />
+        <Placeholder className="max-h-64 min-h-24 w-full flex-1" />
+        <Placeholder className="mt-3 h-5 w-1/2" />
         {/* The controls' share of the height, so the photo lands at the size it keeps. */}
         <div className="h-72" />
       </main>

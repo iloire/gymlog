@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-21 22:05
+
+- **A second coat on every screen.** The plate palette, the four styles and the type stay; what
+  changed is hierarchy and reach. On the session screen the exercise's name sits on the photo's
+  lower edge in a scrim, up to two lines, so it costs no height and long names read whole; the
+  header carries a track with a segment per exercise filled by its logged sets, so where you are
+  in the workout is read from the top edge; the steppers put the number big on the left with − and
+  + paired on the right, one control under the thumb; the rest takeover puts the next set straight
+  under the clock, with how the set felt and the rest length after. Today's open workout has one
+  Continue and a quiet row for Add exercise and Finish; the weigh-in is one raised row with Save
+  inside it. Plan, Progress and Profile headline what is on them — the programme, the count of
+  workouts, your name — with the tab's name as the small line above. Three button styles in
+  `globals.css` (`btn-primary`, `btn-quiet`, `btn-text`) replace the per-screen ones; outlined
+  boxes become raised surfaces, so an outline is left to mean "a set still to do". The unused
+  shadcn button component goes. `docs/design-system.md` records the rules; the screenshots are
+  retaken.
+
 ## 2026-09-21 21:55
 
 - **A rest carried over from the exercise before no longer hides the next exercise's weight and

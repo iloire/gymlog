@@ -14,6 +14,12 @@ const HOLD_REPEAT_MS = 110
  * Numbers go in with the thumb, not the keyboard — chalky hands and a phone
  * keypad do not mix. The field still accepts typing for the odd 42.5. Holding
  * − or + repeats it: an empty bar to 60 kg was twenty-four taps.
+ *
+ * The number is the content, so it gets the left of the row at the largest
+ * size the controls allow, with its label small above it and the unit beside
+ * it. − and + sit together on the right as one control: a thumb changes the
+ * number without shifting its grip, where a − on the far left had it crossing
+ * the screen for every drop.
  */
 export function Stepper({
   label,
@@ -70,31 +76,22 @@ export function Stepper({
 
   useEffect(() => release, [])
 
-  const buttonClass =
-    'flex w-16 shrink-0 touch-manipulation select-none items-center justify-center text-ink-dim active:bg-surface-high'
-
   return (
-    // The label rides inside the field, above the number: a row of its own per
-    // stepper was enough to push the Log button below the fold.
-    <div className="flex w-full items-stretch overflow-hidden rounded-md border border-line bg-surface">
-      <HoldButton label={t('decrease', { label })} onPress={() => press(-step)} onRelease={release} className={buttonClass}>
-        <Minus size={20} aria-hidden />
-      </HoldButton>
-
-      <label className="flex min-w-0 flex-1 flex-col items-center pt-2">
+    <div className="flex h-[4.25rem] w-full items-stretch gap-2">
+      {/* The label rides inside the field, above the number: a row of its own per
+          stepper was enough to push the Log button below the fold. The input sizes
+          to its digits off a hidden twin in the same grid cell. */}
+      <label className="flex min-w-0 flex-1 flex-col justify-center rounded-md bg-surface px-4 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-plate-blue-lift">
         <span className="text-xs leading-none text-ink-dim">{label}</span>
-        {/* The unit rides beside the number at reading size — 77.5 kg, 10 reps —
-            so two boxes one above the other tell apart at a glance, empty or
-            not; a tiny word at the top read the same on both. The input sizes
-            to its digits off a hidden twin in the same grid cell. */}
-        <span className="flex h-11 min-w-0 items-baseline justify-center gap-1.5">
+        <span className="mt-1 flex min-w-0 items-baseline gap-1.5">
           <span className="grid min-w-0 shrink">
-            <span aria-hidden className="figure invisible col-start-1 row-start-1 min-w-[1.5ch] text-4xl whitespace-pre">
+            <span aria-hidden className="figure invisible col-start-1 row-start-1 min-w-[1.5ch] text-[2.5rem] leading-none whitespace-pre">
               {typing ?? value ?? '—'}
             </span>
             <input
               aria-label={label}
               inputMode="decimal"
+              size={1}
               value={typing ?? value ?? ''}
               placeholder="—"
               onFocus={(event) => {
@@ -108,16 +105,21 @@ export function Stepper({
                 if (next !== null && next >= min) onChange(next)
               }}
               onBlur={() => setTyping(null)}
-              className="figure col-start-1 row-start-1 w-full min-w-0 bg-transparent text-center text-4xl outline-none"
+              className="figure col-start-1 row-start-1 w-full min-w-0 bg-transparent text-[2.5rem] leading-none outline-none placeholder:text-ink-dim"
             />
           </span>
-          {unit && <span className="shrink-0 text-lg text-ink-dim">{unit}</span>}
+          {unit && <span className="shrink-0 text-base text-ink-dim">{unit}</span>}
         </span>
       </label>
 
-      <HoldButton label={t('increase', { label })} onPress={() => press(step)} onRelease={release} className={buttonClass}>
-        <Plus size={20} aria-hidden />
-      </HoldButton>
+      <div className="hold-pair">
+        <HoldButton label={t('decrease', { label })} onPress={() => press(-step)} onRelease={release} className="hold-button">
+          <Minus size={22} aria-hidden />
+        </HoldButton>
+        <HoldButton label={t('increase', { label })} onPress={() => press(step)} onRelease={release} className="hold-button">
+          <Plus size={22} aria-hidden />
+        </HoldButton>
+      </div>
     </div>
   )
 }
@@ -131,12 +133,14 @@ function HoldButton({
   onPress,
   onRelease,
   className,
+  disabled,
   children,
 }: {
   label: string
   onPress: () => void
   onRelease: () => void
   className: string
+  disabled?: boolean
   children: React.ReactNode
 }) {
   const pointer = useRef(false)
@@ -145,6 +149,7 @@ function HoldButton({
     <button
       type="button"
       aria-label={label}
+      disabled={disabled}
       onPointerDown={(event) => {
         // Only the primary button or a touch; a right-click must not count.
         if (event.button !== 0) return

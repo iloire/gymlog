@@ -256,7 +256,7 @@ export default function TodayPage() {
               type="button"
               onClick={() => void start(plan.scheduled!.templateId, plan.scheduled!.programId)}
               disabled={starting}
-              className="mt-6 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift disabled:opacity-60"
+              className="btn-primary mt-6 h-16"
             >
               {plan.session?.startedAt ? t('continueWorkout') : t('startWorkout')}
             </button>
@@ -278,7 +278,7 @@ export default function TodayPage() {
               type="button"
               onClick={() => void start(catchUp.templateId, catchUp.programId)}
               disabled={starting}
-              className="mt-6 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift disabled:opacity-60"
+              className="btn-primary mt-6 h-16"
             >
               {t('startWorkout')}
             </button>
@@ -337,7 +337,7 @@ function MissedNote({ missed, disabled, onStart }: { missed: Missed; disabled: b
   const t = useTranslations('today.missedNote')
   const locale = useLocale()
   return (
-    <section className="mt-6 rounded-md border border-line p-4">
+    <section className="mt-6 rounded-md bg-surface p-4">
       <p className="text-[15px]">
         {t.rich('text', {
           weekday: weekdayName(missed.day.weekday, locale),
@@ -350,7 +350,7 @@ function MissedNote({ missed, disabled, onStart }: { missed: Missed; disabled: b
         type="button"
         onClick={onStart}
         disabled={disabled}
-        className="mt-3 h-12 w-full rounded-md border border-line text-sm font-semibold disabled:opacity-60"
+        className="btn-quiet mt-3"
       >
         {t('doToday')}
       </button>
@@ -394,7 +394,7 @@ function SetupChoices() {
         </span>
         <ChevronRight size={20} aria-hidden className="shrink-0" />
       </Link>
-      <Link href="/workouts/new" className="flex items-center gap-3 rounded-md border border-line px-4 py-4">
+      <Link href="/workouts/new" className="flex items-center gap-3 rounded-md bg-surface px-4 py-4 transition-colors hover:bg-surface-high">
         <span className="min-w-0 flex-1">
           <span className="block text-lg font-semibold">{t('ownTitle')}</span>
           <span className="mt-0.5 block text-sm text-ink-dim">{t('ownText')}</span>
@@ -472,25 +472,19 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
           <div className="mt-3">
             <SessionSets exercises={exercises} />
           </div>
-          <Link
-            href={`/session?id=${session.id}`}
-            className="mt-4 flex h-14 w-full items-center justify-center rounded-md bg-plate-blue text-base font-semibold text-white transition-colors hover:bg-plate-blue-lift"
-          >
+          <Link href={`/session?id=${session.id}`} className="btn-primary mt-4">
             {t('continue', { name: session.templateName })}
           </Link>
           {/* Adding an exercise is a change to the whole workout, so it lives here
-              beside the workout's own sets rather than on the one-exercise gym screen. */}
-          <button
-            type="button"
-            onClick={() => setPicking(true)}
-            className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-md border border-line text-sm text-ink-dim"
-          >
-            <Plus size={16} aria-hidden />
-            {t('addExercise')}
-          </button>
-          {/* Ending it is about the whole workout too, and the gym screen only offers
-              Finish once every set is logged — this is the way out of one cut short. */}
-          <div className="mt-3">
+              beside the workout's own sets rather than on the one-exercise gym
+              screen. Ending it is about the whole workout too, and the gym screen
+              only offers Finish once every set is logged — this is the way out of
+              one cut short. Both are quiet, side by side: Continue is the tap. */}
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <button type="button" onClick={() => setPicking(true)} className="btn-quiet">
+              <Plus size={16} aria-hidden />
+              {t('addExercise')}
+            </button>
             <FinishSession session={session} setsLeft={setsPlanned - setsDone} />
           </div>
           {picking && (

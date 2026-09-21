@@ -25,7 +25,7 @@ export function FinishSession({ session, setsLeft }: { session: LocalSession; se
       <button
         type="button"
         onClick={() => (setsLeft > 0 ? setConfirming(true) : void finishSession(userId, session))}
-        className="h-12 w-full rounded-md border border-line text-sm"
+        className="btn-quiet"
       >
         {t('finish')}
       </button>
@@ -36,7 +36,7 @@ export function FinishSession({ session, setsLeft }: { session: LocalSession; se
     <div
       role="alertdialog"
       aria-labelledby={`finish-session-${session.id}`}
-      className="w-full rounded-md border border-line p-4"
+      className="col-span-full w-full rounded-md bg-surface p-4"
     >
       <p id={`finish-session-${session.id}`} className="text-[15px]">
         {t('confirm', { count: setsLeft })}
@@ -47,14 +47,14 @@ export function FinishSession({ session, setsLeft }: { session: LocalSession; se
           type="button"
           autoFocus
           onClick={() => setConfirming(false)}
-          className="h-12 rounded-md border border-line text-sm"
+          className="btn-quiet"
         >
           {t('cancel')}
         </button>
         <button
           type="button"
           onClick={() => void finishSession(userId, session)}
-          className="h-12 rounded-md bg-plate-blue text-sm font-semibold text-white"
+          className="btn-primary h-12 text-base"
         >
           {t('yes')}
         </button>

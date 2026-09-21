@@ -62,16 +62,14 @@ export default function ProfilePage() {
   return (
     <>
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
-        <h1 className="figure text-4xl">{t('title')}</h1>
+        {/* Whose profile it is, as the headline; the tab bar already says Profile. */}
+        <header>
+          <p className="text-sm text-ink-dim">{t('title')}</p>
+          <h1 className="figure mt-1 truncate text-4xl leading-[1.05]">{user?.name || user?.email || t('title')}</h1>
+          {user?.name && user.email && <p className="mt-1.5 text-sm text-ink-dim">{user.email}</p>}
+        </header>
 
-        {user && (
-          <section className="mt-6 border-y border-line py-4">
-            {user.name && <p className="text-lg font-semibold">{user.name}</p>}
-            {user.email && <p className="text-sm text-ink-dim">{user.email}</p>}
-          </section>
-        )}
-
-        <ul className={`divide-y divide-line border-b border-line ${user ? '' : 'mt-6 border-t'}`}>
+        <ul className="mt-6 divide-y divide-line border-y border-line">
           <Row href="/profile/appearance" title={t('rows.appearance')} value={appearance} />
           <Row href="/profile/equipment" title={t('rows.equipment')} value={gym} />
           <Row href="/profile/units" title={t('rows.units')} value={`${t(`units.${unit}`)} (${unit})`} />

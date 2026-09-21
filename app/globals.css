@@ -380,6 +380,36 @@
   }
 }
 
+/* Buttons — three weights, one look each, so the same action reads the same
+   on every screen. Primary is the one thing the screen wants pressed, in plate
+   blue; quiet is an outline on a raised surface; text is a line of words. All
+   three keep the thumb targets the design system asks for. */
+@utility btn-primary {
+  @apply flex h-14 w-full items-center justify-center gap-2 rounded-md bg-plate-blue px-4 text-lg font-semibold text-white transition-[background-color,transform] hover:bg-plate-blue-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plate-blue-lift motion-safe:active:scale-[0.98] disabled:opacity-60;
+}
+@utility btn-quiet {
+  @apply flex h-12 w-full items-center justify-center gap-2 rounded-md border border-line bg-surface px-4 text-[15px] font-medium text-ink transition-colors hover:bg-surface-high focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plate-blue-lift disabled:opacity-50;
+}
+@utility btn-text {
+  @apply flex h-11 w-full items-center justify-center rounded-md px-4 text-sm text-ink-dim transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plate-blue-lift;
+}
+
+/* A − / + pair as one control: two square targets sharing an outline, so a
+   thumb changes a number without shifting its grip. Used by the steppers and
+   the rest-length control. */
+@utility hold-pair {
+  @apply flex shrink-0 items-stretch overflow-hidden rounded-md border border-line bg-surface divide-x divide-line;
+}
+@utility hold-button {
+  @apply flex w-14 touch-manipulation select-none items-center justify-center text-ink transition-colors active:bg-surface-high disabled:opacity-40 disabled:active:bg-transparent;
+}
+
+/* The exercise's name sits on the lower edge of its photo. The scrim fades
+   from nothing to the ground colour, so the name is read whatever the photo. */
+@utility photo-scrim {
+  background: linear-gradient(to top, color-mix(in srgb, var(--ground) 92%, transparent) 0%, color-mix(in srgb, var(--ground) 55%, transparent) 55%, transparent 100%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

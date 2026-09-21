@@ -2,8 +2,8 @@
   "title": "Plan",
   "back": "Plan",
   "intro": {
-    "programme": "{name} — {days, plural, one {# día} other {# días}} a la semana, desde el {since}",
-    "empty": "Tus entrenamientos y los días en que los haces. Toca un día para ponerle uno."
+    "empty": "Tus entrenamientos y los días en que los haces. Toca un día para ponerle uno.",
+    "programmeDetail": "{days, plural, one {# día} other {# días}} a la semana, desde {since}"
   },
   "week": {
     "label": "Tu semana",
