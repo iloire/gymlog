@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { useUserId } from '@/components/session-boot'
@@ -14,6 +15,7 @@ import { finishSession } from '@/lib/sessions'
  */
 export function FinishSession({ session, setsLeft }: { session: LocalSession; setsLeft: number }) {
   const userId = useUserId()
+  const t = useTranslations('session.finishSession')
   const [confirming, setConfirming] = useState(false)
 
   if (!userId) return null
@@ -25,7 +27,7 @@ export function FinishSession({ session, setsLeft }: { session: LocalSession; se
         onClick={() => (setsLeft > 0 ? setConfirming(true) : void finishSession(userId, session))}
         className="h-12 w-full rounded-md border border-line text-sm"
       >
-        Finish workout
+        {t('finish')}
       </button>
     )
   }
@@ -37,11 +39,9 @@ export function FinishSession({ session, setsLeft }: { session: LocalSession; se
       className="w-full rounded-md border border-line p-4"
     >
       <p id={`finish-session-${session.id}`} className="text-[15px]">
-        Finish with {setsLeft} {setsLeft === 1 ? 'set' : 'sets'} not done?
+        {t('confirm', { count: setsLeft })}
       </p>
-      <p className="mt-1 text-sm text-ink-dim">
-        What you logged is kept. You can reopen the workout if there is more in you.
-      </p>
+      <p className="mt-1 text-sm text-ink-dim">{t('kept')}</p>
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
@@ -49,14 +49,14 @@ export function FinishSession({ session, setsLeft }: { session: LocalSession; se
           onClick={() => setConfirming(false)}
           className="h-12 rounded-md border border-line text-sm"
         >
-          Cancel
+          {t('cancel')}
         </button>
         <button
           type="button"
           onClick={() => void finishSession(userId, session)}
           className="h-12 rounded-md bg-plate-blue text-sm font-semibold text-white"
         >
-          Finish
+          {t('yes')}
         </button>
       </div>
     </div>

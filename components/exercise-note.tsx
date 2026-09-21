@@ -1,6 +1,7 @@
 'use client'
 
 import { PencilLine } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import type { LocalSetLog } from '@/lib/db/dexie'
@@ -24,6 +25,7 @@ export function ExerciseNote({
   /** Named when the note is not on the exercise at the top of the screen. */
   exerciseName?: string
 }) {
+  const t = useTranslations('session.note')
   const [editing, setEditing] = useState(false)
 
   if (editing) {
@@ -32,8 +34,8 @@ export function ExerciseNote({
         autoFocus
         rows={2}
         defaultValue={log.notes ?? ''}
-        placeholder={exerciseName ? `${exerciseName}: how it went…` : 'How it went, how close to your limit…'}
-        aria-label={exerciseName ? `Note on ${exerciseName}` : 'Note on this exercise'}
+        placeholder={exerciseName ? t('placeholderNamed', { name: exerciseName }) : t('placeholder')}
+        aria-label={exerciseName ? t('labelNamed', { name: exerciseName }) : t('label')}
         onBlur={async (event) => {
           const notes = event.target.value.trim() || null
           if (notes !== log.notes) await writeRow(userId, 'setLogs', { id: log.id, notes })
@@ -57,9 +59,9 @@ export function ExerciseNote({
           {log.notes}
         </span>
       ) : exerciseName ? (
-        `Add a note on ${exerciseName}`
+        t('addNamed', { name: exerciseName })
       ) : (
-        'Add a note'
+        t('add')
       )}
     </button>
   )

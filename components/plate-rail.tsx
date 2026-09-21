@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { useUnit } from '@/components/use-unit'
@@ -40,6 +41,7 @@ const PLATE_STYLE: Record<Unit, Record<number, { className: string; color?: stri
  */
 export function PlateRail({ weightKg }: { weightKg: number | null }) {
   const unit = useUnit()
+  const t = useTranslations('session.plates')
   const { bars } = PLATE_SETS[unit]
   const [chosen, setBar] = useState<number | null>(null)
   const bar = chosen !== null && bars.includes(chosen) ? chosen : readBar(unit)
@@ -57,20 +59,20 @@ export function PlateRail({ weightKg }: { weightKg: number | null }) {
   const label = loading.perSide.map((plate) => `${plate}`).join(' + ')
 
   return (
-    <div className="flex items-center gap-3 px-1 text-xs text-ink-dim" aria-label="Plates per side">
+    <div className="flex items-center gap-3 px-1 text-xs text-ink-dim" aria-label={t('perSide')}>
       <button
         type="button"
         onClick={toggleBar}
-        aria-label={`${bar} ${unit} bar, tap to change`}
+        aria-label={t('barLabel', { bar, unit })}
         className="figure shrink-0 rounded-sm border border-line px-1.5 py-0.5 text-[11px]"
       >
-        {bar} bar
+        {t('bar', { bar })}
       </button>
 
       {weight < bar ? (
-        <span>Under the bar</span>
+        <span>{t('underBar')}</span>
       ) : loading.perSide.length === 0 ? (
-        <span>Empty bar</span>
+        <span>{t('emptyBar')}</span>
       ) : (
         <span className="flex min-w-0 items-center gap-2">
           <span className="flex items-end gap-0.5" aria-hidden>
@@ -86,14 +88,12 @@ export function PlateRail({ weightKg }: { weightKg: number | null }) {
             })}
           </span>
           <span className="figure truncate text-ink">{label}</span>
-          <span className="shrink-0">a side</span>
+          <span className="shrink-0">{t('aSide')}</span>
         </span>
       )}
 
       {!loading.exact && weight >= bar && (
-        <span className="ml-auto shrink-0">
-          makes {loading.total} {unit}
-        </span>
+        <span className="ml-auto shrink-0">{t('makes', { total: loading.total, unit })}</span>
       )}
     </div>
   )

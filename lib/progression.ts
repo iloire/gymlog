@@ -9,14 +9,28 @@
  * is a unit test.
  */
 import type { LocalSetLog } from '@/lib/db/dexie'
-import { formatWeight, tidyWeight, type Unit } from '@/lib/units'
+import { tidyWeight, type Unit } from '@/lib/units'
 import { roundToStep } from '@/lib/weights'
+
+/**
+ * Why the steppers open where they do, as data: the screen turns it into a
+ * sentence in its language ('All 3×10 at 75 kg last time → 77.5 kg'). Weights
+ * are kilograms; the screen formats them in the unit.
+ */
+export type Reason =
+  | { kind: 'hitTryMoreReps'; sets: number; reps: number; nextReps: number }
+  | { kind: 'hitAddWeight'; sets: number; reps: number; weightKg: number; nextKg: number }
+  | { kind: 'hitAddWeightFromReps'; sets: number; reps: number; weightKg: number; nextKg: number; nextReps: number }
+  | { kind: 'repeatAimFor'; weightKg: number; reps: number }
+  | { kind: 'missedTryAgain'; reps: number }
+  | { kind: 'missedTwiceDrop'; weightKg: number; nextKg: number }
+  | { kind: 'missedRepeat'; weightKg: number }
 
 export type Suggestion = {
   weightKg: number | null
   reps: number | null
-  /** 'All 3×10 at 75 kg last time → 77.5 kg'; null when there is nothing to say. */
-  reason: string | null
+  /** Null when there is nothing to say. */
+  reason: Reason | null
 }
 
 /** The prescription for the set about to be done. */
@@ -48,7 +62,7 @@ function allHit(sets: LocalSetLog[], reps: number): boolean {
  * `recentPerformances` returns them. `incrementKg` is what a hit adds, null
  * for a movement that carries no weight, where a hit adds a rep instead.
  * `stepKg` rounds a deload to a weight you can actually load. `unit` is only
- * for the reason's wording; the weights themselves stay kilograms.
+ * for landing on a weight the plates make; the weights themselves stay kilograms.
  */
 export function suggestNext({
   previous,
@@ -65,7 +79,6 @@ export function suggestNext({
   stepKg: number
   unit?: Unit
 }): Suggestion {
-  const kg = (value: number) => formatWeight(value, unit)
   const last = (previous ?? []).filter(working)
   const { targetReps, targetRepsMax } = prescription
 
@@ -88,25 +101,33 @@ export function suggestNext({
   // then the weight goes up and the reps start again from the bottom.
   if (max !== null) {
     if (allHit(last, max)) {
-      if (!loaded) return { weightKg: weight || null, reps: max + 1, reason: `All ${sets}×${max} last time → try ${max + 1}` }
+      if (!loaded) {
+        return { weightKg: weight || null, reps: max + 1, reason: { kind: 'hitTryMoreReps', sets, reps: max, nextReps: max + 1 } }
+      }
       const next = tidyWeight(weight + incrementKg, unit)
-      return { weightKg: next, reps: min, reason: `All ${sets}×${max} at ${kg(weight)} last time → ${kg(next)} from ${min}` }
+      return {
+        weightKg: next,
+        reps: min,
+        reason: { kind: 'hitAddWeightFromReps', sets, reps: max, weightKg: weight, nextKg: next, nextReps: min },
+      }
     }
     if (allHit(last, min)) {
       const lowest = Math.min(...last.map((set) => set.reps ?? 0))
       const reps = Math.min(max, lowest + 1)
-      return { weightKg: weight || null, reps, reason: `${kg(weight)} again, aim for ${reps} on every set` }
+      return { weightKg: weight || null, reps, reason: { kind: 'repeatAimFor', weightKg: weight, reps } }
     }
-    return missed(before, weight, min, stepKg, loaded, kg)
+    return missed(before, weight, min, stepKg, loaded)
   }
 
   if (allHit(last, min)) {
-    if (!loaded) return { weightKg: weight || null, reps: min + 1, reason: `All ${sets}×${min} last time → try ${min + 1}` }
+    if (!loaded) {
+      return { weightKg: weight || null, reps: min + 1, reason: { kind: 'hitTryMoreReps', sets, reps: min, nextReps: min + 1 } }
+    }
     const next = tidyWeight(weight + incrementKg, unit)
-    return { weightKg: next, reps: min, reason: `All ${sets}×${min} at ${kg(weight)} last time → ${kg(next)}` }
+    return { weightKg: next, reps: min, reason: { kind: 'hitAddWeight', sets, reps: min, weightKg: weight, nextKg: next } }
   }
 
-  return missed(before, weight, min, stepKg, loaded, kg)
+  return missed(before, weight, min, stepKg, loaded)
 }
 
 /**
@@ -119,19 +140,18 @@ function missed(
   reps: number,
   stepKg: number,
   loaded: boolean,
-  kg: (value: number) => string,
 ): Suggestion {
-  if (!loaded) return { weightKg: weight || null, reps, reason: `Missed reps last time, go for ${reps} again` }
+  if (!loaded) return { weightKg: weight || null, reps, reason: { kind: 'missedTryAgain', reps } }
 
   const earlier = (before ?? []).filter(working)
   const twice = earlier.length > 0 && topWeight(earlier) === weight && !allHit(earlier, reps)
   if (twice) {
     const lighter = roundToStep(weight * 0.9, stepKg)
     if (lighter < weight) {
-      return { weightKg: lighter, reps, reason: `Missed twice at ${kg(weight)} → drop 10% to ${kg(lighter)}` }
+      return { weightKg: lighter, reps, reason: { kind: 'missedTwiceDrop', weightKg: weight, nextKg: lighter } }
     }
   }
-  return { weightKg: weight, reps, reason: `Missed reps at ${kg(weight)} last time, repeat it` }
+  return { weightKg: weight, reps, reason: { kind: 'missedRepeat', weightKg: weight } }
 }
 
 export type Values = { weightKg: number | null; reps: number | null; durationSec: number | null }

@@ -1,6 +1,7 @@
 'use client'
 
 import { Minus, Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
 import { parseNumber } from '@/lib/format'
@@ -29,6 +30,7 @@ export function Stepper({
   unit?: string
   onChange: (next: number) => void
 }) {
+  const t = useTranslations('session.stepper')
   const current = value ?? 0
   // What is in the field while it has focus. Showing the parsed number instead
   // turned '42.' straight back into '42', so 42.5 could only ever be typed as 425.
@@ -75,7 +77,7 @@ export function Stepper({
     // The label rides inside the field, above the number: a row of its own per
     // stepper was enough to push the Log button below the fold.
     <div className="flex w-full items-stretch overflow-hidden rounded-md border border-line bg-surface">
-      <HoldButton label={`Decrease ${label}`} onPress={() => press(-step)} onRelease={release} className={buttonClass}>
+      <HoldButton label={t('decrease', { label })} onPress={() => press(-step)} onRelease={release} className={buttonClass}>
         <Minus size={20} aria-hidden />
       </HoldButton>
 
@@ -113,7 +115,7 @@ export function Stepper({
         </span>
       </label>
 
-      <HoldButton label={`Increase ${label}`} onPress={() => press(step)} onRelease={release} className={buttonClass}>
+      <HoldButton label={t('increase', { label })} onPress={() => press(step)} onRelease={release} className={buttonClass}>
         <Plus size={20} aria-hidden />
       </HoldButton>
     </div>

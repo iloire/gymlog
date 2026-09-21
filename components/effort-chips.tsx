@@ -1,15 +1,13 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
+
 import type { LocalSetLog } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
 
-export const EFFORTS = [
-  { value: 'easy', label: 'Easy' },
-  { value: 'hard', label: 'Hard' },
-  { value: 'failed', label: 'Failed' },
-] as const
+export const EFFORTS = ['easy', 'hard', 'failed'] as const
 
-export type Effort = (typeof EFFORTS)[number]['value']
+export type Effort = (typeof EFFORTS)[number]
 
 /**
  * How a set felt, one tap: easy, hard or failed. That is all the progression
@@ -30,15 +28,16 @@ export function EffortChips({
   exerciseName?: string
   className?: string
 }) {
+  const t = useTranslations('session.effort')
   const current = log.effort ?? null
 
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
       <span className="text-sm text-ink-dim">
-        {exerciseName ? `${exerciseName} set ${log.setIndex} felt` : `Set ${log.setIndex} felt`}
+        {exerciseName ? t('feltNamed', { name: exerciseName, n: log.setIndex }) : t('felt', { n: log.setIndex })}
       </span>
-      <ul className="flex gap-2" aria-label={`How set ${log.setIndex} felt`}>
-        {EFFORTS.map(({ value, label }) => {
+      <ul className="flex gap-2" aria-label={t('how', { n: log.setIndex })}>
+        {EFFORTS.map((value) => {
           const active = current === value
           return (
             <li key={value}>
@@ -50,7 +49,7 @@ export function EffortChips({
                   active ? 'bg-ink text-ground' : 'border border-line text-ink-dim'
                 }`}
               >
-                {label}
+                {t(value)}
               </button>
             </li>
           )

@@ -1,7 +1,9 @@
 'use client'
 
 import { Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
+import { useLocale } from '@/components/locale-provider'
 import { useUnit } from '@/components/use-unit'
 import type { LocalSetLog } from '@/lib/db/dexie'
 import { formatSet } from '@/lib/format'
@@ -33,7 +35,7 @@ export function SetSquares({
   activeId,
   previousTopKg = null,
   previous = null,
-  previousLabel = 'Last time',
+  previousLabel,
   justLoggedId = null,
   onSelect,
   onAdd,
@@ -53,8 +55,11 @@ export function SetSquares({
   onAdd?: () => void
 }) {
   const unit = useUnit()
+  const locale = useLocale()
+  const t = useTranslations('session.squares')
   if (logs.length === 0) return null
 
+  const ghostLabel = previousLabel ?? t('lastTime')
   const ghosts = previous ?? []
   const columns = Math.max(logs.length + (onAdd ? 1 : 0), ghosts.length)
   // One grid for both rows, so set 3 sits under set 3 whatever each row holds.
@@ -65,13 +70,13 @@ export function SetSquares({
     <div className="-mx-5 mt-4 overflow-x-auto px-5 [scrollbar-width:none]">
       {ghosts.length > 0 && (
         <>
-          <p className="mb-1.5 text-xs text-ink-dim">{previousLabel}</p>
-          <ol className="grid gap-2" style={grid} aria-label={previousLabel}>
+          <p className="mb-1.5 text-xs text-ink-dim">{ghostLabel}</p>
+          <ol className="grid gap-2" style={grid} aria-label={ghostLabel}>
             {ghosts.map((set) => (
               <li
                 key={set.id}
                 className="flex h-11 min-w-12 flex-col items-center justify-center rounded-sm border border-dashed border-line px-2 text-ink-dim"
-                aria-label={`Set ${set.setIndex}, ${formatSet(set, unit)}`}
+                aria-label={t('setGhost', { n: set.setIndex, set: formatSet(set, unit, locale) })}
               >
                 <Figure set={set} unit={unit} />
               </li>
@@ -85,6 +90,10 @@ export function SetSquares({
           const done = log.completedAt !== null
           const active = log.id === activeId
           const beat = done && heavierThanLastTime(log.weightKg, previousTopKg)
+          const figure =
+            log.durationSec != null
+              ? formatSet(log, unit, locale)
+              : `${log.weightKg === null ? '—' : displayWeight(log.weightKg, unit)} ${unit} × ${log.reps ?? '—'}`
 
           return (
             <li key={log.id}>
@@ -95,8 +104,8 @@ export function SetSquares({
                 aria-pressed={active}
                 aria-label={
                   done
-                    ? `Set ${log.setIndex}, ${log.durationSec != null ? formatSet(log, unit) : `${log.weightKg === null ? '—' : displayWeight(log.weightKg, unit)} ${unit} × ${log.reps ?? '—'}`}${beat ? ', heavier than last time' : ''}`
-                    : `Set ${log.setIndex}`
+                    ? t(beat ? 'setDoneHeavier' : 'setDone', { n: log.setIndex, set: figure })
+                    : t('set', { n: log.setIndex })
                 }
                 className={`flex h-12 w-full min-w-12 flex-col items-center justify-center rounded-sm px-2 ${
                   done
@@ -116,7 +125,7 @@ export function SetSquares({
             <button
               type="button"
               onClick={onAdd}
-              aria-label="Add a set"
+              aria-label={t('add')}
               className="flex h-12 w-full min-w-12 items-center justify-center rounded-sm border border-dashed border-line text-ink-dim"
             >
               <Plus size={18} aria-hidden />
@@ -130,11 +139,12 @@ export function SetSquares({
 
 /** The two-line figure inside a square: the weight over ×reps, or minutes for a timed set. */
 function Figure({ set, unit }: { set: LocalSetLog; unit: Unit }) {
+  const t = useTranslations('session.squares')
   if (set.durationSec != null) {
     return (
       <>
         <span className="figure text-base leading-none">{Number((set.durationSec / 60).toFixed(1))}</span>
-        <span className="mt-0.5 text-[11px] leading-none opacity-80">min</span>
+        <span className="mt-0.5 text-[11px] leading-none opacity-80">{t('min')}</span>
       </>
     )
   }

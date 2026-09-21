@@ -1,7 +1,9 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useTranslations } from 'next-intl'
 
+import { useLocale } from '@/components/locale-provider'
 import { Loading, Placeholder } from '@/components/loading'
 import { SessionSets } from '@/components/session-sets'
 import { useUnit } from '@/components/use-unit'
@@ -10,6 +12,7 @@ import { formatDay, formatDuration, formatMinutes, formatSet } from '@/lib/forma
 import { sessionHistory } from '@/lib/history'
 import { lastPerformance, today } from '@/lib/queries'
 import { compareExercise, recordHeadline, type ExerciseRecord } from '@/lib/records'
+import type { Locale } from '@/lib/i18n'
 import { formatWeight, type Unit } from '@/lib/units'
 
 /**
@@ -35,6 +38,8 @@ export function WorkoutSummary({
   onReopen: () => void
 }) {
   const unit = useUnit()
+  const locale = useLocale()
+  const t = useTranslations('session.summary')
   const data = useLiveQuery(async () => {
     const history = await sessionHistory(userId)
     const entry = history.find((row) => row.session.id === sessionId)
@@ -82,8 +87,8 @@ export function WorkoutSummary({
   if (!data.entry) {
     return (
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-8">
-        <h1 className="figure text-4xl leading-[1.05]">Workout finished</h1>
-        <p className="mt-2 text-[15px] text-ink-dim">No sets were logged, so there is nothing to compare.</p>
+        <h1 className="figure text-4xl leading-[1.05]">{t('finished')}</h1>
+        <p className="mt-2 text-[15px] text-ink-dim">{t('nothingLogged')}</p>
         <Buttons onDone={onDone} onReopen={onReopen} />
       </main>
     )
@@ -100,7 +105,7 @@ export function WorkoutSummary({
   return (
     <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-8">
       <p className="text-sm text-ink-dim">
-        {session.templateName} · {formatDay(session.scheduledFor)}
+        {session.templateName} · {formatDay(session.scheduledFor, locale)}
       </p>
 
       {/* The hero is the weight itself. A workout is measured in kilos moved,
@@ -108,27 +113,30 @@ export function WorkoutSummary({
           in ink, because red on this screen marks what was *added* to last
           time and nothing else. A red total would drown the three lines below
           that actually earned it. */}
-      <p className="figure mt-2 text-6xl leading-none">{cardioOnly ? formatMinutes(cardioSec) : formatWeight(volumeKg, unit)}</p>
+      <p className="figure mt-2 text-6xl leading-none">{cardioOnly ? formatMinutes(cardioSec) : formatWeight(volumeKg, unit, locale)}</p>
       <p className="mt-2 text-[15px] text-ink-dim">
-        {cardioOnly ? 'logged' : 'moved'} over {setsDone} {setsDone === 1 ? 'set' : 'sets'}
-        {durationMs !== null && durationMs >= 60_000 && <> in {formatDuration(durationMs)}</>}
+        {durationMs !== null && durationMs >= 60_000
+          ? t(cardioOnly ? 'loggedOverIn' : 'movedOverIn', { count: setsDone, duration: formatDuration(durationMs) })
+          : t(cardioOnly ? 'loggedOver' : 'movedOver', { count: setsDone })}
       </p>
       {volumeUpKg !== null && (
         <p className="figure mt-1 text-[15px] text-plate-red">
-          +{formatWeight(volumeUpKg, unit)} on last {session.templateName}
+          {t('upOnLast', { weight: formatWeight(volumeUpKg, unit, locale), name: session.templateName })}
         </p>
       )}
 
       {beaten.length > 0 && (
         <section className="mt-8">
-          <h2 className="text-sm text-ink-dim">Beat last time</h2>
+          <h2 className="text-sm text-ink-dim">{t('beatLastTime')}</h2>
           <ul className="mt-2 divide-y divide-line border-y border-line">
             {beaten.map((record) => (
               <li key={record.exerciseId} className="flex items-baseline justify-between gap-3 py-3">
                 <span className="min-w-0 truncate text-[15px]">{record.name}</span>
                 <span className="shrink-0 text-right">
                   <span className="figure block text-[15px] text-plate-red">{recordHeadline(record, unit)}</span>
-                  <span className="figure block text-sm text-ink-dim">{comparison(record, unit)}</span>
+                  <span className="figure block text-sm text-ink-dim">
+                    {comparison(record, unit, locale, t)}
+                  </span>
                 </span>
               </li>
             ))}
@@ -138,22 +146,18 @@ export function WorkoutSummary({
 
       {firsts.length > 0 && (
         <p className="mt-6 text-[15px] text-ink-dim">
-          First time logging {firsts.map((record) => record.name).join(', ')} —{' '}
-          {firsts.length === 1 ? 'that is the number' : 'those are the numbers'} to beat now.
+          {t('firstTime', { names: firsts.map((record) => record.name).join(', '), count: firsts.length })}
         </p>
       )}
 
       <p className="mt-6 text-[15px]">
-        <span className="figure text-ink">{streak.current}</span> {streak.current === 1 ? 'week' : 'weeks'} in a row
-        <span className="text-ink-dim">
-          {' '}
-          · {streak.thisWeek} {streak.thisWeek === 1 ? 'day' : 'days'} this week
-        </span>
+        {t.rich('weeksInRow', { count: streak.current, figure: (chunks) => <span className="figure text-ink">{chunks}</span> })}
+        <span className="text-ink-dim"> {t('daysThisWeek', { count: streak.thisWeek })}</span>
         <span className="block text-sm text-ink-dim">{streakMessage(streak)}</span>
       </p>
 
       <section className="mt-8">
-        <h2 className="text-sm text-ink-dim">What you logged</h2>
+        <h2 className="text-sm text-ink-dim">{t('whatYouLogged')}</h2>
         <div className="mt-2">
           <SessionSets exercises={exercises} />
         </div>
@@ -165,13 +169,19 @@ export function WorkoutSummary({
 }
 
 /** '82.5×5 from 80×5' — the set that beat it, and the set it beat. */
-function comparison(record: ExerciseRecord, unit: Unit): string {
+function comparison(
+  record: ExerciseRecord,
+  unit: Unit,
+  locale: Locale,
+  t: ReturnType<typeof useTranslations<'session.summary'>>,
+): string {
   if (!record.best) return ''
-  const now = formatSet(record.best, unit)
-  return record.previousBest ? `${now} from ${formatSet(record.previousBest, unit)}` : now
+  const now = formatSet(record.best, unit, locale)
+  return record.previousBest ? t('from', { now, before: formatSet(record.previousBest, unit, locale) }) : now
 }
 
 function Buttons({ onDone, onReopen }: { onDone: () => void; onReopen: () => void }) {
+  const t = useTranslations('session.summary')
   return (
     <>
       <button
@@ -179,11 +189,11 @@ function Buttons({ onDone, onReopen }: { onDone: () => void; onReopen: () => voi
         onClick={onDone}
         className="mt-8 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift"
       >
-        Back to today
+        {t('backToToday')}
       </button>
       {/* One more exercise in you after all, or finished by mistake. */}
       <button type="button" onClick={onReopen} className="mt-3 h-12 w-full rounded-md border border-line text-sm">
-        Reopen workout
+        {t('reopen')}
       </button>
     </>
   )

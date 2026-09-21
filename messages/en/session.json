@@ -1,1 +1,127 @@
-{}
+{
+  "page": {
+    "back": "Today",
+    "workoutFallback": "Workout",
+    "exerciseFallback": "Exercise",
+    "about": "About {name}",
+    "moreFor": "More for {name}",
+    "undoSet": "Undo set {n}",
+    "removeExercise": "Remove exercise",
+    "firstTime": "First time logging this one.",
+    "lastTime": "Last time",
+    "lastTimeAgo": "Last time · {ago}",
+    "setSkipped": "Set {n} skipped",
+    "setAdded": "Set {n} added",
+    "time": "time",
+    "repsOnly": "{reps} reps",
+    "next": "Set {n} · <figure>{next}</figure>",
+    "nextAfter": "{exercise} · Set {n} · <figure>{next}</figure>",
+    "allLogged": "Every set logged. Tap a square to fix one.",
+    "finish": "Finish workout",
+    "timeLabel": "Time",
+    "weightLabel": "Weight",
+    "repsLabel": "Reps",
+    "repsUnit": "reps",
+    "quickWeights": "Quick weights",
+    "heavier": "Heavier than last time’s top set.",
+    "logTime": "Log {time}",
+    "updateTime": "Update {time}",
+    "updateSet": "Update set {n}",
+    "logSet": "Log set {n} · {next}",
+    "clearSet": "Clear set {n}",
+    "skipSet": "Skip set {n}",
+    "noExercises": "This workout has no exercises yet.",
+    "reopen": "Reopen workout"
+  },
+  "progression": {
+    "hitTryMoreReps": "All {sets}×{reps} last time → try {next}",
+    "hitAddWeight": "All {sets}×{reps} at {weight} last time → {next}",
+    "hitAddWeightFromReps": "All {sets}×{reps} at {weight} last time → {next} from {nextReps}",
+    "repeatAimFor": "{weight} again, aim for {reps} on every set",
+    "missedTryAgain": "Missed reps last time, go for {reps} again",
+    "missedTwiceDrop": "Missed twice at {weight} → drop 10% to {next}",
+    "missedRepeat": "Missed reps at {weight} last time, repeat it"
+  },
+  "restTimer": {
+    "backToWorkout": "Back to workout",
+    "rest": "Rest",
+    "remaining": "Rest remaining",
+    "extend": "+{seconds} s",
+    "skip": "Skip",
+    "restAfter": "Rest after {name}",
+    "secondsLeft": "{count, plural, one {# second} other {# seconds}} of rest left",
+    "next": "Next",
+    "betweenSets": "Rest between sets",
+    "keptFor": "Kept for {name}",
+    "keptForThis": "Kept for this exercise",
+    "less": "Less rest between sets",
+    "more": "More rest between sets",
+    "seconds": "{seconds} s",
+    "skipRest": "Skip rest"
+  },
+  "summary": {
+    "finished": "Workout finished",
+    "nothingLogged": "No sets were logged, so there is nothing to compare.",
+    "movedOver": "moved over {count, plural, one {# set} other {# sets}}",
+    "movedOverIn": "moved over {count, plural, one {# set} other {# sets}} in {duration}",
+    "loggedOver": "logged over {count, plural, one {# set} other {# sets}}",
+    "loggedOverIn": "logged over {count, plural, one {# set} other {# sets}} in {duration}",
+    "upOnLast": "+{weight} on last {name}",
+    "beatLastTime": "Beat last time",
+    "from": "{now} from {before}",
+    "firstTime": "First time logging {names} — {count, plural, one {that is the number} other {those are the numbers}} to beat now.",
+    "weeksInRow": "<figure>{count}</figure> {count, plural, one {week} other {weeks}} in a row",
+    "daysThisWeek": "· {count, plural, one {# day} other {# days}} this week",
+    "whatYouLogged": "What you logged",
+    "backToToday": "Back to today",
+    "reopen": "Reopen workout"
+  },
+  "stepper": {
+    "decrease": "Decrease {label}",
+    "increase": "Increase {label}"
+  },
+  "squares": {
+    "lastTime": "Last time",
+    "setGhost": "Set {n}, {set}",
+    "setDone": "Set {n}, {set}",
+    "setDoneHeavier": "Set {n}, {set}, heavier than last time",
+    "set": "Set {n}",
+    "add": "Add a set",
+    "min": "min"
+  },
+  "plates": {
+    "perSide": "Plates per side",
+    "barLabel": "{bar} {unit} bar, tap to change",
+    "bar": "{bar} bar",
+    "underBar": "Under the bar",
+    "emptyBar": "Empty bar",
+    "aSide": "a side",
+    "makes": "makes {total} {unit}"
+  },
+  "effort": {
+    "easy": "Easy",
+    "hard": "Hard",
+    "failed": "Failed",
+    "felt": "Set {n} felt",
+    "feltNamed": "{name} set {n} felt",
+    "how": "How set {n} felt"
+  },
+  "finishSession": {
+    "finish": "Finish workout",
+    "confirm": "Finish with {count, plural, one {# set} other {# sets}} not done?",
+    "kept": "What you logged is kept. You can reopen the workout if there is more in you.",
+    "cancel": "Cancel",
+    "yes": "Finish"
+  },
+  "note": {
+    "placeholderNamed": "{name}: how it went…",
+    "placeholder": "How it went, how close to your limit…",
+    "labelNamed": "Note on {name}",
+    "label": "Note on this exercise",
+    "addNamed": "Add a note on {name}",
+    "add": "Add a note"
+  },
+  "sets": {
+    "warmup": "w"
+  }
+}

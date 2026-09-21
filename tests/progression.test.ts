@@ -41,7 +41,7 @@ describe('suggestNext', () => {
       ...barbell,
     })
 
-    expect(result).toEqual({ weightKg: 62.5, reps: 5, reason: 'All 3×5 at 60 kg last time → 62.5 kg' })
+    expect(result).toEqual({ weightKg: 62.5, reps: 5, reason: { kind: 'hitAddWeight', sets: 3, reps: 5, weightKg: 60, nextKg: 62.5 } })
   })
 
   it('repeats the weight after a missed rep', () => {
@@ -51,7 +51,7 @@ describe('suggestNext', () => {
       ...barbell,
     })
 
-    expect(result).toMatchObject({ weightKg: 60, reps: 5, reason: 'Missed reps at 60 kg last time, repeat it' })
+    expect(result).toMatchObject({ weightKg: 60, reps: 5, reason: { kind: 'missedRepeat', weightKg: 60 } })
   })
 
   it('drops 10% after missing twice at the same weight, rounded to a loadable weight', () => {
@@ -63,7 +63,7 @@ describe('suggestNext', () => {
     })
 
     // 54 rounds to 55 on 2.5 kg plates.
-    expect(result).toMatchObject({ weightKg: 55, reason: 'Missed twice at 60 kg → drop 10% to 55 kg' })
+    expect(result).toMatchObject({ weightKg: 55, reason: { kind: 'missedTwiceDrop', weightKg: 60, nextKg: 55 } })
   })
 
   it('does not deload when the earlier miss was at a different weight', () => {
@@ -93,13 +93,13 @@ describe('suggestNext', () => {
     expect(suggestNext({ previous: [set(20, 9), set(20, 8)], prescription: range, incrementKg: 2, stepKg: 2 })).toEqual({
       weightKg: 20,
       reps: 9,
-      reason: '20 kg again, aim for 9 on every set',
+      reason: { kind: 'repeatAimFor', weightKg: 20, reps: 9 },
     })
 
     expect(suggestNext({ previous: [set(20, 12), set(20, 12)], prescription: range, incrementKg: 2, stepKg: 2 })).toEqual({
       weightKg: 22,
       reps: 8,
-      reason: 'All 2×12 at 20 kg last time → 22 kg from 8',
+      reason: { kind: 'hitAddWeightFromReps', sets: 2, reps: 12, weightKg: 20, nextKg: 22, nextReps: 8 },
     })
   })
 
@@ -111,7 +111,7 @@ describe('suggestNext', () => {
       stepKg: 1,
     })
 
-    expect(result).toEqual({ weightKg: null, reps: 9, reason: 'All 3×8 last time → try 9' })
+    expect(result).toEqual({ weightKg: null, reps: 9, reason: { kind: 'hitTryMoreReps', sets: 3, reps: 8, nextReps: 9 } })
   })
 
   it('falls back to the prescription the first time', () => {
@@ -183,7 +183,7 @@ describe('weight steps', () => {
 })
 
 describe('suggestNext in pounds', () => {
-  it('speaks in the unit and lands on a weight the plates make', () => {
+  it('lands on a weight the plates make in the unit', () => {
     // 135 lb, logged from a pound gym, is 61.235 kg on disk.
     const result = suggestNext({
       previous: [set(61.235, 5), set(61.235, 5), set(61.235, 5)],
@@ -192,7 +192,7 @@ describe('suggestNext in pounds', () => {
       stepKg: weightStepKg({ equipment: 'barbell', primaryMuscles: ['quadriceps'] }, 'lb'),
       unit: 'lb',
     })
-    expect(result.reason).toBe('All 3×5 at 135 lb last time → 145 lb')
+    expect(result.reason).toMatchObject({ kind: 'hitAddWeight', sets: 3, reps: 5, weightKg: 61.235 })
     expect(displayWeight(result.weightKg ?? 0, 'lb')).toBe(145)
   })
 
@@ -205,7 +205,8 @@ describe('suggestNext in pounds', () => {
       unit: 'lb',
     })
     // 77.5 kg is 170.9 lb; plus 10 lb is 180.9, which no bar makes → 180.
-    expect(result.reason).toBe('All 3×5 at 170.9 lb last time → 180 lb')
+    expect(result.reason).toMatchObject({ kind: 'hitAddWeight', weightKg: 77.5 })
+    expect(displayWeight(result.weightKg ?? 0, 'lb')).toBe(180)
   })
 
   it('starts a kilogram prescription on the pound bar', () => {
@@ -222,7 +223,7 @@ describe('suggestNext in pounds', () => {
 
 describe('openingValues', () => {
   const todo = (setIndex: number) => set(null, null, { setIndex, completedAt: null, targetReps: 10, targetWeightKg: 80 })
-  const plan = { weightKg: 80, reps: 10, reason: 'All 3×10 at 77.5 kg last time → 80 kg' }
+  const plan = { weightKg: 80, reps: 10, reason: { kind: 'hitAddWeight' as const, sets: 3, reps: 10, weightKg: 77.5, nextKg: 80 } }
 
   it('opens the first set on the progression', () => {
     expect(openingValues({ log: todo(1), sets: [todo(1), todo(2)], previous: null, suggestion: plan, unit: 'kg' }))

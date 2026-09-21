@@ -3,6 +3,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronRight, Minus, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
 import { useUserId } from '@/components/session-boot'
@@ -89,16 +90,17 @@ export function useRest(): RestState {
  */
 export function RestBar({ rest, remaining, link = false }: RestState & { link?: boolean }) {
   const userId = useUserId()
+  const t = useTranslations('session.restTimer')
   if (!rest || remaining === 0 || !userId) return null
 
   const progress = Math.min(1, remaining / rest.totalSec)
 
   const label = link ? (
     <>
-      Back to workout <ChevronRight size={16} aria-hidden />
+      {t('backToWorkout')} <ChevronRight size={16} aria-hidden />
     </>
   ) : (
-    'Rest'
+    t('rest')
   )
   const labelClass = 'flex min-h-14 items-center gap-1 pl-5 text-sm text-ink-dim'
 
@@ -108,7 +110,7 @@ export function RestBar({ rest, remaining, link = false }: RestState & { link?: 
         className="h-1 bg-plate-yellow transition-[width] duration-200 ease-linear"
         style={{ width: `${progress * 100}%` }}
         role="progressbar"
-        aria-label="Rest remaining"
+        aria-label={t('remaining')}
         aria-valuenow={remaining}
         aria-valuemin={0}
         aria-valuemax={rest.totalSec}
@@ -127,14 +129,14 @@ export function RestBar({ rest, remaining, link = false }: RestState & { link?: 
             onClick={() => void extendRest(userId)}
             className="figure px-3 text-sm text-ink-dim"
           >
-            +{EXTEND_SEC} s
+            {t('extend', { seconds: EXTEND_SEC })}
           </button>
           <button
             type="button"
             onClick={() => void clearRest(userId)}
             className="px-3 text-sm text-ink-dim"
           >
-            Skip
+            {t('skip')}
           </button>
           <span className="figure flex items-center pr-5 pl-1 text-2xl text-plate-yellow">
             {formatRest(remaining)}
@@ -186,18 +188,19 @@ export function RestTakeover({
   children?: React.ReactNode
 }) {
   const userId = useUserId()
+  const t = useTranslations('session.restTimer')
   if (!rest || remaining === 0 || !userId) return null
 
   const progress = Math.min(1, remaining / rest.totalSec)
 
   return (
-    <section className="mt-4" aria-label="Rest">
-      <p className="text-sm text-ink-dim">{after ? `Rest after ${after}` : 'Rest'}</p>
+    <section className="mt-4" aria-label={t('rest')}>
+      <p className="text-sm text-ink-dim">{after ? t('restAfter', { name: after }) : t('rest')}</p>
       <p
         className="figure mt-1 text-[5.5rem] leading-none text-plate-yellow"
         role="timer"
         aria-live="off"
-        aria-label={`${remaining} seconds of rest left`}
+        aria-label={t('secondsLeft', { count: remaining })}
       >
         {formatRest(remaining)}
       </p>
@@ -210,19 +213,19 @@ export function RestTakeover({
 
       {children}
 
-      <p className="mt-5 text-sm text-ink-dim">Next</p>
+      <p className="mt-5 text-sm text-ink-dim">{t('next')}</p>
       <p className="mt-0.5 text-[17px]">{next}</p>
 
       {restSec != null && onRestSec && (
         <div className="mt-4 flex items-center justify-between gap-3">
           <span className="text-sm text-ink-dim">
-            Rest between sets
-            <span className="block text-xs">{after ? `Kept for ${after}` : 'Kept for this exercise'}</span>
+            {t('betweenSets')}
+            <span className="block text-xs">{after ? t('keptFor', { name: after }) : t('keptForThis')}</span>
           </span>
           <div className="flex items-stretch overflow-hidden rounded-md border border-line">
             <button
               type="button"
-              aria-label="Less rest between sets"
+              aria-label={t('less')}
               disabled={restSec < REST_STEP_SEC}
               onClick={() => onRestSec(restSec - REST_STEP_SEC)}
               className="flex w-12 touch-manipulation items-center justify-center text-ink-dim active:bg-surface-high disabled:opacity-40"
@@ -230,11 +233,11 @@ export function RestTakeover({
               <Minus size={18} aria-hidden />
             </button>
             <span className="figure flex min-w-16 items-center justify-center text-lg" aria-live="polite">
-              {restSec} s
+              {t('seconds', { seconds: restSec })}
             </span>
             <button
               type="button"
-              aria-label="More rest between sets"
+              aria-label={t('more')}
               onClick={() => onRestSec(restSec + REST_STEP_SEC)}
               className="flex w-12 touch-manipulation items-center justify-center text-ink-dim active:bg-surface-high"
             >
@@ -250,14 +253,14 @@ export function RestTakeover({
           onClick={() => void extendRest(userId)}
           className="figure h-14 rounded-md border border-line text-lg"
         >
-          +{EXTEND_SEC} s
+          {t('extend', { seconds: EXTEND_SEC })}
         </button>
         <button
           type="button"
           onClick={() => void clearRest(userId)}
           className="h-14 rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift"
         >
-          Skip rest
+          {t('skipRest')}
         </button>
       </div>
     </section>

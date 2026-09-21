@@ -1,1 +1,127 @@
-{}
+{
+  "page": {
+    "back": "Hoy",
+    "workoutFallback": "Entrenamiento",
+    "exerciseFallback": "Ejercicio",
+    "about": "Sobre {name}",
+    "moreFor": "Más para {name}",
+    "undoSet": "Deshacer serie {n}",
+    "removeExercise": "Quitar ejercicio",
+    "firstTime": "Primera vez que registras este.",
+    "lastTime": "La última vez",
+    "lastTimeAgo": "La última vez · {ago}",
+    "setSkipped": "Serie {n} saltada",
+    "setAdded": "Serie {n} añadida",
+    "time": "tiempo",
+    "repsOnly": "{reps} reps",
+    "next": "Serie {n} · <figure>{next}</figure>",
+    "nextAfter": "{exercise} · Serie {n} · <figure>{next}</figure>",
+    "allLogged": "Todas las series registradas. Toca un cuadro para corregirlo.",
+    "finish": "Terminar entrenamiento",
+    "timeLabel": "Tiempo",
+    "weightLabel": "Peso",
+    "repsLabel": "Reps",
+    "repsUnit": "reps",
+    "quickWeights": "Pesos rápidos",
+    "heavier": "Más peso que la mejor serie de la última vez.",
+    "logTime": "Registrar {time}",
+    "updateTime": "Actualizar {time}",
+    "updateSet": "Actualizar serie {n}",
+    "logSet": "Registrar serie {n} · {next}",
+    "clearSet": "Borrar serie {n}",
+    "skipSet": "Saltar serie {n}",
+    "noExercises": "Este entrenamiento aún no tiene ejercicios.",
+    "reopen": "Reabrir entrenamiento"
+  },
+  "progression": {
+    "hitTryMoreReps": "Las {sets}×{reps} la última vez → prueba {next}",
+    "hitAddWeight": "Las {sets}×{reps} a {weight} la última vez → {next}",
+    "hitAddWeightFromReps": "Las {sets}×{reps} a {weight} la última vez → {next} desde {nextReps}",
+    "repeatAimFor": "{weight} otra vez, busca {reps} en cada serie",
+    "missedTryAgain": "Fallaste reps la última vez, ve a por {reps} otra vez",
+    "missedTwiceDrop": "Fallaste dos veces a {weight} → baja un 10% a {next}",
+    "missedRepeat": "Fallaste reps a {weight} la última vez, repítelo"
+  },
+  "restTimer": {
+    "backToWorkout": "Volver al entrenamiento",
+    "rest": "Descanso",
+    "remaining": "Descanso restante",
+    "extend": "+{seconds} s",
+    "skip": "Saltar",
+    "restAfter": "Descanso tras {name}",
+    "secondsLeft": "{count, plural, one {Queda # segundo} other {Quedan # segundos}} de descanso",
+    "next": "Siguiente",
+    "betweenSets": "Descanso entre series",
+    "keptFor": "Se guarda para {name}",
+    "keptForThis": "Se guarda para este ejercicio",
+    "less": "Menos descanso entre series",
+    "more": "Más descanso entre series",
+    "seconds": "{seconds} s",
+    "skipRest": "Saltar descanso"
+  },
+  "summary": {
+    "finished": "Entrenamiento terminado",
+    "nothingLogged": "No registraste ninguna serie, así que no hay nada que comparar.",
+    "movedOver": "movidos en {count, plural, one {# serie} other {# series}}",
+    "movedOverIn": "movidos en {count, plural, one {# serie} other {# series}} durante {duration}",
+    "loggedOver": "registrados en {count, plural, one {# serie} other {# series}}",
+    "loggedOverIn": "registrados en {count, plural, one {# serie} other {# series}} durante {duration}",
+    "upOnLast": "+{weight} sobre el último {name}",
+    "beatLastTime": "Mejor que la última vez",
+    "from": "{now} desde {before}",
+    "firstTime": "Primera vez que registras {names}: {count, plural, one {esa es la marca} other {esas son las marcas}} a batir.",
+    "weeksInRow": "<figure>{count}</figure> {count, plural, one {semana} other {semanas}} seguidas",
+    "daysThisWeek": "· {count, plural, one {# día} other {# días}} esta semana",
+    "whatYouLogged": "Lo que registraste",
+    "backToToday": "Volver a hoy",
+    "reopen": "Reabrir entrenamiento"
+  },
+  "stepper": {
+    "decrease": "Bajar {label}",
+    "increase": "Subir {label}"
+  },
+  "squares": {
+    "lastTime": "La última vez",
+    "setGhost": "Serie {n}, {set}",
+    "setDone": "Serie {n}, {set}",
+    "setDoneHeavier": "Serie {n}, {set}, más peso que la última vez",
+    "set": "Serie {n}",
+    "add": "Añadir una serie",
+    "min": "min"
+  },
+  "plates": {
+    "perSide": "Discos por lado",
+    "barLabel": "Barra de {bar} {unit}, toca para cambiar",
+    "bar": "barra {bar}",
+    "underBar": "Menos que la barra",
+    "emptyBar": "Barra vacía",
+    "aSide": "por lado",
+    "makes": "hacen {total} {unit}"
+  },
+  "effort": {
+    "easy": "Fácil",
+    "hard": "Dura",
+    "failed": "Fallida",
+    "felt": "La serie {n} fue",
+    "feltNamed": "{name} serie {n} fue",
+    "how": "Cómo fue la serie {n}"
+  },
+  "finishSession": {
+    "finish": "Terminar entrenamiento",
+    "confirm": "¿Terminar con {count, plural, one {# serie} other {# series}} sin hacer?",
+    "kept": "Lo que registraste se guarda. Puedes reabrir el entrenamiento si te queda cuerda.",
+    "cancel": "Cancelar",
+    "yes": "Terminar"
+  },
+  "note": {
+    "placeholderNamed": "{name}: cómo fue…",
+    "placeholder": "Cómo fue, cuánto te quedaba…",
+    "labelNamed": "Nota sobre {name}",
+    "label": "Nota sobre este ejercicio",
+    "addNamed": "Añadir una nota sobre {name}",
+    "add": "Añadir una nota"
+  },
+  "sets": {
+    "warmup": "c"
+  }
+}

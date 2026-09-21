@@ -4,11 +4,13 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronDown, ChevronLeft, Info } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
 import { EffortChips } from '@/components/effort-chips'
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseNote } from '@/components/exercise-note'
+import { useLocale } from '@/components/locale-provider'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { Placeholder } from '@/components/loading'
 import { OverflowMenu } from '@/components/overflow-menu'
@@ -24,10 +26,10 @@ import { WorkoutSheet } from '@/components/workout-sheet'
 import { WorkoutSummary } from '@/components/workout-summary'
 import { isCardio } from '@/lib/cardio'
 import { getDb, type LocalSetLog } from '@/lib/db/dexie'
-import { formatMinutes } from '@/lib/format'
-import { daysAgo } from '@/lib/history'
-import { openingValues, suggestNext, type Values } from '@/lib/progression'
-import { epochToDate, recentPerformances, type LastPerformance } from '@/lib/queries'
+import { formatAgo, formatMinutes } from '@/lib/format'
+import type { Locale } from '@/lib/i18n'
+import { openingValues, suggestNext, type Reason, type Values } from '@/lib/progression'
+import { recentPerformances, type LastPerformance } from '@/lib/queries'
 import { heavierThanLastTime } from '@/lib/records'
 import { changeRest, startRest } from '@/lib/rest'
 import {
@@ -43,7 +45,7 @@ import {
   unlogSet,
 } from '@/lib/sessions'
 import { useWakeLock } from '@/lib/use-wake-lock'
-import { displayWeight, fromUnit } from '@/lib/units'
+import { displayWeight, formatWeight, fromUnit, type Unit } from '@/lib/units'
 import { progressionIncrementKg, weightStep, weightStepKg } from '@/lib/weights'
 
 const REP_STEP = 1
@@ -51,6 +53,37 @@ const REP_STEP = 1
 const SWIPE_PX = 64
 const MINUTE_STEP = 1
 
+/** The progression's reason as one line in the language, weights in the unit. */
+function describeReason(
+  reason: Reason,
+  unit: Unit,
+  locale: Locale,
+  t: ReturnType<typeof useTranslations<'session.progression'>>,
+): string {
+  const kg = (value: number) => formatWeight(value, unit, locale)
+  switch (reason.kind) {
+    case 'hitTryMoreReps':
+      return t('hitTryMoreReps', { sets: reason.sets, reps: reason.reps, next: reason.nextReps })
+    case 'hitAddWeight':
+      return t('hitAddWeight', { sets: reason.sets, reps: reason.reps, weight: kg(reason.weightKg), next: kg(reason.nextKg) })
+    case 'hitAddWeightFromReps':
+      return t('hitAddWeightFromReps', {
+        sets: reason.sets,
+        reps: reason.reps,
+        weight: kg(reason.weightKg),
+        next: kg(reason.nextKg),
+        nextReps: reason.nextReps,
+      })
+    case 'repeatAimFor':
+      return t('repeatAimFor', { weight: kg(reason.weightKg), reps: reason.reps })
+    case 'missedTryAgain':
+      return t('missedTryAgain', { reps: reason.reps })
+    case 'missedTwiceDrop':
+      return t('missedTwiceDrop', { weight: kg(reason.weightKg), next: kg(reason.nextKg) })
+    case 'missedRepeat':
+      return t('missedRepeat', { weight: kg(reason.weightKg) })
+  }
+}
 
 /**
  * The session lives at `/session?id=…` rather than `/session/<id>`.
@@ -63,6 +96,9 @@ const MINUTE_STEP = 1
 function Session() {
   const userId = useUserId()
   const unit = useUnit()
+  const locale = useLocale()
+  const t = useTranslations('session.page')
+  const tReason = useTranslations('session.progression')
   const router = useRouter()
   const params = useSearchParams()
   const id = params.get('id') ?? ''
@@ -208,7 +244,9 @@ function Session() {
   // The reason under the steppers, while the numbers are still the suggestion:
   // once you change them, or the set is logged, the reason no longer applies.
   const reason =
-    activeSet && activeSet.completedAt === null && draft === null && !timed ? progression?.reason : null
+    activeSet && activeSet.completedAt === null && draft === null && !timed && progression?.reason
+      ? describeReason(progression.reason, unit, locale, tReason)
+      : null
 
   async function completeSet() {
     if (!activeSet || !userId) return
@@ -250,7 +288,7 @@ function Session() {
     undoCount.current += 1
     setUndoable({
       key: undoCount.current,
-      message: `Set ${log.setIndex} skipped`,
+      message: t('setSkipped', { n: log.setIndex }),
       onUndo: () => {
         setUndoable(null)
         void restoreSet(userId, log.id)
@@ -266,7 +304,7 @@ function Session() {
     undoCount.current += 1
     setUndoable({
       key: undoCount.current,
-      message: `Set ${added.setIndex} added`,
+      message: t('setAdded', { n: added.setIndex }),
       onUndo: async () => {
         setUndoable(null)
         const row = await getDb(userId).setLogs.get(added.id)
@@ -297,10 +335,10 @@ function Session() {
   const takeover = resting && selectedId === null && activeSet !== undefined && activeSet.completedAt === null
   const nextSet = activeSet
     ? timed
-      ? `${values.durationSec ? formatMinutes(values.durationSec) : 'time'}`
+      ? `${values.durationSec ? formatMinutes(values.durationSec) : t('time')}`
       : values.weightKg
         ? `${displayWeight(values.weightKg, unit)} ${unit} × ${values.reps ?? '—'}`
-        : `${values.reps ?? '—'} reps`
+        : t('repsOnly', { reps: values.reps ?? '—' })
     : null
 
   const allDone = data.logs.every((log) => log.completedAt !== null)
@@ -316,7 +354,7 @@ function Session() {
     : groupLogs[0]
   // Nothing left to log and nothing picked to fix: Finish takes the Log button's place.
   const finishing = allDone && data.session.completedAt === null && selectedId === null
-  const exerciseName = groupLogs[0]?.exerciseName ?? 'Workout'
+  const exerciseName = groupLogs[0]?.exerciseName ?? t('workoutFallback')
 
   return (
     <div className="flex flex-1 flex-col">
@@ -324,7 +362,7 @@ function Session() {
           a sheet with every exercise and its squares, and a tap to jump. The
           count beside the name says where you are without a bar to hit. */}
       <header className="mx-auto flex w-full max-w-page items-center gap-1 px-4 pt-3 pb-1">
-        <Link href="/" aria-label="Today" className="flex h-11 w-9 items-center text-ink-dim">
+        <Link href="/" aria-label={t('back')} className="flex h-11 w-9 items-center text-ink-dim">
           <ChevronLeft size={20} aria-hidden />
         </Link>
         <button
@@ -348,7 +386,7 @@ function Session() {
           name={data.session.templateName}
           exercises={positions.map((at) => {
             const logs = data.logs.filter((log) => log.position === at)
-            return { position: at, name: logs[0]?.exerciseName ?? 'Exercise', logs }
+            return { position: at, name: logs[0]?.exerciseName ?? t('exerciseFallback'), logs }
           })}
           current={position}
           onPick={(index) => {
@@ -403,7 +441,7 @@ function Session() {
             <button
               type="button"
               onClick={() => setViewingExercise(true)}
-              aria-label={`About ${exerciseName}`}
+              aria-label={t('about', { name: exerciseName })}
               className="absolute inset-0 block"
             >
               <ExerciseFrames exercise={exercise} className="h-full w-full" />
@@ -434,12 +472,12 @@ function Session() {
               Swap exercise (roadmap §4.5) joins them here when it lands. */}
           {exerciseId && (
             <OverflowMenu
-              label={`More for ${exerciseName}`}
+              label={t('moreFor', { name: exerciseName })}
               items={[
                 ...(lastDone
-                  ? [{ label: `Undo set ${lastDone.setIndex}`, onSelect: () => void undoSet(lastDone) }]
+                  ? [{ label: t('undoSet', { n: lastDone.setIndex }), onSelect: () => void undoSet(lastDone) }]
                   : []),
-                { label: 'Remove exercise', onSelect: () => setRemoving(exerciseId) },
+                { label: t('removeExercise'), onSelect: () => setRemoving(exerciseId) },
               ]}
             />
           )}
@@ -459,7 +497,7 @@ function Session() {
           />
         )}
 
-        {!previous && <p className="mt-2 text-sm text-ink-dim">First time logging this one.</p>}
+        {!previous && <p className="mt-2 text-sm text-ink-dim">{t('firstTime')}</p>}
         {previousNote && <p className="mt-1 text-sm italic text-ink-dim">“{previousNote}”</p>}
 
         <SetSquares
@@ -467,7 +505,9 @@ function Session() {
           activeId={activeSet?.id}
           previousTopKg={previousTopKg}
           previous={previous?.sets ?? null}
-          previousLabel={previous ? `Last time · ${daysAgo(epochToDate(previous.performedAt))}` : 'Last time'}
+          previousLabel={
+            previous ? t('lastTimeAgo', { ago: formatAgo(previous.performedAt, undefined, locale) ?? '' }) : t('lastTime')
+          }
           justLoggedId={lastLoggedId}
           onSelect={(logId) => {
             setSelectedId(logId)
@@ -483,11 +523,12 @@ function Session() {
             after={carried?.exerciseName}
             restSec={restLog?.restSec}
             onRestSec={(restSec) => void changeRest(userId, restLog ?? activeSet, restSec)}
-            next={
-              <>
-                {carried && `${exerciseName} · `}Set {activeSet.setIndex} · <span className="figure">{nextSet}</span>
-              </>
-            }
+            next={t.rich(carried ? 'nextAfter' : 'next', {
+              exercise: exerciseName,
+              n: activeSet.setIndex,
+              next: nextSet ?? '',
+              figure: (chunks) => <span className="figure">{chunks}</span>,
+            })}
           >
             {lastLogged && (
               <EffortChips userId={userId} log={lastLogged} exerciseName={carried?.exerciseName} className="mt-5" />
@@ -497,7 +538,7 @@ function Session() {
           // The last set is logged and there is no rest to start: the Log
           // button's place goes to Finish, so the summary is the next tap.
           <section className="mt-4">
-            <p className="text-[15px] text-ink-dim">Every set logged. Tap a square to fix one.</p>
+            <p className="text-[15px] text-ink-dim">{t('allLogged')}</p>
             {lastLogged && <EffortChips userId={userId} log={lastLogged} className="mt-4" />}
             <button
               type="button"
@@ -507,7 +548,7 @@ function Session() {
               }}
               className="mt-4 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift"
             >
-              Finish workout
+              {t('finish')}
             </button>
           </section>
         ) : activeSet ? (
@@ -517,7 +558,7 @@ function Session() {
             <div className="flex flex-col gap-2">
               {timed ? (
                 <Stepper
-                  label="Time"
+                  label={t('timeLabel')}
                   unit="min"
                   value={values.durationSec === null ? null : Number((values.durationSec / 60).toFixed(1))}
                   step={MINUTE_STEP}
@@ -526,7 +567,7 @@ function Session() {
               ) : (
                 <>
                   <Stepper
-                    label="Weight"
+                    label={t('weightLabel')}
                     unit={unit}
                     value={values.weightKg === null ? null : displayWeight(values.weightKg, unit)}
                     step={weightStep(exercise, unit)}
@@ -535,7 +576,7 @@ function Session() {
                   {/* The weights within reach, one tap each: the suggestion, then
                       what this session and last time have already been lifted at. */}
                   {quickWeights.length > 1 && (
-                    <ul className="flex gap-2 overflow-x-auto [scrollbar-width:none]" aria-label="Quick weights">
+                    <ul className="flex gap-2 overflow-x-auto [scrollbar-width:none]" aria-label={t('quickWeights')}>
                       {quickWeights.map((weight) => (
                         <li key={weight}>
                           <button
@@ -554,8 +595,8 @@ function Session() {
                   )}
                   {exercise?.equipment === 'barbell' && <PlateRail weightKg={values.weightKg} />}
                   <Stepper
-                    label="Reps"
-                    unit="reps"
+                    label={t('repsLabel')}
+                    unit={t('repsUnit')}
                     value={values.reps}
                     step={REP_STEP}
                     onChange={(reps) => setDraft({ ...values, reps })}
@@ -571,7 +612,7 @@ function Session() {
             ) : (
               beatsLastTime && (
                 <p className="mt-3 border-l-2 border-plate-red pl-3 text-sm">
-                  Heavier than last time&apos;s top set.
+                  {t('heavier')}
                 </p>
               )
             )}
@@ -582,10 +623,12 @@ function Session() {
               className="mt-3 h-14 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-[background-color,transform] hover:bg-plate-blue-lift motion-safe:active:scale-[0.98]"
             >
               {timed && groupLogs.length === 1
-                ? `${activeSet.completedAt ? 'Update' : 'Log'} ${values.durationSec ? formatMinutes(values.durationSec) : 'time'}`
+                ? t(activeSet.completedAt ? 'updateTime' : 'logTime', {
+                    time: values.durationSec ? formatMinutes(values.durationSec) : t('time'),
+                  })
                 : activeSet.completedAt
-                  ? `Update set ${activeSet.setIndex}`
-                  : `Log set ${activeSet.setIndex} · ${nextSet}`}
+                  ? t('updateSet', { n: activeSet.setIndex })
+                  : t('logSet', { n: activeSet.setIndex, next: nextSet ?? '' })}
             </button>
 
             {activeSet.completedAt !== null && !timed && (
@@ -602,7 +645,7 @@ function Session() {
                 onClick={() => void undoSet(activeSet)}
                 className="mt-3 h-11 w-full rounded-md text-sm text-ink-dim"
               >
-                Clear set {activeSet.setIndex}
+                {t('clearSet', { n: activeSet.setIndex })}
               </button>
             ) : (
               data.session.completedAt === null && (
@@ -611,13 +654,13 @@ function Session() {
                   onClick={() => void skipOneSet(activeSet)}
                   className="mt-3 h-11 w-full rounded-md text-sm text-ink-dim"
                 >
-                  Skip set {activeSet.setIndex}
+                  {t('skipSet', { n: activeSet.setIndex })}
                 </button>
               )
             )}
           </section>
         ) : (
-          <p className="mt-8 text-ink-dim">This workout has no exercises yet.</p>
+          <p className="mt-8 text-ink-dim">{t('noExercises')}</p>
         )}
 
         {/* Under the clock, the Finish button and the steppers alike: the rest is
@@ -639,7 +682,7 @@ function Session() {
               onClick={() => void reopenSession(userId, data.session)}
               className="h-14 w-full rounded-md border border-line text-base font-semibold"
             >
-              Reopen workout
+              {t('reopen')}
             </button>
           </div>
         )}
@@ -666,10 +709,11 @@ function Session() {
  * gym screen has no tab bar, so this is not `Loading` from components.
  */
 function SessionLoading() {
+  const t = useTranslations('session.page')
   return (
     <div className="flex flex-1 flex-col" aria-busy="true">
       <header className="mx-auto flex w-full max-w-page items-center gap-1 px-4 pt-3 pb-1">
-        <Link href="/" aria-label="Today" className="flex h-11 w-9 items-center text-ink-dim">
+        <Link href="/" aria-label={t('back')} className="flex h-11 w-9 items-center text-ink-dim">
           <ChevronLeft size={20} aria-hidden />
         </Link>
         <Placeholder className="h-4 w-24" />
