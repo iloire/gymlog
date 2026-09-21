@@ -97,7 +97,7 @@ Components never fetch. The sync engine is the only network caller, and it runs 
   converts at the edge — `displayWeight`/`formatWeight` to show, `fromUnit` to store what was
   typed (to the gram, so two phones write the same row), `tidyWeight` to move a prescription or
   history written in the other unit onto a weight the plates make (an empty 20 kg bar is 44.1 lb,
-  which becomes 45). Steps and plates have a table per unit (`lib/weights.ts`, `lib/plates.ts`).
+  which becomes 45). Steps have a table per unit (`lib/weights.ts`).
 - **The language** (`users.locale`, `en` or `es`) rides the same way: `meta.locale` plus
   `localePending`, `locale` in the push and in every response, last device to choose wins, no rev.
   The shared preference helper in `lib/sync/client.ts` handles both. What differs is that the

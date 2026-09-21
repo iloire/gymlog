@@ -138,8 +138,7 @@ change. No all-caps labels, no monospace for data.
 - **Thumb zone.** Primary actions sit in the bottom third; minimum 56px targets; weight and reps
   adjust with −/+ in one rep and one equipment step (2.5 kg on a barbell, 2 on dumbbells, 5 on
   a stack — `lib/weights.ts`), held to repeat, because typing with chalk on your hands is
-  miserable. Under the weight, chips for the weights within reach and, on a barbell lift, the
-  plates per side drawn in the plate colours.
+  miserable. Under the weight, chips for the weights within reach.
 - **Finishing a workout pays out.** *Finish workout* hands the screen to the summary
   (`components/workout-summary.tsx`): the kilos moved set at the largest size on the screen, then
   every exercise that beat last time with what it added and the set it beat, then the week streak

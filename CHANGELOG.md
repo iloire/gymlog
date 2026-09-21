@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-21 21:35
+
+- **The plate rail is gone.** Under the weight on a barbell lift sat a "20 bar" chip, coloured
+  plates, "a side", "Empty bar" or "Under the bar", and a "makes 60 kg" note: three things in one
+  thin line, none of them naming itself. The weight in the stepper is what gets read at the rack,
+  so the row, its bar toggle, `lib/plates.ts` and its tests and messages are removed.
+
 ## 2026-09-21 16:28
 
 - **Every screen reads in Spanish.** Phases 2 and 3 of `docs/i18n.md`, one commit per screen: Today,
@@ -348,7 +355,7 @@
   weights within reach — the suggestion, then what this session and last time were lifted at —
   and, on a barbell lift, the plates to load per side drawn as plates in the competition colours
   (`components/plate-rail.tsx`, `lib/plates.ts`), with the bar switchable between 20 and 15 kg
-  and a note when the plates cannot make the weight.
+  and a note when the plates cannot make the weight. (The plate rail was removed on 2026-09-21.)
 
 ## 2026-09-18 02:30
 

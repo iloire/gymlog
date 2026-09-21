@@ -89,15 +89,6 @@
     "add": "Añadir una serie",
     "min": "min"
   },
-  "plates": {
-    "perSide": "Discos por lado",
-    "barLabel": "Barra de {bar} {unit}, toca para cambiar",
-    "bar": "barra {bar}",
-    "underBar": "Menos que la barra",
-    "emptyBar": "Barra vacía",
-    "aSide": "por lado",
-    "makes": "hacen {total} {unit}"
-  },
   "effort": {
     "easy": "Fácil",
     "hard": "Dura",

@@ -14,7 +14,6 @@ import { useLocale } from '@/components/locale-provider'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { Placeholder } from '@/components/loading'
 import { OverflowMenu } from '@/components/overflow-menu'
-import { PlateRail } from '@/components/plate-rail'
 import { RemoveExercise } from '@/components/remove-exercise'
 import { RestBar, RestTakeover, useRest } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
@@ -594,7 +593,6 @@ function Session() {
                       ))}
                     </ul>
                   )}
-                  {exercise?.equipment === 'barbell' && <PlateRail weightKg={values.weightKg} />}
                   <Stepper
                     label={t('repsLabel')}
                     unit={t('repsUnit')}

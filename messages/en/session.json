@@ -89,15 +89,6 @@
     "add": "Add a set",
     "min": "min"
   },
-  "plates": {
-    "perSide": "Plates per side",
-    "barLabel": "{bar} {unit} bar, tap to change",
-    "bar": "{bar} bar",
-    "underBar": "Under the bar",
-    "emptyBar": "Empty bar",
-    "aSide": "a side",
-    "makes": "makes {total} {unit}"
-  },
   "effort": {
     "easy": "Easy",
     "hard": "Hard",

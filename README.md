@@ -6,7 +6,7 @@
 Build your workouts, put them on the days you train, then log the weight and reps you actually
 did — **with or without signal**. Made for a gym in a basement.
 
-![gymlog: today's workout, logging a set with the plates per side, the exercise library by body part, and progress](docs/screenshots/gymlog.png)
+![gymlog: today's workout, logging a set, the exercise library by body part, and progress](docs/screenshots/gymlog.png)
 
 The CI badge is green only when a commit's **unit tests pass, it builds, and that same commit
 deployed to production** — the workflow waits for Vercel's verdict and smoke-tests the live site.
@@ -19,9 +19,8 @@ deployed to production** — the workflow waits for Vercel's verdict and smoke-t
 - **Your week** — the Plan tab opens on the week, a cell per day; tap one to put a workout on it.
   Moving up a stage starts a new programme; everything you logged before stays exactly as it was.
 - **The gym screen** — one exercise at a time, last time's sets as a ghost row above today's,
-  steppers opened on the next step of the progression with the reason under them, the plates
-  to load per side, a rest that takes the screen and asks how the set felt, and the screen
-  kept awake.
+  steppers opened on the next step of the progression with the reason under them, a rest that
+  takes the screen and asks how the set felt, and the screen kept awake.
 - **Exercise library** — 873 movements, filed by body part, each with a start and end photo that
   fade into one another to show the movement.
 - **Progress** — this week against the plan, each main lift's top set and e1RM over time, and

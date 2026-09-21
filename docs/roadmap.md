@@ -126,10 +126,12 @@ The service worker already handles a `precache-media` message; nothing sends it.
 URLs of every exercise in the active programme after each sync (and on a button), so the whole
 programme's photos are on the phone before you leave the house.
 
-### ~~2.5 Plate calculator — S~~ ✅
+### ~~2.5 Plate calculator — S~~ ✅ (removed 2026-09-21)
 
 **Shipped 2026-09-18** as `components/plate-rail.tsx` under the weight stepper on barbell lifts,
 with a 20/15 kg bar toggle and "makes 60 kg" when the plates cannot make the number.
+**Removed 2026-09-21**: the row of bar chip, plate colours and "empty bar" read as noise under the
+weight; the total is what gets read at the rack.
 
 Under the weight stepper: the plates to load *per side* for the target weight on a 20 kg bar, drawn
 as coloured plates — red 25, blue 20, yellow 15, green 10, white 5, then the change plates. It
