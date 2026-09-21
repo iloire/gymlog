@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronLeft, Copy, GripVertical, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useCallback, useRef, useState } from 'react'
 
 import { ExerciseDialog } from '@/components/exercise-dialog'
@@ -11,6 +12,7 @@ import { ExerciseFrames } from '@/components/exercise-frames'
 import { ExercisePicker } from '@/components/exercise-picker'
 import { ItemSheet, type EditableItem } from '@/components/item-sheet'
 import { Loading, Placeholder } from '@/components/loading'
+import { useLocale } from '@/components/locale-provider'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { UndoToast } from '@/components/undo-toast'
@@ -21,9 +23,8 @@ import { deleteRow, writeRow } from '@/lib/db/write'
 import { newId } from '@/lib/id'
 import { estimateWorkoutMs, formatTarget, planSummary } from '@/lib/plan'
 import { activeProgram, templateItems } from '@/lib/queries'
+import { weekdayName } from '@/lib/week'
 import { duplicateWorkout, reorderItems, restoreTemplateItem } from '@/lib/workouts'
-
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 /** How far a row is swiped left before it is removed. */
 const SWIPE_REMOVE_PX = 88
@@ -32,6 +33,9 @@ export default function WorkoutEditorPage() {
   const userId = useUserId()
   const router = useRouter()
   const { id } = useParams<{ id: string }>()
+  const t = useTranslations('plan')
+  const locale = useLocale()
+  const fallbackName = t('defaults.exercise')
   const [picking, setPicking] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [viewingExerciseId, setViewingExerciseId] = useState<string | null>(null)
@@ -52,7 +56,7 @@ export default function WorkoutEditorPage() {
         const exercise = await db.exercises.get(item.exerciseId)
         return {
           ...item,
-          exerciseName: exercise?.name ?? 'Exercise',
+          exerciseName: exercise?.name ?? fallbackName,
           exerciseImages: exercise?.images ?? null,
           cardio: isCardio(exercise) || item.targetDurationSec != null,
         }
@@ -69,7 +73,7 @@ export default function WorkoutEditorPage() {
       : []
 
     return { template, items: named, scheduledOn }
-  }, [userId, id])
+  }, [userId, id, fallbackName])
 
   const items = data?.items ?? []
 
@@ -86,7 +90,7 @@ export default function WorkoutEditorPage() {
       <Loading className="pt-5">
         <Link href="/workouts" className="flex items-center gap-1 text-sm text-ink-dim">
           <ChevronLeft size={18} aria-hidden />
-          Plan
+          {t('back')}
         </Link>
         <Placeholder className="mt-4 h-9 w-56" />
       </Loading>
@@ -152,7 +156,7 @@ export default function WorkoutEditorPage() {
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-5 pb-6">
         <Link href="/workouts" className="flex items-center gap-1 text-sm text-ink-dim">
           <ChevronLeft size={18} aria-hidden />
-          Plan
+          {t('back')}
         </Link>
 
         <input
@@ -160,10 +164,10 @@ export default function WorkoutEditorPage() {
           onChange={(event) =>
             void writeRow(userId, 'workoutTemplates', { ...template, name: event.target.value })
           }
-          aria-label="Workout name"
+          aria-label={t('editor.nameLabel')}
           className="figure mt-4 w-full bg-transparent text-3xl outline-none focus-visible:text-plate-blue-lift"
         />
-        <p className="mt-1 text-sm text-ink-dim">{planSummary(items.length, estimateWorkoutMs(items))}</p>
+        <p className="mt-1 text-sm text-ink-dim">{planSummary(items.length, estimateWorkoutMs(items), locale)}</p>
 
         {/* One line per exercise, so a whole workout fits on a screen: the
             handle drags it into place, a swipe left takes it out, and a tap
@@ -178,7 +182,7 @@ export default function WorkoutEditorPage() {
             >
               <button
                 type="button"
-                aria-label={`Move ${item.exerciseName}`}
+                aria-label={t('editor.move', { name: item.exerciseName })}
                 {...reorder.handleProps(index)}
                 className="flex w-10 shrink-0 cursor-grab items-center justify-center text-ink-dim active:cursor-grabbing"
               >
@@ -187,7 +191,7 @@ export default function WorkoutEditorPage() {
               <SwipeRow
                 onOpen={() => setEditingId(item.id)}
                 onRemove={() => void remove(item)}
-                label={`Edit ${item.exerciseName}`}
+                label={t('editor.edit', { name: item.exerciseName })}
               >
                 <ExerciseFrames
                   exercise={{ name: item.exerciseName, images: item.exerciseImages }}
@@ -199,7 +203,7 @@ export default function WorkoutEditorPage() {
                   <span className="block text-sm text-ink-dim">
                     <span className="figure">{formatTarget(item)}</span>
                     {' · '}
-                    <span className="figure">{item.restSec} s</span> rest
+                    {t.rich('editor.rest', { seconds: item.restSec, figure: (chunks) => <span className="figure">{chunks}</span> })}
                   </span>
                 </span>
               </SwipeRow>
@@ -209,7 +213,7 @@ export default function WorkoutEditorPage() {
 
         {items.length === 0 && (
           <p className="mt-6 border-y border-line py-6 text-[15px] text-ink-dim">
-            Add the exercises you want to do, in the order you want to do them.
+            {t('editor.empty')}
           </p>
         )}
 
@@ -219,7 +223,7 @@ export default function WorkoutEditorPage() {
           className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-md bg-plate-blue text-base font-semibold text-white"
         >
           <Plus size={18} aria-hidden />
-          Add exercise
+          {t('editor.addExercise')}
         </button>
 
         <button
@@ -228,7 +232,7 @@ export default function WorkoutEditorPage() {
           className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-md border border-line text-sm"
         >
           <Copy size={16} aria-hidden />
-          Duplicate workout
+          {t('editor.duplicate')}
         </button>
 
         {confirmingDelete ? (
@@ -238,11 +242,13 @@ export default function WorkoutEditorPage() {
             className="mt-3 rounded-md border border-plate-red p-4"
           >
             <p id="delete-workout-title" className="text-[15px]">
-              Delete “{template.name}”?
+              {t('editor.deleteTitle', { name: template.name })}
             </p>
             {scheduledOn.length > 0 && (
               <p className="mt-1 text-sm text-ink-dim">
-                It is on your programme for {scheduledOn.map((day) => WEEKDAYS[day]).join(', ')}.
+                {t('editor.deleteScheduled', {
+                  days: scheduledOn.map((day) => weekdayName(day, locale).slice(0, 3)).join(', '),
+                })}
               </p>
             )}
             <div className="mt-4 grid grid-cols-2 gap-2">
@@ -252,7 +258,7 @@ export default function WorkoutEditorPage() {
                 onClick={() => setConfirmingDelete(false)}
                 className="h-12 rounded-md border border-line text-sm"
               >
-                Cancel
+                {t('editor.cancel')}
               </button>
               <button
                 type="button"
@@ -262,7 +268,7 @@ export default function WorkoutEditorPage() {
                 }}
                 className="h-12 rounded-md bg-plate-red text-sm font-semibold text-white"
               >
-                Delete
+                {t('editor.delete')}
               </button>
             </div>
           </div>
@@ -272,7 +278,7 @@ export default function WorkoutEditorPage() {
             onClick={() => setConfirmingDelete(true)}
             className="mt-3 h-12 w-full rounded-md border border-line text-sm text-ink-dim"
           >
-            Delete workout
+            {t('editor.deleteWorkout')}
           </button>
         )}
       </main>
@@ -280,7 +286,7 @@ export default function WorkoutEditorPage() {
         {removed && (
           <UndoToast
             key={removed.id}
-            message={`Removed ${removed.name}`}
+            message={t('editor.removed', { name: removed.name })}
             onUndo={() => {
               void restoreTemplateItem(userId, removed.id)
               setRemoved(null)

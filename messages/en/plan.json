@@ -1,1 +1,113 @@
-{}
+{
+  "title": "Plan",
+  "back": "Plan",
+  "intro": {
+    "programme": "{name} — {days, plural, one {# day} other {# days}} a week, since {since}",
+    "empty": "Your workouts, and the days you train them. Tap a day to put one on it."
+  },
+  "week": {
+    "label": "Your week",
+    "dayLabel": "{day}: {workout}. Change",
+    "dayLabelToday": "{day}, today: {workout}. Change",
+    "rest": "rest"
+  },
+  "workout": {
+    "noSetDay": "No set day",
+    "lastDone": "last done {when}",
+    "notDoneYet": "not done yet",
+    "exercises": "{count, plural, one {# exercise} other {# exercises}}",
+    "start": "Start",
+    "startLabel": "Start {name}"
+  },
+  "empty": "No workouts yet. Build one, or copy a premade programme, then put it on the days you train.",
+  "newWorkout": "New workout",
+  "browse": "Browse premade programmes",
+  "newStage": {
+    "title": "Start a new stage",
+    "intro": "Ends the current programme and starts an empty week for the next one. Everything you have logged stays exactly as it is.",
+    "placeholder": "Intermediate 4-day",
+    "nameLabel": "New programme name",
+    "submit": "Start it"
+  },
+  "defaults": {
+    "programme": "My programme",
+    "workout": "New workout",
+    "exercise": "Exercise"
+  },
+  "editor": {
+    "creating": "Creating…",
+    "nameLabel": "Workout name",
+    "move": "Move {name}",
+    "edit": "Edit {name}",
+    "rest": "<figure>{seconds} s</figure> rest",
+    "empty": "Add the exercises you want to do, in the order you want to do them.",
+    "addExercise": "Add exercise",
+    "duplicate": "Duplicate workout",
+    "deleteTitle": "Delete “{name}”?",
+    "deleteScheduled": "It is on your programme for {days}.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleteWorkout": "Delete workout",
+    "removed": "Removed {name}"
+  },
+  "programmes": {
+    "title": "Programmes",
+    "back": "Programmes",
+    "intro": "Ready-made weeks of training. Picking one copies it into your workouts, where you can change anything.",
+    "equipmentQuestion": "What can you train with?",
+    "done": "Done",
+    "yourEquipment": "Your equipment: ",
+    "change": "Change",
+    "noEquipment": "No equipment",
+    "needs": "Needs {items}",
+    "fits": "Fits your equipment",
+    "fitsWithSwaps": "Fits your equipment, with {count, plural, one {# swap} other {# swaps}}",
+    "daysAWeek": "{level} · {count, plural, one {# day} other {# days}} a week",
+    "trainOn": "Train on",
+    "insteadOf": "Instead of {name}",
+    "notDoable": "Some exercises need equipment you have not ticked. They are copied as written, so you can swap them in the workout editor.",
+    "start": "Start this programme",
+    "ends": "Ends “{name}”. Everything you have logged stays as it is.",
+    "justAdd": "Just add the workouts",
+    "level": {
+      "beginner": "Beginner",
+      "novice": "Novice",
+      "intermediate": "Intermediate"
+    }
+  },
+  "workoutSheet": {
+    "logged": "<n>{done}</n> of {total} sets logged",
+    "close": "Close",
+    "now": "now"
+  },
+  "itemSheet": {
+    "about": "About {name}",
+    "close": "Close",
+    "sets": "Sets",
+    "time": "Time",
+    "reps": "Reps",
+    "rest": "Rest",
+    "repRange": "Rep range",
+    "repRangeHint": "Reps climb to the top of the range before the weight goes up.",
+    "topOfRange": "Top of the rep range",
+    "remove": "Remove from workout"
+  },
+  "dayPicker": {
+    "rest": "Rest",
+    "close": "Close"
+  },
+  "picker": {
+    "search": "Search exercises",
+    "close": "Close",
+    "favourite": "Favourite",
+    "noFavourites": "No favourites yet. Star exercises on the Exercises page.",
+    "noMatch": "Nothing matches “{query}”.",
+    "noMatchFilters": "Nothing matches. Try fewer filters."
+  },
+  "removeExercise": {
+    "title": "Remove {name} from this workout?",
+    "logged": "The sets you logged for it go too.",
+    "cancel": "Cancel",
+    "remove": "Remove"
+  }
+}

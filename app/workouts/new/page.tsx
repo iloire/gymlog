@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef } from 'react'
 
 import { useUserId } from '@/components/session-boot'
@@ -11,6 +12,8 @@ export default function NewWorkoutPage() {
   const userId = useUserId()
   const router = useRouter()
   const created = useRef(false)
+  const t = useTranslations('plan')
+  const defaultName = t('defaults.workout')
 
   useEffect(() => {
     if (!userId || created.current) return
@@ -20,13 +23,13 @@ export default function NewWorkoutPage() {
       const id = newId()
       await writeRow(userId, 'workoutTemplates', {
         id,
-        name: 'New workout',
+        name: defaultName,
         notes: null,
         archivedAt: null,
       })
       router.replace(`/workouts/${id}`)
     })()
-  }, [userId, router])
+  }, [userId, router, defaultName])
 
-  return <main className="p-6 text-ink-dim">Creating…</main>
+  return <main className="p-6 text-ink-dim">{t('editor.creating')}</main>
 }

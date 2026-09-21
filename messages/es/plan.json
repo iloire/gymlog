@@ -1,1 +1,113 @@
-{}
+{
+  "title": "Plan",
+  "back": "Plan",
+  "intro": {
+    "programme": "{name} — {days, plural, one {# día} other {# días}} a la semana, desde el {since}",
+    "empty": "Tus entrenamientos y los días en que los haces. Toca un día para ponerle uno."
+  },
+  "week": {
+    "label": "Tu semana",
+    "dayLabel": "{day}: {workout}. Cambiar",
+    "dayLabelToday": "{day}, hoy: {workout}. Cambiar",
+    "rest": "descanso"
+  },
+  "workout": {
+    "noSetDay": "Sin día fijo",
+    "lastDone": "última vez {when}",
+    "notDoneYet": "aún no hecho",
+    "exercises": "{count, plural, one {# ejercicio} other {# ejercicios}}",
+    "start": "Empezar",
+    "startLabel": "Empezar {name}"
+  },
+  "empty": "Todavía no hay entrenamientos. Crea uno o copia un programa ya hecho, y ponlo en los días que entrenas.",
+  "newWorkout": "Nuevo entrenamiento",
+  "browse": "Ver programas ya hechos",
+  "newStage": {
+    "title": "Empezar una nueva etapa",
+    "intro": "Termina el programa actual y empieza una semana vacía para el siguiente. Todo lo que has registrado se queda tal cual.",
+    "placeholder": "Intermedio 4 días",
+    "nameLabel": "Nombre del nuevo programa",
+    "submit": "Empezar"
+  },
+  "defaults": {
+    "programme": "Mi programa",
+    "workout": "Nuevo entrenamiento",
+    "exercise": "Ejercicio"
+  },
+  "editor": {
+    "creating": "Creando…",
+    "nameLabel": "Nombre del entrenamiento",
+    "move": "Mover {name}",
+    "edit": "Editar {name}",
+    "rest": "<figure>{seconds} s</figure> de descanso",
+    "empty": "Añade los ejercicios que quieres hacer, en el orden en que quieres hacerlos.",
+    "addExercise": "Añadir ejercicio",
+    "duplicate": "Duplicar entrenamiento",
+    "deleteTitle": "¿Eliminar “{name}”?",
+    "deleteScheduled": "Está en tu programa el {days}.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "deleteWorkout": "Eliminar entrenamiento",
+    "removed": "Quitado {name}"
+  },
+  "programmes": {
+    "title": "Programas",
+    "back": "Programas",
+    "intro": "Semanas de entrenamiento ya hechas. Al elegir uno se copia a tus entrenamientos, donde puedes cambiar lo que quieras.",
+    "equipmentQuestion": "¿Con qué puedes entrenar?",
+    "done": "Listo",
+    "yourEquipment": "Tu material: ",
+    "change": "Cambiar",
+    "noEquipment": "Sin material",
+    "needs": "Necesita {items}",
+    "fits": "Encaja con tu material",
+    "fitsWithSwaps": "Encaja con tu material, con {count, plural, one {# cambio} other {# cambios}}",
+    "daysAWeek": "{level} · {count, plural, one {# día} other {# días}} a la semana",
+    "trainOn": "Entrenar los",
+    "insteadOf": "En lugar de {name}",
+    "notDoable": "Algunos ejercicios necesitan material que no has marcado. Se copian tal cual, así que puedes cambiarlos en el editor del entrenamiento.",
+    "start": "Empezar este programa",
+    "ends": "Termina “{name}”. Todo lo que has registrado se queda tal cual.",
+    "justAdd": "Solo añadir los entrenamientos",
+    "level": {
+      "beginner": "Principiante",
+      "novice": "Iniciado",
+      "intermediate": "Intermedio"
+    }
+  },
+  "workoutSheet": {
+    "logged": "<n>{done}</n> de {total} series registradas",
+    "close": "Cerrar",
+    "now": "ahora"
+  },
+  "itemSheet": {
+    "about": "Sobre {name}",
+    "close": "Cerrar",
+    "sets": "Series",
+    "time": "Tiempo",
+    "reps": "Reps",
+    "rest": "Descanso",
+    "repRange": "Rango de reps",
+    "repRangeHint": "Las reps suben hasta el tope del rango antes de subir el peso.",
+    "topOfRange": "Tope del rango de reps",
+    "remove": "Quitar del entrenamiento"
+  },
+  "dayPicker": {
+    "rest": "Descanso",
+    "close": "Cerrar"
+  },
+  "picker": {
+    "search": "Buscar ejercicios",
+    "close": "Cerrar",
+    "favourite": "Favorito",
+    "noFavourites": "Todavía no hay favoritos. Marca ejercicios con la estrella en Ejercicios.",
+    "noMatch": "Nada coincide con “{query}”.",
+    "noMatchFilters": "Nada coincide. Prueba con menos filtros."
+  },
+  "removeExercise": {
+    "title": "¿Quitar {name} de este entrenamiento?",
+    "logged": "Las series que registraste también se van.",
+    "cancel": "Cancelar",
+    "remove": "Quitar"
+  }
+}

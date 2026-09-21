@@ -5,6 +5,7 @@
  * item on any screen.
  */
 import { formatDuration, formatMinutes } from '@/lib/format'
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n'
 import { formatWeight, type Unit } from '@/lib/units'
 
 /** The template fields a planned line is built from. */
@@ -60,23 +61,38 @@ export function estimateWorkoutMs(items: PlanTarget[]): number {
   return Math.max(0, seconds - trailingRest) * 1000
 }
 
+/** The words around the figures, per language; the figures themselves read the same in both. */
+const WORDS: Record<Locale, { about: (duration: string) => string; exercises: (n: number) => string; none: string }> = {
+  en: {
+    about: (duration) => `about ${duration}`,
+    exercises: (n) => `${n} ${n === 1 ? 'exercise' : 'exercises'}`,
+    none: 'No exercises yet',
+  },
+  es: {
+    about: (duration) => `unos ${duration}`,
+    exercises: (n) => `${n} ${n === 1 ? 'ejercicio' : 'ejercicios'}`,
+    none: 'Sin ejercicios todavía',
+  },
+}
+
 /** 'about 45 min' — rounded to five minutes, because it is a guess and reads like one. */
-export function formatEstimate(ms: number): string {
+export function formatEstimate(ms: number, locale: Locale = DEFAULT_LOCALE): string {
   const step = 5 * 60_000
-  return `about ${formatDuration(Math.max(step, Math.round(ms / step) * step))}`
+  return WORDS[locale].about(formatDuration(Math.max(step, Math.round(ms / step) * step)))
 }
 
 /** '5 exercises · about 45 min' — the line under a planned workout's name. */
-export function planSummary(exercises: number, estimateMs: number): string {
-  if (exercises === 0) return 'No exercises yet'
-  return `${exercises} ${exercises === 1 ? 'exercise' : 'exercises'} · ${formatEstimate(estimateMs)}`
+export function planSummary(exercises: number, estimateMs: number, locale: Locale = DEFAULT_LOCALE): string {
+  if (exercises === 0) return WORDS[locale].none
+  return `${WORDS[locale].exercises(exercises)} · ${formatEstimate(estimateMs, locale)}`
 }
 
 /** The one number worth carrying forward from last time: '60 kg', '12 reps', '8 min'. */
 export function formatLast(
   set: { weightKg: number | null; reps: number | null; durationSec?: number | null },
   unit: Unit = 'kg',
+  locale: Locale = DEFAULT_LOCALE,
 ): string {
   if (set.durationSec != null) return formatMinutes(set.durationSec)
-  return set.weightKg ? formatWeight(set.weightKg, unit) : `${set.reps ?? 0} reps`
+  return set.weightKg ? formatWeight(set.weightKg, unit, locale) : `${set.reps ?? 0} reps`
 }

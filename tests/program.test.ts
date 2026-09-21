@@ -110,6 +110,11 @@ describe('assignDay and startNewStage', () => {
     expect(await templateForDay(USER, MONDAY)).toEqual({ templateId: 'workout-a', programId: created?.id })
   })
 
+  it('names the first programme in the language of the screen that made it', async () => {
+    await assignDay(USER, MONDAY, 'workout-a', 'es')
+    expect((await activeProgram(USER))?.name).toBe('Mi programa')
+  })
+
   it('replaces the workout on a day, and clears it with null', async () => {
     await assignDay(USER, MONDAY, 'workout-a')
     await assignDay(USER, MONDAY, 'workout-b')

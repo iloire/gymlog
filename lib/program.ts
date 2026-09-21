@@ -2,8 +2,10 @@
 
 import { getDb } from '@/lib/db/dexie'
 import { deleteRow, writeRow } from '@/lib/db/write'
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n'
 import { newId } from '@/lib/id'
 import { activeProgram, today } from '@/lib/queries'
+import { MESSAGES } from '@/messages'
 
 /**
  * Writing the week: which workout goes on which day, under the active
@@ -11,14 +13,18 @@ import { activeProgram, today } from '@/lib/queries'
  * the first tap on a day cell needs no setup screen first.
  */
 
-/** The active programme's id, creating a first one if there is none. */
-export async function ensureProgram(userId: string): Promise<string> {
+/**
+ * The active programme's id, creating a first one if there is none. The first
+ * one is named in the language of the screen that made it; from then on it is
+ * the user's name to change, and it does not follow a later language switch.
+ */
+export async function ensureProgram(userId: string, locale: Locale = DEFAULT_LOCALE): Promise<string> {
   const current = await activeProgram(userId)
   if (current) return current.id
   const id = newId()
   await writeRow(userId, 'programs', {
     id,
-    name: 'My programme',
+    name: MESSAGES[locale].plan.defaults.programme,
     stage: 'beginner',
     startedOn: today(),
     endedOn: null,
@@ -28,8 +34,13 @@ export async function ensureProgram(userId: string): Promise<string> {
 }
 
 /** Put a workout on a weekday (0 = Monday), or clear the day with null. */
-export async function assignDay(userId: string, weekday: number, templateId: string | null): Promise<void> {
-  const programId = await ensureProgram(userId)
+export async function assignDay(
+  userId: string,
+  weekday: number,
+  templateId: string | null,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<void> {
+  const programId = await ensureProgram(userId, locale)
   const existing = (await getDb(userId).programDays.where('programId').equals(programId).toArray()).find(
     (day) => day.dayOfWeek === weekday && day.deletedAt === null,
   )

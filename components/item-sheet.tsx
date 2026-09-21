@@ -1,6 +1,7 @@
 'use client'
 
 import { Info, Trash2, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useEffect, useId, useRef } from 'react'
 
 import { ExerciseFrames } from '@/components/exercise-frames'
@@ -36,6 +37,7 @@ export function ItemSheet({
 }) {
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
+  const t = useTranslations('plan.itemSheet')
 
   useEffect(() => {
     const dialog = ref.current
@@ -58,7 +60,7 @@ export function ItemSheet({
     >
       <div className="px-5 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <div className="flex items-center gap-3">
-          <button type="button" onClick={onView} aria-label={`About ${item.exerciseName}`} className="relative shrink-0">
+          <button type="button" onClick={onView} aria-label={t('about', { name: item.exerciseName })} className="relative shrink-0">
             <ExerciseFrames
               exercise={{ name: item.exerciseName, images: item.exerciseImages }}
               className="aspect-[3/2] w-20"
@@ -71,26 +73,26 @@ export function ItemSheet({
           <h2 id={titleId} className="figure min-w-0 flex-1 text-xl leading-tight">
             {item.exerciseName}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="-mr-2 shrink-0 p-2 text-ink-dim">
+          <button type="button" onClick={onClose} aria-label={t('close')} className="-mr-2 shrink-0 p-2 text-ink-dim">
             <X size={22} aria-hidden />
           </button>
         </div>
 
         <div className="mt-5 grid grid-cols-3 gap-2">
-          <NumberField label="Sets" value={item.sets} min={1} onChange={(sets) => onChange({ sets })} />
+          <NumberField label={t('sets')} value={item.sets} min={1} onChange={(sets) => onChange({ sets })} />
           {item.cardio ? (
             <NumberField
-              label="Time"
+              label={t('time')}
               unit="min"
               value={Math.round((item.targetDurationSec ?? CARDIO_ITEM.targetDurationSec) / 60)}
               min={1}
               onChange={(minutes) => onChange({ targetDurationSec: minutes * 60 })}
             />
           ) : (
-            <NumberField label="Reps" value={item.targetReps} min={1} onChange={(targetReps) => onChange({ targetReps })} />
+            <NumberField label={t('reps')} value={item.targetReps} min={1} onChange={(targetReps) => onChange({ targetReps })} />
           )}
           <NumberField
-            label="Rest"
+            label={t('rest')}
             unit="s"
             value={item.restSec}
             min={0}
@@ -102,10 +104,8 @@ export function ItemSheet({
         {!item.cardio && (
           <label className="mt-4 flex items-center justify-between gap-3">
             <span className="text-sm">
-              Rep range
-              <span className="block text-xs text-ink-dim">
-                Reps climb to the top of the range before the weight goes up.
-              </span>
+              {t('repRange')}
+              <span className="block text-xs text-ink-dim">{t('repRangeHint')}</span>
             </span>
             <span className="flex shrink-0 items-center gap-2 text-sm text-ink-dim">
               {item.targetReps}–
@@ -115,7 +115,7 @@ export function ItemSheet({
                 min={item.targetReps + 1}
                 value={item.targetRepsMax ?? ''}
                 placeholder="—"
-                aria-label="Top of the rep range"
+                aria-label={t('topOfRange')}
                 onChange={(event) => {
                   const next = Number(event.target.value)
                   onChange({ targetRepsMax: event.target.value === '' || next <= item.targetReps ? null : next })
@@ -132,7 +132,7 @@ export function ItemSheet({
           className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-md border border-line text-sm text-ink-dim"
         >
           <Trash2 size={16} aria-hidden />
-          Remove from workout
+          {t('remove')}
         </button>
       </div>
     </dialog>

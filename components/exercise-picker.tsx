@@ -2,6 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Search, Star, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
 import { useEquipment } from '@/components/equipment-picker'
@@ -27,6 +28,7 @@ export function ExercisePicker({
   onClose: () => void
 }) {
   const userId = useUserId()
+  const t = useTranslations('plan.picker')
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState(NO_FILTER)
   const equipment = useEquipment()
@@ -63,12 +65,12 @@ export function ExercisePicker({
             autoFocus
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search exercises"
-            aria-label="Search exercises"
+            placeholder={t('search')}
+            aria-label={t('search')}
             className="w-full bg-transparent outline-none"
           />
         </div>
-        <button type="button" onClick={onClose} aria-label="Close" className="p-2 text-ink-dim">
+        <button type="button" onClick={onClose} aria-label={t('close')} className="p-2 text-ink-dim">
           <X size={22} aria-hidden />
         </button>
       </header>
@@ -101,7 +103,7 @@ export function ExercisePicker({
               {favorites.has(exercise.id) && (
                 <Star
                   size={16}
-                  aria-label="Favourite"
+                  aria-label={t('favourite')}
                   className="shrink-0 fill-plate-yellow text-plate-yellow"
                 />
               )}
@@ -111,10 +113,10 @@ export function ExercisePicker({
         {results.length === 0 && (
           <li className="px-4 py-8 text-center text-ink-dim">
             {filter.favoritesOnly && favorites.size === 0
-              ? 'No favourites yet. Star exercises on the Exercises page.'
+              ? t('noFavourites')
               : query.trim()
-                ? `Nothing matches “${query}”.`
-                : 'Nothing matches. Try fewer filters.'}
+                ? t('noMatch', { query })
+                : t('noMatchFilters')}
           </li>
         )}
       </ul>

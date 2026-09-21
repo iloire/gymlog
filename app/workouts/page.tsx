@@ -4,10 +4,12 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronRight, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { BodyPartBadges } from '@/components/body-part-badges'
 import { DayPicker } from '@/components/day-picker'
+import { useLocale } from '@/components/locale-provider'
 import { Loading, Placeholder } from '@/components/loading'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
@@ -32,6 +34,8 @@ const letter = (index: number) => String.fromCharCode(65 + index)
 export default function WorkoutsPage() {
   const userId = useUserId()
   const router = useRouter()
+  const t = useTranslations('plan')
+  const locale = useLocale()
   const [starting, setStarting] = useState(false)
   const [picking, setPicking] = useState<number | null>(null)
 
@@ -76,14 +80,14 @@ export default function WorkoutsPage() {
     )
 
     // A programme day pointing at a deleted workout is a rest day.
-    const week = weekdayInitials().map((_, weekday) => {
+    const week = weekdayInitials(locale).map((_, weekday) => {
       const templateId = days.find((day) => day.dayOfWeek === weekday)?.templateId ?? null
       const index = workouts.findIndex((workout) => workout.id === templateId)
       return { weekday, templateId: index === -1 ? null : templateId, index }
     })
 
     return { program, workouts, week, trainingDays: week.filter((day) => day.templateId !== null).length }
-  }, [userId])
+  }, [userId, locale])
 
   async function start(templateId: string, programId: string | null) {
     if (!userId || starting) return
@@ -95,7 +99,7 @@ export default function WorkoutsPage() {
   if (!userId || !data) {
     return (
       <Loading>
-        <h1 className="figure text-4xl">Plan</h1>
+        <h1 className="figure text-4xl">{t('title')}</h1>
         <Placeholder className="mt-2 h-5 w-64" />
         <Placeholder className="mt-7 h-16 w-full" />
       </Loading>
@@ -113,7 +117,7 @@ export default function WorkoutsPage() {
           templates={workouts}
           current={week[picking]?.templateId ?? null}
           onPick={(templateId) => {
-            void assignDay(userId, picking, templateId)
+            void assignDay(userId, picking, templateId, locale)
             setPicking(null)
           }}
           onClose={() => setPicking(null)}
@@ -121,15 +125,15 @@ export default function WorkoutsPage() {
       )}
 
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
-        <h1 className="figure text-4xl">Plan</h1>
+        <h1 className="figure text-4xl">{t('title')}</h1>
         <p className="mt-2 text-sm text-ink-dim">
           {program
-            ? `${program.name} — ${trainingDays} ${trainingDays === 1 ? 'day' : 'days'} a week, since ${formatDay(program.startedOn)}`
-            : 'Your workouts, and the days you train them. Tap a day to put one on it.'}
+            ? t('intro.programme', { name: program.name, days: trainingDays, since: formatDay(program.startedOn, locale) })
+            : t('intro.empty')}
         </p>
 
         {/* The week: a cell per day wearing its workout's letter. */}
-        <section className="mt-7" aria-label="Your week">
+        <section className="mt-7" aria-label={t('week.label')}>
           <ol className="grid grid-cols-7 gap-1.5">
             {week.map((day) => {
               const isToday = day.weekday === current
@@ -137,13 +141,16 @@ export default function WorkoutsPage() {
               return (
                 <li key={day.weekday} className="flex flex-col items-center gap-1.5">
                   <span aria-hidden className={`text-xs ${isToday ? 'text-ink' : 'text-ink-dim'}`}>
-                    {weekdayInitials()[day.weekday]}
+                    {weekdayInitials(locale)[day.weekday]}
                   </span>
                   <button
                     type="button"
                     onClick={() => setPicking(day.weekday)}
                     disabled={workouts.length === 0}
-                    aria-label={`${weekdayName(day.weekday)}${isToday ? ', today' : ''}: ${name ?? 'rest'}. Change`}
+                    aria-label={t(isToday ? 'week.dayLabelToday' : 'week.dayLabel', {
+                      day: weekdayName(day.weekday, locale),
+                      workout: name ?? t('week.rest'),
+                    })}
                     className={`figure flex aspect-square w-full items-center justify-center rounded-sm text-lg ${
                       name ? 'bg-plate-blue text-white' : 'border border-line text-ink-dim'
                     } ${isToday ? 'ring-2 ring-ink ring-inset' : ''} disabled:opacity-50`}
@@ -173,13 +180,13 @@ export default function WorkoutsPage() {
                     <span className="block truncate text-[15px]">{workout.name}</span>
                     <span className="block text-sm text-ink-dim">
                       {workout.scheduledOn.length > 0
-                        ? workout.scheduledOn.map((day) => weekdayName(day).slice(0, 3)).join(' · ')
-                        : 'No set day'}
+                        ? workout.scheduledOn.map((day) => weekdayName(day, locale).slice(0, 3)).join(' · ')
+                        : t('workout.noSetDay')}
                       {' · '}
-                      {workout.lastDone ? `last done ${daysAgo(workout.lastDone)}` : 'not done yet'}
+                      {workout.lastDone ? t('workout.lastDone', { when: daysAgo(workout.lastDone) }) : t('workout.notDoneYet')}
                     </span>
                     <span className="block text-sm text-ink-dim">
-                      {workout.exerciseCount} {workout.exerciseCount === 1 ? 'exercise' : 'exercises'}
+                      {t('workout.exercises', { count: workout.exerciseCount })}
                     </span>
                     <BodyPartBadges parts={workout.parts} className="mt-1.5" />
                   </span>
@@ -189,17 +196,17 @@ export default function WorkoutsPage() {
                   type="button"
                   onClick={() => void start(workout.id, workout.programId)}
                   disabled={starting}
-                  aria-label={`Start ${workout.name}`}
+                  aria-label={t('workout.startLabel', { name: workout.name })}
                   className="h-12 shrink-0 rounded-md border border-line px-4 text-sm disabled:opacity-60"
                 >
-                  Start
+                  {t('workout.start')}
                 </button>
               </li>
             ))}
           </ul>
         ) : (
           <p className="mt-7 border-y border-line py-6 text-[15px] text-ink-dim">
-            No workouts yet. Build one, or copy a premade programme, then put it on the days you train.
+            {t('empty')}
           </p>
         )}
 
@@ -208,13 +215,13 @@ export default function WorkoutsPage() {
           className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-md bg-plate-blue text-base font-semibold text-white"
         >
           <Plus size={18} aria-hidden />
-          New workout
+          {t('newWorkout')}
         </Link>
         <Link
           href="/programmes"
           className="mt-3 flex h-12 w-full items-center justify-center rounded-md border border-line text-sm"
         >
-          Browse premade programmes
+          {t('browse')}
         </Link>
 
         {program && <NewStage onStart={(name) => startNewStage(userId, name)} />}
@@ -229,13 +236,11 @@ export default function WorkoutsPage() {
  * Old sessions keep pointing at the old programme, so the history stays intact.
  */
 function NewStage({ onStart }: { onStart: (name: string) => Promise<unknown> }) {
+  const t = useTranslations('plan.newStage')
   return (
     <section className="mt-10 border-t border-line pt-6">
-      <h2 className="text-xl font-semibold">Start a new stage</h2>
-      <p className="mt-1 text-sm text-ink-dim">
-        Ends the current programme and starts an empty week for the next one. Everything you have
-        logged stays exactly as it is.
-      </p>
+      <h2 className="text-xl font-semibold">{t('title')}</h2>
+      <p className="mt-1 text-sm text-ink-dim">{t('intro')}</p>
       <form
         className="mt-4 flex gap-2"
         onSubmit={async (event) => {
@@ -249,12 +254,12 @@ function NewStage({ onStart }: { onStart: (name: string) => Promise<unknown> }) 
       >
         <input
           name="name"
-          placeholder="Intermediate 4-day"
-          aria-label="New programme name"
+          placeholder={t('placeholder')}
+          aria-label={t('nameLabel')}
           className="h-12 min-w-0 flex-1 rounded-md border border-line bg-surface px-3 outline-none focus-visible:border-plate-blue-lift"
         />
         <button type="submit" className="h-12 shrink-0 rounded-md border border-line px-4 text-sm">
-          Start it
+          {t('submit')}
         </button>
       </form>
     </section>

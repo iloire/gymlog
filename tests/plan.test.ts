@@ -76,6 +76,13 @@ describe('planSummary', () => {
   it('has nothing to estimate for an empty workout', () => {
     expect(planSummary(0, 0)).toBe('No exercises yet')
   })
+
+  it('reads in Spanish', () => {
+    expect(planSummary(5, 44 * 60_000, 'es')).toBe('5 ejercicios · unos 45 min')
+    expect(planSummary(1, 10 * 60_000, 'es')).toBe('1 ejercicio · unos 10 min')
+    expect(planSummary(0, 0, 'es')).toBe('Sin ejercicios todavía')
+    expect(formatEstimate(64 * 60_000, 'es')).toBe('unos 1 h 5 min')
+  })
 })
 
 describe('formatLast', () => {
@@ -87,6 +94,10 @@ describe('formatLast', () => {
   it('is the reps for a bodyweight set, not 0 kg', () => {
     expect(formatLast({ weightKg: null, reps: 12 })).toBe('12 reps')
     expect(formatLast({ weightKg: 0, reps: 12 })).toBe('12 reps')
+  })
+
+  it('writes the weight with a decimal comma in Spanish', () => {
+    expect(formatLast({ weightKg: 62.5, reps: 5 }, 'kg', 'es')).toBe('62,5 kg')
   })
 
   it('is the minutes for a timed set', () => {

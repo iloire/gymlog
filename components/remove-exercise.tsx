@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useEffect, useId, useRef } from 'react'
 
 /**
@@ -21,6 +22,7 @@ export function RemoveExercise({
 }) {
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
+  const t = useTranslations('plan.removeExercise')
 
   useEffect(() => {
     const dialog = ref.current
@@ -44,9 +46,9 @@ export function RemoveExercise({
       className="m-auto w-[calc(100%-2rem)] max-w-sm rounded-md border border-plate-red bg-ground p-4 text-ink backdrop:bg-black/70"
     >
       <p id={titleId} className="text-[15px]">
-        Remove {exerciseName} from this workout?
+        {t('title', { name: exerciseName })}
       </p>
-      {loggedSets && <p className="mt-1 text-sm text-ink-dim">The sets you logged for it go too.</p>}
+      {loggedSets && <p className="mt-1 text-sm text-ink-dim">{t('logged')}</p>}
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
@@ -54,14 +56,14 @@ export function RemoveExercise({
           onClick={onCancel}
           className="h-12 rounded-md border border-line text-sm"
         >
-          Cancel
+          {t('cancel')}
         </button>
         <button
           type="button"
           onClick={onConfirm}
           className="h-12 rounded-md bg-plate-red text-sm font-semibold text-white"
         >
-          Remove
+          {t('remove')}
         </button>
       </div>
     </dialog>

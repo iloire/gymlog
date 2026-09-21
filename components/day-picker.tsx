@@ -1,8 +1,10 @@
 'use client'
 
 import { Check, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useEffect, useId, useRef } from 'react'
 
+import { useLocale } from '@/components/locale-provider'
 import type { LocalWorkoutTemplate } from '@/lib/db/dexie'
 import { weekdayName } from '@/lib/week'
 
@@ -27,6 +29,8 @@ export function DayPicker({
 }) {
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
+  const t = useTranslations('plan.dayPicker')
+  const locale = useLocale()
 
   useEffect(() => {
     const dialog = ref.current
@@ -36,7 +40,7 @@ export function DayPicker({
 
   const options: { id: string | null; name: string }[] = [
     ...templates.map((template) => ({ id: template.id, name: template.name })),
-    { id: null, name: 'Rest' },
+    { id: null, name: t('rest') },
   ]
 
   return (
@@ -55,9 +59,9 @@ export function DayPicker({
       <div className="px-5 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <div className="flex items-center justify-between gap-3">
           <h2 id={titleId} className="figure text-xl">
-            {weekdayName(weekday)}
+            {weekdayName(weekday, locale)}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="-mr-2 p-2 text-ink-dim">
+          <button type="button" onClick={onClose} aria-label={t('close')} className="-mr-2 p-2 text-ink-dim">
             <X size={22} aria-hidden />
           </button>
         </div>

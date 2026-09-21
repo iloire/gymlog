@@ -4,12 +4,14 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { Check, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Suspense, useMemo, useState } from 'react'
 
 import { EquipmentPicker, useEquipment } from '@/components/equipment-picker'
 import { ExerciseDialog } from '@/components/exercise-dialog'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { Loading, Placeholder } from '@/components/loading'
+import { useLocale } from '@/components/locale-provider'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
@@ -25,8 +27,7 @@ import {
   type Programme,
 } from '@/lib/programmes'
 import { activeProgram } from '@/lib/queries'
-
-const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+import { weekdayName } from '@/lib/week'
 
 type Library = ReadonlyMap<string, LocalExercise>
 
@@ -82,13 +83,14 @@ function Programmes() {
  * known before the library is, so they are drawn where they will stay.
  */
 function ProgrammesLoading({ detail = false }: { detail?: boolean }) {
+  const t = useTranslations('plan')
   return (
     <Loading className="pt-5">
       {detail ? (
         <>
           <Link href="/programmes" className="flex items-center gap-1 text-sm text-ink-dim">
             <ChevronLeft size={18} aria-hidden />
-            Programmes
+            {t('programmes.back')}
           </Link>
           <Placeholder className="mt-4 h-10 w-56" />
         </>
@@ -96,9 +98,9 @@ function ProgrammesLoading({ detail = false }: { detail?: boolean }) {
         <>
           <Link href="/workouts" className="flex items-center gap-1 text-sm text-ink-dim">
             <ChevronLeft size={18} aria-hidden />
-            Plan
+            {t('back')}
           </Link>
-          <h1 className="figure mt-4 text-4xl">Programmes</h1>
+          <h1 className="figure mt-4 text-4xl">{t('programmes.title')}</h1>
           <Placeholder className="mt-2 h-5 w-64" />
         </>
       )}
@@ -107,6 +109,7 @@ function ProgrammesLoading({ detail = false }: { detail?: boolean }) {
 }
 
 function Catalogue({ have, library }: { have: string[] | null; library: Library }) {
+  const t = useTranslations('plan')
   const [editing, setEditing] = useState(false)
 
   const entries = useMemo(() => {
@@ -117,24 +120,21 @@ function Catalogue({ have, library }: { have: string[] | null; library: Library 
   }, [have, library])
 
   const summary = have
-    ? (presetFor(have)?.name ?? (have.map(equipmentName).join(', ') || 'No equipment'))
+    ? (presetFor(have)?.name ?? (have.map(equipmentName).join(', ') || t('programmes.noEquipment')))
     : null
 
   return (
     <>
       <Link href="/workouts" className="flex items-center gap-1 text-sm text-ink-dim">
         <ChevronLeft size={18} aria-hidden />
-        Plan
+        {t('back')}
       </Link>
-      <h1 className="figure mt-4 text-4xl">Programmes</h1>
-      <p className="mt-2 text-sm text-ink-dim">
-        Ready-made weeks of training. Picking one copies it into your workouts, where you can change
-        anything.
-      </p>
+      <h1 className="figure mt-4 text-4xl">{t('programmes.title')}</h1>
+      <p className="mt-2 text-sm text-ink-dim">{t('programmes.intro')}</p>
 
       {have === null || editing ? (
         <section className="mt-7">
-          <h2 className="mb-4 text-xl font-semibold">What can you train with?</h2>
+          <h2 className="mb-4 text-xl font-semibold">{t('programmes.equipmentQuestion')}</h2>
           <EquipmentPicker />
           {have !== null && (
             <button
@@ -142,14 +142,14 @@ function Catalogue({ have, library }: { have: string[] | null; library: Library 
               onClick={() => setEditing(false)}
               className="mt-5 h-12 w-full rounded-md border border-line text-sm"
             >
-              Done
+              {t('programmes.done')}
             </button>
           )}
         </section>
       ) : (
         <div className="mt-6 flex items-baseline justify-between gap-3">
           <p className="text-sm">
-            <span className="text-ink-dim">Your equipment: </span>
+            <span className="text-ink-dim">{t('programmes.yourEquipment')}</span>
             {summary}
           </p>
           <button
@@ -157,7 +157,7 @@ function Catalogue({ have, library }: { have: string[] | null; library: Library 
             onClick={() => setEditing(true)}
             className="shrink-0 text-sm underline underline-offset-4"
           >
-            Change
+            {t('programmes.change')}
           </button>
         </div>
       )}
@@ -169,7 +169,7 @@ function Catalogue({ have, library }: { have: string[] | null; library: Library 
               <Link href={`/programmes?id=${programme.id}`} className="block py-4">
                 <span className="flex items-baseline justify-between gap-3">
                   <span className="text-[17px] font-semibold">{programme.name}</span>
-                  <span className="shrink-0 text-sm text-ink-dim capitalize">{programme.level}</span>
+                  <span className="shrink-0 text-sm text-ink-dim">{t(`programmes.level.${programme.level}`)}</span>
                 </span>
                 <span className="mt-1 block text-sm text-ink-dim">{programme.summary}</span>
                 <FitLine fit={fit} />
@@ -183,19 +183,18 @@ function Catalogue({ have, library }: { have: string[] | null; library: Library 
 }
 
 function FitLine({ fit }: { fit: Fit }) {
+  const t = useTranslations('plan.programmes')
   if (!fit.doable) {
     return (
       <span className="mt-2 block text-sm text-ink-dim">
-        Needs {fit.missing.map(equipmentName).join(', ')}
+        {t('needs', { items: fit.missing.map(equipmentName).join(', ') })}
       </span>
     )
   }
   return (
     <span className="mt-2 flex items-center gap-1.5 text-sm">
       <Check size={16} aria-hidden className="text-plate-blue-lift" />
-      {fit.swaps === 0
-        ? 'Fits your equipment'
-        : `Fits your equipment, with ${fit.swaps} ${fit.swaps === 1 ? 'swap' : 'swaps'}`}
+      {fit.swaps === 0 ? t('fits') : t('fitsWithSwaps', { count: fit.swaps })}
     </span>
   )
 }
@@ -212,6 +211,8 @@ function ProgrammeDetail({
   library: Library
 }) {
   const router = useRouter()
+  const t = useTranslations('plan.programmes')
+  const locale = useLocale()
   const [shift, setShift] = useState(0)
   const [viewingExerciseId, setViewingExerciseId] = useState<string | null>(null)
   const [adopting, setAdopting] = useState(false)
@@ -224,9 +225,9 @@ function ProgrammeDetail({
 
   // Every distinct set of training days the week can be moved to.
   const dayOptions = [...new Map(
-    WEEKDAYS.map((_, by) => {
+    Array.from({ length: 7 }, (_, by) => {
       const label = shiftWeek(programme.week, by)
-        .flatMap((key, day) => (key === null ? [] : [WEEKDAYS[day]!.slice(0, 3)]))
+        .flatMap((key, day) => (key === null ? [] : [weekdayName(day, locale).slice(0, 3)]))
         .join(' · ')
       return [label, by] as const
     }),
@@ -251,26 +252,25 @@ function ProgrammeDetail({
 
       <Link href="/programmes" className="flex items-center gap-1 text-sm text-ink-dim">
         <ChevronLeft size={18} aria-hidden />
-        Programmes
+        {t('back')}
       </Link>
 
       <h1 className="figure mt-4 text-4xl leading-[1.05]">{programme.name}</h1>
       <p className="mt-2 text-sm text-ink-dim">
-        <span className="capitalize">{programme.level}</span> · {trainingDays(programme.week)} days a
-        week
+        {t('daysAWeek', { level: t(`level.${programme.level}`), count: trainingDays(programme.week) })}
       </p>
       <p className="mt-3 text-[15px]">{programme.summary}</p>
 
       {have === null && (
         <section className="mt-7 border-y border-line py-5">
-          <h2 className="mb-4 text-xl font-semibold">What can you train with?</h2>
+          <h2 className="mb-4 text-xl font-semibold">{t('equipmentQuestion')}</h2>
           <EquipmentPicker />
         </section>
       )}
 
       <section className="mt-8">
         <label className="block">
-          <span className="mb-2 block text-sm text-ink-dim">Train on</span>
+          <span className="mb-2 block text-sm text-ink-dim">{t('trainOn')}</span>
           <select
             value={shift}
             onChange={(event) => setShift(Number(event.target.value))}
@@ -290,7 +290,7 @@ function ProgrammeDetail({
               ? []
               : [
                   <li key={day} className="flex items-baseline gap-3 py-2.5 text-[15px]">
-                    <span className="w-28 shrink-0 text-ink-dim">{WEEKDAYS[day]}</span>
+                    <span className="w-28 shrink-0 text-ink-dim">{weekdayName(day, locale)}</span>
                     {names[key]}
                   </li>,
                 ],
@@ -323,12 +323,12 @@ function ProgrammeDetail({
                       <span className="block text-[15px]">{name}</span>
                       {!choice.doable ? (
                         <span className="block text-xs text-ink-dim">
-                          Needs {choice.missing.map(equipmentName).join(', ')}
+                          {t('needs', { items: choice.missing.map(equipmentName).join(', ') })}
                         </span>
                       ) : (
                         choice.swapped && (
                           <span className="block text-xs text-ink-dim">
-                            Instead of {library.get(choice.slot.exercise)?.name ?? choice.slot.exercise}
+                            {t('insteadOf', { name: library.get(choice.slot.exercise)?.name ?? choice.slot.exercise })}
                           </span>
                         )
                       )}
@@ -346,10 +346,7 @@ function ProgrammeDetail({
 
       <section className="mt-8">
         {!fit.doable && (
-          <p className="mb-4 text-sm text-ink-dim">
-            Some exercises need equipment you have not ticked. They are copied as written, so you can
-            swap them in the workout editor.
-          </p>
+          <p className="mb-4 text-sm text-ink-dim">{t('notDoable')}</p>
         )}
         <button
           type="button"
@@ -357,11 +354,11 @@ function ProgrammeDetail({
           disabled={adopting}
           className="h-14 w-full rounded-md bg-plate-blue text-base font-semibold text-white transition-colors hover:bg-plate-blue-lift disabled:opacity-60"
         >
-          Start this programme
+          {t('start')}
         </button>
         {current && (
           <p className="mt-2 text-center text-xs text-ink-dim">
-            Ends “{current.name}”. Everything you have logged stays as it is.
+            {t('ends', { name: current.name })}
           </p>
         )}
         <button
@@ -370,7 +367,7 @@ function ProgrammeDetail({
           disabled={adopting}
           className="mt-3 h-12 w-full rounded-md border border-line text-sm disabled:opacity-60"
         >
-          Just add the workouts
+          {t('justAdd')}
         </button>
       </section>
     </>

@@ -1,6 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useEffect, useId, useRef } from 'react'
 
 import type { LocalSetLog } from '@/lib/db/dexie'
@@ -29,6 +30,7 @@ export function WorkoutSheet({
 }) {
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
+  const t = useTranslations('plan.workoutSheet')
 
   useEffect(() => {
     const dialog = ref.current
@@ -59,10 +61,10 @@ export function WorkoutSheet({
               {name}
             </h2>
             <p className="text-sm text-ink-dim">
-              <span className="figure text-ink">{done}</span> of {total} sets logged
+              {t.rich('logged', { done, total, n: (chunks) => <span className="figure text-ink">{chunks}</span> })}
             </p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="-mr-2 shrink-0 p-2 text-ink-dim">
+          <button type="button" onClick={onClose} aria-label={t('close')} className="-mr-2 shrink-0 p-2 text-ink-dim">
             <X size={22} aria-hidden />
           </button>
         </div>
@@ -81,7 +83,7 @@ export function WorkoutSheet({
                   <span className="figure w-6 shrink-0 text-sm text-ink-dim">{index + 1}</span>
                   <span className={`min-w-0 flex-1 truncate text-[15px] ${finished ? 'text-ink-dim' : ''}`}>
                     {exercise.name}
-                    {index === current && <span className="ml-2 text-xs text-ink-dim">now</span>}
+                    {index === current && <span className="ml-2 text-xs text-ink-dim">{t('now')}</span>}
                   </span>
                   <span className="flex shrink-0 gap-1" aria-hidden>
                     {exercise.logs.map((log) => (
