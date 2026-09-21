@@ -4,16 +4,17 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
+import { useLibraryLabel } from '@/components/exercise-filters'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { FavoriteButton } from '@/components/favorite-button'
 import { useLocale } from '@/components/locale-provider'
-import { exerciseName } from '@/lib/exercise-i18n'
 import { Placeholder } from '@/components/loading'
 import { StrengthChart } from '@/components/strength-chart'
 import { useUnit } from '@/components/use-unit'
 import type { LocalSetLog } from '@/lib/db/dexie'
 import { getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
+import { exerciseInstructions, exerciseName } from '@/lib/exercise-i18n'
 import { formatAgo, formatDay, formatMinutes, formatSet } from '@/lib/format'
 import { INTL_TAG, type Locale } from '@/lib/i18n'
 import { exerciseNoteId } from '@/lib/id'
@@ -53,6 +54,7 @@ export function ExerciseDetail({
 }) {
   const t = useTranslations('today.exerciseDetail')
   const locale = useLocale()
+  const label = useLibraryLabel()
   const unit = useUnit()
   const data = useLiveQuery(async () => {
     const db = getDb(userId)
@@ -77,16 +79,23 @@ export function ExerciseDetail({
       .map((sets) => sets.sort((a, b) => a.setIndex - b.setIndex))
       .slice(0, 12)
 
-    return { exercise, note: note ?? null, history, series: strengthSeries(logs), best: bestSet(logs) }
-  }, [userId, exerciseId])
+    return {
+      exercise,
+      note: note ?? null,
+      history,
+      series: strengthSeries(logs),
+      best: bestSet(logs),
+      // The how-to in the language: a chunk fetched once for Spanish, the row itself for English.
+      steps: await exerciseInstructions(exercise, locale),
+    }
+  }, [userId, exerciseId, locale])
 
   if (!data) return <ExerciseDetailLoading />
 
-  const { exercise, note, history, series, best } = data
+  const { exercise, note, history, series, best, steps } = data
   const last = history[0] ?? null
   const lastTop = last ? (bestSet(last) ?? last[0] ?? null) : null
   const bestE1rm = series.length > 0 ? Math.max(...series.map((point) => point.e1rmKg)) : null
-  const steps = exercise.instructions ?? []
 
   return (
     <>
@@ -104,8 +113,12 @@ export function ExerciseDetail({
           className="-mr-2 shrink-0 p-2 text-ink-dim"
         />
       </div>
-      <p className="mt-1.5 text-sm capitalize text-ink-dim">
-        {[exercise.equipment, exercise.level, ...(exercise.primaryMuscles ?? [])]
+      <p className="mt-1.5 text-sm text-ink-dim">
+        {[
+          exercise.equipment && label('equipment', exercise.equipment),
+          exercise.level && label('level', exercise.level),
+          ...(exercise.primaryMuscles ?? []).map((muscle) => label('muscle', muscle)),
+        ]
           .filter(Boolean)
           .join(', ')}
       </p>
