@@ -199,6 +199,20 @@ export function ExerciseDetail({
               </li>
             ))}
           </ol>
+          {exercise.userId === null && (
+            // The library is public domain and deserves its name; the Spanish is
+            // machine-made, and anyone reading it should know that.
+            <p className="mt-3 text-xs text-ink-dim">
+              {t.rich('source', {
+                link: (chunks) => (
+                  <a href="https://github.com/yuhonas/free-exercise-db" className="underline underline-offset-2" target="_blank" rel="noreferrer">
+                    {chunks}
+                  </a>
+                ),
+              })}
+              {locale !== 'en' && <> {t('machineTranslated')}</>}
+            </p>
+          )}
         </details>
       )}
     </>

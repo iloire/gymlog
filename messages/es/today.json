@@ -64,6 +64,8 @@
     "progress": "Tu progreso",
     "cues": "Tus apuntes",
     "cuesPlaceholder": "Rodillas hacia fuera, aprieta el core antes de sacar la barra.",
-    "howTo": "Cómo se hace"
+    "howTo": "Cómo se hace",
+    "source": "Texto y fotos del ejercicio de <link>free-exercise-db</link>, dominio público.",
+    "machineTranslated": "El español es una traducción automática del original en inglés."
   }
 }

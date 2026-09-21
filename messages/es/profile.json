@@ -114,5 +114,6 @@
       "exercises": "{count, plural, one {# ejercicio propio} other {# ejercicios propios}}",
       "exerciseNotes": "{count, plural, one {# nota de ejercicio} other {# notas de ejercicio}}"
     }
-  }
+  },
+  "credits": "Biblioteca de ejercicios y fotos: <link>free-exercise-db</link>, dominio público."
 }

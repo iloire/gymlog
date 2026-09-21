@@ -87,8 +87,17 @@ export default function ProfilePage() {
 
         <footer className="mt-8">
           <SignOutButton />
+          <p className="mt-6 text-center text-[11px] text-ink-dim">
+            {t.rich('credits', {
+              link: (chunks) => (
+                <a href="https://github.com/yuhonas/free-exercise-db" className="underline underline-offset-2" target="_blank" rel="noreferrer">
+                  {chunks}
+                </a>
+              ),
+            })}
+          </p>
           {publicEnv.commitSha && (
-            <p className="mt-4 text-center text-[11px] text-ink-dim">{publicEnv.commitSha}</p>
+            <p className="mt-2 text-center text-[11px] text-ink-dim">{publicEnv.commitSha}</p>
           )}
         </footer>
       </main>

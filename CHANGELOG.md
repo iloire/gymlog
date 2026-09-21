@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-21 21:38
+
+- **The exercise library is credited in the app.** Under every library exercise's how-to and in the
+  Profile footer: text and photos from free-exercise-db, public domain, with a link. In Spanish the
+  how-to also says the text is a machine translation of the English original.
+
 ## 2026-09-21 21:35
 
 - **The plate rail is gone.** Under the weight on a barbell lift sat a "20 bar" chip, coloured

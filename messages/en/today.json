@@ -64,6 +64,8 @@
     "progress": "Your progress",
     "cues": "Your cues",
     "cuesPlaceholder": "Knees out, brace before you unrack.",
-    "howTo": "How to do it"
+    "howTo": "How to do it",
+    "source": "Exercise text and photos from <link>free-exercise-db</link>, public domain.",
+    "machineTranslated": "The Spanish is a machine translation of the English original."
   }
 }
