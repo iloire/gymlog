@@ -35,15 +35,13 @@ export default function UnitsPage() {
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
         <Link href="/profile" className="flex items-center gap-1 text-sm text-ink-dim">
           <ChevronLeft size={18} aria-hidden />
-          Profile
+          {t('back')}
         </Link>
-        <h1 className="figure mt-2 text-4xl">Units</h1>
-        <p className="mt-2 text-sm text-ink-dim">
-          How every weight is shown and typed: the steppers, the plates, the charts, your bodyweight.
-        </p>
+        <h1 className="figure mt-2 text-4xl">{t('unitsPage.title')}</h1>
+        <p className="mt-2 text-sm text-ink-dim">{t('unitsPage.intro')}</p>
 
         <fieldset className="mt-8">
-          <legend className="sr-only">Unit</legend>
+          <legend className="sr-only">{t('unitsPage.legend')}</legend>
           <div className="grid grid-cols-2 gap-2">
             {UNITS.map((value) => (
               <label
@@ -64,10 +62,7 @@ export default function UnitsPage() {
               </label>
             ))}
           </div>
-          <p className="mt-3 text-xs text-ink-dim">
-            Saved to your account, so every device signed in as you shows the same. What you have
-            already logged is kept as it was and shown in the unit you pick.
-          </p>
+          <p className="mt-3 text-xs text-ink-dim">{t('unitsPage.saved')}</p>
         </fieldset>
       </main>
       <Nav />

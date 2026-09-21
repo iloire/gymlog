@@ -33,5 +33,86 @@
   "units": {
     "kg": "Kilogramos",
     "lb": "Libras"
+  },
+  "appearance": {
+    "title": "Apariencia",
+    "style": "Estilo",
+    "theme": "Tema",
+    "styles": {
+      "plate": {
+        "label": "Disco",
+        "description": "Colores de los discos de competición"
+      },
+      "whiteboard": {
+        "label": "Pizarra",
+        "description": "Rotulador en la pizarra del box"
+      },
+      "iron": {
+        "label": "Hierro",
+        "description": "Hierro fundido, cuadrado y alto"
+      },
+      "studio": {
+        "label": "Estudio",
+        "description": "Suave y redondeado"
+      }
+    },
+    "modes": {
+      "dark": "Oscuro",
+      "light": "Claro",
+      "system": "Sistema"
+    },
+    "deviceOnly": "Se guarda solo en este dispositivo. Sistema sigue el ajuste de tu teléfono."
+  },
+  "equipment": {
+    "title": "Material",
+    "intro": "Lo que hay en tu gimnasio, para que los programas predefinidos usen ejercicios que puedes hacer."
+  },
+  "unitsPage": {
+    "title": "Unidades",
+    "intro": "Cómo se muestra y se escribe cada peso: los selectores, los discos, las gráficas, tu peso corporal.",
+    "legend": "Unidad",
+    "saved": "Se guarda en tu cuenta, así que todos los dispositivos con tu sesión muestran lo mismo. Lo que ya has registrado se conserva tal cual y se muestra en la unidad que elijas."
+  },
+  "data": {
+    "title": "Tus datos",
+    "export": {
+      "title": "Exportar",
+      "intro": "Un archivo JSON con cada entrenamiento, sesión, serie y pesaje de este dispositivo: una copia de seguridad, y algo que puedes darle a un asistente para que lo lea. La biblioteca de ejercicios compartida se queda fuera; los ejercicios que añadiste tú van dentro.",
+      "download": "Descargar copia de seguridad"
+    },
+    "import": {
+      "title": "Importar",
+      "intro": "Vuelve a leer una copia de seguridad. No se borra nada: las filas del archivo se añaden, o se actualizan si ya están aquí.",
+      "choose": "Elegir un archivo de copia de seguridad",
+      "exportedOn": "Exportada el {date}",
+      "empty": "No hay nada dentro.",
+      "otherAccount": "Esta copia es de otra cuenta, así que sus filas entran aquí como nuevas en vez de sustituir las tuyas. Importarla dos veces sigue siendo seguro.",
+      "apply": "Importar",
+      "applying": "Importando…",
+      "cancel": "Cancelar",
+      "imported": "{count, plural, one {# fila importada.} other {# filas importadas.}}",
+      "nothingNew": "Nada que importar: ya está todo aquí.",
+      "merged": "{count, plural, one {# ejercicio coincidía con uno que ya tenías.} other {# ejercicios coincidían con otros que ya tenías.}}",
+      "skipped": "{count, plural, one {# fila fuera: aquello a lo que pertenece no estaba en el archivo.} other {# filas fuera: aquello a lo que pertenecen no estaba en el archivo.}}",
+      "writeFailed": "Algo de esa copia no se pudo escribir. No se cambió nada más."
+    },
+    "errors": {
+      "notJson": "Ese archivo no es JSON.",
+      "notBackup": "Eso no es una copia de seguridad de gymlog.",
+      "newer": "Esa copia se hizo con una versión más nueva de gymlog.",
+      "damaged": "Esa copia está dañada.",
+      "damagedAt": "Esa copia está dañada ({detail})."
+    },
+    "counts": {
+      "sessions": "{count, plural, one {# entrenamiento registrado} other {# entrenamientos registrados}}",
+      "setLogs": "{count, plural, one {# serie} other {# series}}",
+      "bodyWeights": "{count, plural, one {# pesaje} other {# pesajes}}",
+      "workoutTemplates": "{count, plural, one {# entrenamiento} other {# entrenamientos}}",
+      "templateItems": "{count, plural, one {# ejercicio en un entrenamiento} other {# ejercicios en entrenamientos}}",
+      "programs": "{count, plural, one {# programa} other {# programas}}",
+      "programDays": "{count, plural, one {# día programado} other {# días programados}}",
+      "exercises": "{count, plural, one {# ejercicio propio} other {# ejercicios propios}}",
+      "exerciseNotes": "{count, plural, one {# nota de ejercicio} other {# notas de ejercicio}}"
+    }
   }
 }

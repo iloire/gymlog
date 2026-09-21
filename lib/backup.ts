@@ -145,22 +145,27 @@ export function countRows(backup: Backup): BackupCounts {
   ) as BackupCounts
 }
 
-export type ReadResult = { ok: true; backup: Backup } | { ok: false; error: string }
+/** Why a file could not be read; the page has the words for each, in either language. */
+export type ReadError = 'notJson' | 'notBackup' | 'newer' | 'damaged'
 
-/** Parse a file the user picked. Never throws — the message is shown as-is. */
+export type ReadResult =
+  | { ok: true; backup: Backup }
+  | { ok: false; error: ReadError; /** Where a damaged file first went wrong, e.g. `tables.setLogs.3.reps: Expected number`. */ detail?: string }
+
+/** Parse a file the user picked. Never throws — the result says what was wrong. */
 export function readBackup(contents: string): ReadResult {
   let data: unknown
   try {
     data = JSON.parse(contents)
   } catch {
-    return { ok: false, error: 'That file is not JSON.' }
+    return { ok: false, error: 'notJson' }
   }
 
   if ((data as { format?: unknown })?.format !== BACKUP_FORMAT) {
-    return { ok: false, error: 'That is not a gymlog backup.' }
+    return { ok: false, error: 'notBackup' }
   }
   if (Number((data as { version?: unknown }).version) > BACKUP_VERSION) {
-    return { ok: false, error: 'That backup was made by a newer version of gymlog.' }
+    return { ok: false, error: 'newer' }
   }
 
   const parsed = backupSchema.safeParse(data)
@@ -168,7 +173,8 @@ export function readBackup(contents: string): ReadResult {
     const issue = parsed.error.issues[0]
     return {
       ok: false,
-      error: `That backup is damaged${issue ? ` (${issue.path.join('.')}: ${issue.message})` : ''}.`,
+      error: 'damaged',
+      ...(issue ? { detail: `${issue.path.join('.')}: ${issue.message}` } : {}),
     }
   }
 

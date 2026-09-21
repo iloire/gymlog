@@ -33,5 +33,86 @@
   "units": {
     "kg": "Kilograms",
     "lb": "Pounds"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "style": "Style",
+    "theme": "Theme",
+    "styles": {
+      "plate": {
+        "label": "Plate",
+        "description": "Competition plate colours"
+      },
+      "whiteboard": {
+        "label": "Whiteboard",
+        "description": "Marker on the box board"
+      },
+      "iron": {
+        "label": "Iron",
+        "description": "Cast iron, square and tall"
+      },
+      "studio": {
+        "label": "Studio",
+        "description": "Soft and rounded"
+      }
+    },
+    "modes": {
+      "dark": "Dark",
+      "light": "Light",
+      "system": "System"
+    },
+    "deviceOnly": "Saved on this device only. System follows your phone's setting."
+  },
+  "equipment": {
+    "title": "Equipment",
+    "intro": "What your gym has, so premade programmes swap in exercises you can do."
+  },
+  "unitsPage": {
+    "title": "Units",
+    "intro": "How every weight is shown and typed: the steppers, the plates, the charts, your bodyweight.",
+    "legend": "Unit",
+    "saved": "Saved to your account, so every device signed in as you shows the same. What you have already logged is kept as it was and shown in the unit you pick."
+  },
+  "data": {
+    "title": "Your data",
+    "export": {
+      "title": "Export",
+      "intro": "One JSON file with every workout, session, set and weigh-in on this device — a backup, and something you can hand to an assistant to read. The shared exercise library is left out; the exercises you added yourself are in.",
+      "download": "Download backup"
+    },
+    "import": {
+      "title": "Import",
+      "intro": "Read a backup back in. Nothing is deleted: rows in the file are added, or updated where they are already here.",
+      "choose": "Choose a backup file",
+      "exportedOn": "Exported {date}",
+      "empty": "There is nothing in it.",
+      "otherAccount": "This backup is from another account, so its rows come in as new ones here rather than replacing yours. Importing it twice is still safe.",
+      "apply": "Import",
+      "applying": "Importing…",
+      "cancel": "Cancel",
+      "imported": "Imported {count, plural, one {# row} other {# rows}}.",
+      "nothingNew": "Nothing to import — it is all already here.",
+      "merged": "{count, plural, one {# exercise matched one you already have.} other {# exercises matched ones you already have.}}",
+      "skipped": "{count, plural, one {# row left out — what it belongs to was not in the file.} other {# rows left out — what they belong to was not in the file.}}",
+      "writeFailed": "Something in that backup could not be written. Nothing else was changed."
+    },
+    "errors": {
+      "notJson": "That file is not JSON.",
+      "notBackup": "That is not a gymlog backup.",
+      "newer": "That backup was made by a newer version of gymlog.",
+      "damaged": "That backup is damaged.",
+      "damagedAt": "That backup is damaged ({detail})."
+    },
+    "counts": {
+      "sessions": "{count, plural, one {# logged workout} other {# logged workouts}}",
+      "setLogs": "{count, plural, one {# set} other {# sets}}",
+      "bodyWeights": "{count, plural, one {# weigh-in} other {# weigh-ins}}",
+      "workoutTemplates": "{count, plural, one {# workout} other {# workouts}}",
+      "templateItems": "{count, plural, one {# exercise in a workout} other {# exercises in workouts}}",
+      "programs": "{count, plural, one {# programme} other {# programmes}}",
+      "programDays": "{count, plural, one {# scheduled day} other {# scheduled days}}",
+      "exercises": "{count, plural, one {# exercise of your own} other {# exercises of your own}}",
+      "exerciseNotes": "{count, plural, one {# exercise note} other {# exercise notes}}"
+    }
   }
 }

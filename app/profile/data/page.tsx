@@ -2,8 +2,10 @@
 
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 
+import { useLocale } from '@/components/locale-provider'
 import { Nav } from '@/components/nav'
 import { useSync, useUserId } from '@/components/session-boot'
 import {
@@ -15,9 +17,10 @@ import {
   type Backup,
   type BackupCounts,
   type ImportSummary,
+  type ReadError,
 } from '@/lib/backup'
 import { formatDay } from '@/lib/format'
-import type { SyncTable } from '@/lib/sync/types'
+import { SYNC_TABLES } from '@/lib/sync/types'
 
 /**
  * Export and import, both of them ordinary local work: the file is written from
@@ -26,33 +29,32 @@ import type { SyncTable } from '@/lib/sync/types'
  */
 
 /** Reading order — what you did first, then what you built it from. */
-const TABLES: [SyncTable, string, string][] = [
-  ['sessions', 'logged workout', 'logged workouts'],
-  ['setLogs', 'set', 'sets'],
-  ['bodyWeights', 'weigh-in', 'weigh-ins'],
-  ['workoutTemplates', 'workout', 'workouts'],
-  ['templateItems', 'exercise in a workout', 'exercises in workouts'],
-  ['programs', 'programme', 'programmes'],
-  ['programDays', 'scheduled day', 'scheduled days'],
-  ['exercises', 'exercise of your own', 'exercises of your own'],
-  ['exerciseNotes', 'exercise note', 'exercise notes'],
-]
-
-function lines(counts: BackupCounts): string[] {
-  return TABLES.filter(([table]) => counts[table] > 0).map(
-    ([table, one, many]) => `${counts[table].toLocaleString('en-GB')} ${counts[table] === 1 ? one : many}`,
-  )
-}
+const TABLES = [
+  'sessions',
+  'setLogs',
+  'bodyWeights',
+  'workoutTemplates',
+  'templateItems',
+  'programs',
+  'programDays',
+  'exercises',
+  'exerciseNotes',
+] as const satisfies readonly (typeof SYNC_TABLES)[number][]
 
 type Picked = { backup: Backup; counts: BackupCounts; name: string }
+
+/** What the file could not be read for, or what went wrong writing it. */
+type DataError = ReadError | 'writeFailed'
 
 export default function DataPage() {
   const userId = useUserId()
   const { syncNow } = useSync()
   const fileInput = useRef<HTMLInputElement>(null)
+  const t = useTranslations('profile')
+  const locale = useLocale()
 
   const [picked, setPicked] = useState<Picked | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<{ code: DataError; detail?: string } | null>(null)
   const [busy, setBusy] = useState(false)
   const [summary, setSummary] = useState<ImportSummary | null>(null)
 
@@ -82,7 +84,7 @@ export default function DataPage() {
 
     const result = readBackup(await file.text())
     if (!result.ok) {
-      setError(result.error)
+      setError({ code: result.error, detail: result.detail })
       return
     }
     setPicked({ backup: result.backup, counts: countRows(result.backup), name: file.name })
@@ -98,45 +100,49 @@ export default function DataPage() {
       // Straight out to the server, so the phone in your pocket has it too.
       void syncNow()
     } catch {
-      setError('Something in that backup could not be written. Nothing else was changed.')
+      setError({ code: 'writeFailed' })
     } finally {
       setBusy(false)
       if (fileInput.current) fileInput.current.value = ''
     }
   }
 
+  /** One line per table with rows in it: '12 logged workouts', '3 weigh-ins'. */
+  const lines = (counts: BackupCounts) =>
+    TABLES.filter((table) => counts[table] > 0).map((table) => t(`data.counts.${table}`, { count: counts[table] }))
+
+  const errorText = (e: { code: DataError; detail?: string }) =>
+    e.code === 'writeFailed'
+      ? t('data.import.writeFailed')
+      : e.code === 'damaged' && e.detail
+        ? t('data.errors.damagedAt', { detail: e.detail })
+        : t(`data.errors.${e.code}`)
+
   return (
     <>
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
         <Link href="/profile" className="flex items-center gap-1 text-sm text-ink-dim">
           <ChevronLeft size={18} aria-hidden />
-          Profile
+          {t('back')}
         </Link>
-        <h1 className="figure mt-2 text-4xl">Your data</h1>
+        <h1 className="figure mt-2 text-4xl">{t('data.title')}</h1>
 
         <section className="mt-8">
-          <h2 className="mb-1 text-xl font-semibold">Export</h2>
-          <p className="mb-4 text-sm text-ink-dim">
-            One JSON file with every workout, session, set and weigh-in on this device — a backup,
-            and something you can hand to an assistant to read. The shared exercise library is left
-            out; the exercises you added yourself are in.
-          </p>
+          <h2 className="mb-1 text-xl font-semibold">{t('data.export.title')}</h2>
+          <p className="mb-4 text-sm text-ink-dim">{t('data.export.intro')}</p>
           <button
             type="button"
             onClick={download}
             disabled={!userId || busy}
             className="h-12 w-full rounded-md border border-line text-sm disabled:opacity-40"
           >
-            Download backup
+            {t('data.export.download')}
           </button>
         </section>
 
         <section className="mt-10">
-          <h2 className="mb-1 text-xl font-semibold">Import</h2>
-          <p className="mb-4 text-sm text-ink-dim">
-            Read a backup back in. Nothing is deleted: rows in the file are added, or updated where
-            they are already here.
-          </p>
+          <h2 className="mb-1 text-xl font-semibold">{t('data.import.title')}</h2>
+          <p className="mb-4 text-sm text-ink-dim">{t('data.import.intro')}</p>
 
           <input
             ref={fileInput}
@@ -150,16 +156,16 @@ export default function DataPage() {
             htmlFor="backup-file"
             className="flex h-12 w-full cursor-pointer items-center justify-center rounded-md border border-line text-sm"
           >
-            Choose a backup file
+            {t('data.import.choose')}
           </label>
 
-          {error && <p className="mt-3 text-sm text-plate-red">{error}</p>}
+          {error && <p className="mt-3 text-sm text-plate-red">{errorText(error)}</p>}
 
           {picked && (
             <div className="mt-4 rounded-md border border-plate-blue-lift bg-surface p-4">
               <p className="text-sm font-semibold [overflow-wrap:anywhere]">{picked.name}</p>
               <p className="mt-1 text-xs text-ink-dim">
-                Exported {formatDay(picked.backup.exportedAt)}
+                {t('data.import.exportedOn', { date: formatDay(picked.backup.exportedAt, locale) })}
               </p>
 
               {lines(picked.counts).length > 0 ? (
@@ -169,14 +175,11 @@ export default function DataPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="mt-3 text-sm text-ink-dim">There is nothing in it.</p>
+                <p className="mt-3 text-sm text-ink-dim">{t('data.import.empty')}</p>
               )}
 
               {picked.backup.userId !== userId && (
-                <p className="mt-3 text-sm">
-                  This backup is from another account, so its rows come in as new ones here rather
-                  than replacing yours. Importing it twice is still safe.
-                </p>
+                <p className="mt-3 text-sm">{t('data.import.otherAccount')}</p>
               )}
 
               <div className="mt-4 flex gap-2">
@@ -186,7 +189,7 @@ export default function DataPage() {
                   disabled={busy}
                   className="h-12 flex-1 rounded-md bg-plate-blue text-sm font-semibold text-white disabled:opacity-60"
                 >
-                  {busy ? 'Importing…' : 'Import'}
+                  {busy ? t('data.import.applying') : t('data.import.apply')}
                 </button>
                 <button
                   type="button"
@@ -196,7 +199,7 @@ export default function DataPage() {
                   }}
                   className="h-12 shrink-0 rounded-md border border-line px-4 text-sm"
                 >
-                  Cancel
+                  {t('data.import.cancel')}
                 </button>
               </div>
             </div>
@@ -206,8 +209,8 @@ export default function DataPage() {
             <div className="mt-4 rounded-md border border-line p-4">
               <p className="text-sm font-semibold">
                 {summary.total > 0
-                  ? `Imported ${summary.total.toLocaleString('en-GB')} rows.`
-                  : 'Nothing to import — it is all already here.'}
+                  ? t('data.import.imported', { count: summary.total })
+                  : t('data.import.nothingNew')}
               </p>
               {lines(summary.written).length > 0 && (
                 <ul className="mt-2 text-sm text-ink-dim">
@@ -217,16 +220,10 @@ export default function DataPage() {
                 </ul>
               )}
               {summary.merged > 0 && (
-                <p className="mt-2 text-sm text-ink-dim">
-                  {summary.merged} exercise{summary.merged === 1 ? '' : 's'} matched
-                  {summary.merged === 1 ? ' one' : ' ones'} you already have.
-                </p>
+                <p className="mt-2 text-sm text-ink-dim">{t('data.import.merged', { count: summary.merged })}</p>
               )}
               {summary.skipped > 0 && (
-                <p className="mt-2 text-sm text-ink-dim">
-                  {summary.skipped} row{summary.skipped === 1 ? '' : 's'} left out — what{' '}
-                  {summary.skipped === 1 ? 'it belongs' : 'they belong'} to was not in the file.
-                </p>
+                <p className="mt-2 text-sm text-ink-dim">{t('data.import.skipped', { count: summary.skipped })}</p>
               )}
             </div>
           )}

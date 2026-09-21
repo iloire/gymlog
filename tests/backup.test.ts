@@ -312,11 +312,11 @@ describe('what an import queues', () => {
 
 describe('reading a file', () => {
   it('refuses what is not JSON, not a backup, or newer than this app', () => {
-    expect(readBackup('not json at all')).toMatchObject({ ok: false })
-    expect(readBackup('{"format":"something-else"}')).toMatchObject({ ok: false })
+    expect(readBackup('not json at all')).toMatchObject({ ok: false, error: 'notJson' })
+    expect(readBackup('{"format":"something-else"}')).toMatchObject({ ok: false, error: 'notBackup' })
     expect(
       readBackup(JSON.stringify({ format: BACKUP_FORMAT, version: 99, exportedAt: 1, userId: 'u', tables: {} })),
-    ).toMatchObject({ ok: false, error: expect.stringContaining('newer version') })
+    ).toMatchObject({ ok: false, error: 'newer' })
   })
 
   it('refuses a backup whose rows are damaged rather than importing half of it', () => {
@@ -328,7 +328,11 @@ describe('reading a file', () => {
       tables: { bodyWeights: [{ id: 'bw-1', measuredOn: '2026-09-14', weightKg: 'heavy' }] },
     }
 
-    expect(readBackup(JSON.stringify(broken))).toMatchObject({ ok: false })
+    expect(readBackup(JSON.stringify(broken))).toMatchObject({
+      ok: false,
+      error: 'damaged',
+      detail: expect.stringContaining('bodyWeights'),
+    })
   })
 
   it('drops columns it does not know, which the server would refuse', async () => {

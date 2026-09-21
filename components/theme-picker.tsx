@@ -1,6 +1,7 @@
 'use client'
 
 import { Moon, Sun, SunMoon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useSyncExternalStore } from 'react'
 
 import {
@@ -13,23 +14,20 @@ import {
   type Theme,
 } from '@/lib/theme'
 
-const modes: { value: Theme; label: string; icon: typeof Sun }[] = [
-  { value: 'dark', label: 'Dark', icon: Moon },
-  { value: 'light', label: 'Light', icon: Sun },
-  { value: 'system', label: 'System', icon: SunMoon },
+// The ids; each one's name and description are in messages/<locale>/profile.json.
+const modes: { value: Theme; icon: typeof Sun }[] = [
+  { value: 'dark', icon: Moon },
+  { value: 'light', icon: Sun },
+  { value: 'system', icon: SunMoon },
 ]
 
-const styles: { value: Style; label: string; description: string }[] = [
-  { value: 'plate', label: 'Plate', description: 'Competition plate colours' },
-  { value: 'whiteboard', label: 'Whiteboard', description: 'Marker on the box board' },
-  { value: 'iron', label: 'Iron', description: 'Cast iron, square and tall' },
-  { value: 'studio', label: 'Studio', description: 'Soft and rounded' },
-]
+const styles: Style[] = ['plate', 'whiteboard', 'iron', 'studio']
 
 const option =
   'cursor-pointer rounded-md border border-line bg-surface text-sm text-ink-dim has-checked:border-plate-blue-lift has-checked:text-ink has-focus-visible:ring-2 has-focus-visible:ring-ring'
 
 export function ThemePicker() {
+  const t = useTranslations('profile.appearance')
   // The stored choice exists only in the browser; the server snapshot is null,
   // so nothing is marked selected until hydration rather than the wrong option.
   const theme = useSyncExternalStore(subscribeTheme, readTheme, () => null)
@@ -38,9 +36,9 @@ export function ThemePicker() {
   return (
     <div className="space-y-6">
       <fieldset>
-        <legend className="mb-2 text-sm text-ink-dim">Style</legend>
+        <legend className="mb-2 text-sm text-ink-dim">{t('style')}</legend>
         <div className="grid grid-cols-2 gap-2">
-          {styles.map(({ value, label, description }) => (
+          {styles.map((value) => (
             <label key={value} className={`${option} flex flex-col overflow-hidden`}>
               <input
                 type="radio"
@@ -51,17 +49,17 @@ export function ThemePicker() {
                 className="sr-only"
               />
               <StylePreview style={value} />
-              <span className="px-3 pt-2 font-semibold text-ink">{label}</span>
-              <span className="px-3 pb-2.5 text-xs">{description}</span>
+              <span className="px-3 pt-2 font-semibold text-ink">{t(`styles.${value}.label`)}</span>
+              <span className="px-3 pb-2.5 text-xs">{t(`styles.${value}.description`)}</span>
             </label>
           ))}
         </div>
       </fieldset>
 
       <fieldset>
-        <legend className="mb-2 text-sm text-ink-dim">Theme</legend>
+        <legend className="mb-2 text-sm text-ink-dim">{t('theme')}</legend>
         <div className="grid grid-cols-3 gap-2">
-          {modes.map(({ value, label, icon: Icon }) => (
+          {modes.map(({ value, icon: Icon }) => (
             <label key={value} className={`${option} flex h-16 flex-col items-center justify-center gap-1`}>
               <input
                 type="radio"
@@ -72,13 +70,11 @@ export function ThemePicker() {
                 className="sr-only"
               />
               <Icon size={20} aria-hidden />
-              {label}
+              {t(`modes.${value}`)}
             </label>
           ))}
         </div>
-        <p className="mt-2 text-xs text-ink-dim">
-          Saved on this device only. System follows your phone&apos;s setting.
-        </p>
+        <p className="mt-2 text-xs text-ink-dim">{t('deviceOnly')}</p>
       </fieldset>
     </div>
   )
