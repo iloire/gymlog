@@ -268,7 +268,13 @@ function SessionRow({ entry, open = false }: { entry: HistoryEntry; open?: boole
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[15px]">{session.templateName}</span>
             <span className="block text-sm text-ink-dim">
-              {formatDay(session.scheduledFor, locale)}
+              {/* A workout done today is read as "Today", in full ink: the date would be
+                  worked out from the calendar above, and this row is the one that matters. */}
+              {session.scheduledFor === today() ? (
+                <span className="font-medium text-ink">{t('past.today')}</span>
+              ) : (
+                formatDay(session.scheduledFor, locale)
+              )}
               {durationMs !== null && durationMs >= 60_000 && <> · {formatDuration(durationMs)}</>}
             </span>
           </span>

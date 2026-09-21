@@ -36,6 +36,7 @@
   "past": {
     "title": "Past workouts",
     "sets": "{done}/{planned} sets",
+    "today": "Today",
     "openToFix": "Open to fix a set"
   },
   "empty": "Nothing logged yet. <link>Start today's workout</link>.",

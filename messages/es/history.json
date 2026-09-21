@@ -36,6 +36,7 @@
   "past": {
     "title": "Entrenamientos anteriores",
     "sets": "{done}/{planned} series",
+    "today": "Hoy",
     "openToFix": "Abrir para corregir una serie"
   },
   "empty": "Nada registrado todavía. <link>Empieza el entrenamiento de hoy</link>.",

@@ -2,6 +2,12 @@
 
 ## 2026-09-21 22:34
 
+- **Today's workout in the past list says "Today".** The row for a session dated today printed
+  the calendar date like any other; it now reads Today (Hoy), in full ink, so the workout just
+  done is told from the rest of the list at a glance.
+
+## 2026-09-21 22:34
+
 - **A past set says how it felt.** The effort logged between sets, easy, hard or failed, was
   written to the row and never shown again; the set lists in History, on Today and on the finish
   screen, and an exercise's own history, now put the word after the figure. Easy is dim ink, hard
