@@ -1,6 +1,11 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
 import { AuthHero } from '@/components/auth-hero'
+import { useChooseLocale, useLocale } from '@/components/locale-provider'
+import { LOCALE_NAMES, LOCALES } from '@/lib/i18n'
 
 export function AuthShell({
   title,
@@ -11,6 +16,7 @@ export function AuthShell({
   error?: string | null
   children: ReactNode
 }) {
+  const t = useTranslations('common.auth')
   return (
     // Phone: the picture across the top with the wordmark on its lower edge and
     // the form below. Desk: the picture fills the left, the form the right.
@@ -26,7 +32,10 @@ export function AuthShell({
 
       <div className="flex flex-col justify-center px-6 pt-5 pb-12 lg:px-14 lg:py-12">
         <div className="mx-auto w-full max-w-sm">
-          <p className="text-sm text-ink-dim">Your programme, your numbers, signal or no signal.</p>
+          <div className="flex items-baseline justify-between gap-4">
+            <p className="text-sm text-ink-dim">{t('tagline')}</p>
+            <LanguageToggle />
+          </div>
 
           <h1 className="mt-10 mb-6 text-xl font-semibold">{title}</h1>
 
@@ -40,6 +49,34 @@ export function AuthShell({
         </div>
       </div>
     </main>
+  )
+}
+
+/**
+ * Before there is an account to save it on, the language is the device's:
+ * the cookie the proxy set from the browser, or this toggle. Signup copies
+ * it onto the new account.
+ */
+function LanguageToggle() {
+  const t = useTranslations('common.auth')
+  const locale = useLocale()
+  const chooseLocale = useChooseLocale()
+  return (
+    <div className="flex shrink-0 gap-2 text-xs" role="group" aria-label={t('language')}>
+      {LOCALES.map((value) => (
+        <button
+          key={value}
+          type="button"
+          lang={value}
+          aria-pressed={locale === value}
+          onClick={() => void chooseLocale(value)}
+          className={`rounded-sm px-1 uppercase ${locale === value ? 'text-ink underline underline-offset-4' : 'text-ink-dim'}`}
+          title={LOCALE_NAMES[value]}
+        >
+          {value}
+        </button>
+      ))}
+    </div>
   )
 }
 
@@ -67,13 +104,14 @@ export function Field({
 }
 
 export function SubmitButton({ busy, children }: { busy: boolean; children: ReactNode }) {
+  const t = useTranslations('common.auth')
   return (
     <button
       type="submit"
       disabled={busy}
       className="h-14 w-full rounded-md bg-plate-blue text-base font-semibold text-white transition-colors hover:bg-plate-blue-lift disabled:opacity-60"
     >
-      {busy ? 'Working…' : children}
+      {busy ? t('working') : children}
     </button>
   )
 }

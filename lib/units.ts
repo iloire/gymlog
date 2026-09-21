@@ -8,6 +8,8 @@
  * server. Pure, so the rounding is a unit test.
  */
 
+import { DEFAULT_LOCALE, INTL_TAG, type Locale } from '@/lib/i18n'
+
 export const UNITS = ['kg', 'lb'] as const
 export type Unit = (typeof UNITS)[number]
 
@@ -54,9 +56,7 @@ export function tidyWeight(kg: number, unit: Unit): number {
   return fromUnit(Math.max(0, Math.round(value / grain) * grain), unit)
 }
 
-/** '4,250 kg', '135 lb'. */
-export function formatWeight(kg: number, unit: Unit): string {
-  return `${displayWeight(kg, unit).toLocaleString('en-GB')} ${unit}`
+/** '4,250 kg', '135 lb' — and '77,5 kg' in Spanish. The names of the units are in `messages/`. */
+export function formatWeight(kg: number, unit: Unit, locale: Locale = DEFAULT_LOCALE): string {
+  return `${displayWeight(kg, unit).toLocaleString(INTL_TAG[locale])} ${unit}`
 }
-
-export const UNIT_NAMES: Record<Unit, string> = { kg: 'Kilograms', lb: 'Pounds' }

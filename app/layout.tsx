@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Archivo, Big_Shoulders, Kalam, Nunito } from 'next/font/google'
+import { getLocale } from 'next-intl/server'
 
+import { LocaleProvider } from '@/components/locale-provider'
 import { SessionBoot } from '@/components/session-boot'
 import { publicEnv } from '@/lib/env.public'
 import { THEME_COLORS, themeScript } from '@/lib/theme'
@@ -41,18 +43,23 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
-export default function RootLayout({ children }: LayoutProps<'/'>) {
+export default async function RootLayout({ children }: LayoutProps<'/'>) {
+  // The device's language cookie (i18n/request.ts). Reading it makes the
+  // layout dynamic, which every screen behind the proxy already is.
+  const locale = await getLocale()
   return (
     // The theme script adds `light` and `data-style` to <html> before React
     // hydrates, so the attributes legitimately differ from the server's.
-    <html lang="en" className={`${fontVariables} h-full antialiased`} suppressHydrationWarning>
+    <html lang={locale} className={`${fontVariables} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       {/* Installed on a phone the page runs under a translucent status bar
           (statusBarStyle above, viewportFit cover), so every screen starts below it. */}
       <body className="min-h-full flex flex-col bg-ground text-ink pt-[env(safe-area-inset-top)]">
-        <SessionBoot>{children}</SessionBoot>
+        <SessionBoot>
+          <LocaleProvider initial={locale}>{children}</LocaleProvider>
+        </SessionBoot>
       </body>
     </html>
   )

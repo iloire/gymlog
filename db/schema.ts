@@ -38,6 +38,10 @@ export const users = sqliteTable('users', {
   unit: text('unit', { enum: ['kg', 'lb'] })
     .notNull()
     .default('kg'),
+  /** The language every screen reads in. Synced beside the unit; see `lib/i18n.ts`. */
+  locale: text('locale', { enum: ['en', 'es'] })
+    .notNull()
+    .default('en'),
   /**
    * `admin` unlocks /admin and nothing else. It is read from this column on
    * every admin request, never from the JWT, and sync never looks at it — an

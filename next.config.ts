@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import createNextIntlPlugin from 'next-intl/plugin'
 
 const nextConfig: NextConfig = {
   env: {
@@ -11,4 +12,5 @@ const nextConfig: NextConfig = {
   redirects: async () => [{ source: '/program', destination: '/workouts', permanent: true }],
 }
 
-export default nextConfig
+// Points next-intl at i18n/request.ts, which reads the language cookie for the server tree.
+export default createNextIntlPlugin('./i18n/request.ts')(nextConfig)

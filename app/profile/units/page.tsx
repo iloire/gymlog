@@ -2,12 +2,13 @@
 
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 import { Nav } from '@/components/nav'
 import { useSync, useUserId } from '@/components/session-boot'
 import { useUnit } from '@/components/use-unit'
 import { setUnit } from '@/lib/sync/client'
-import { UNIT_NAMES, UNITS, type Unit } from '@/lib/units'
+import { UNITS, type Unit } from '@/lib/units'
 
 const EXAMPLE: Record<Unit, string> = { kg: '60 · 77.5 · 100', lb: '135 · 185 · 225' }
 
@@ -21,6 +22,7 @@ export default function UnitsPage() {
   const userId = useUserId()
   const unit = useUnit()
   const { syncNow } = useSync()
+  const t = useTranslations('profile')
 
   async function choose(next: Unit) {
     if (!userId || next === unit) return
@@ -57,7 +59,7 @@ export default function UnitsPage() {
                   className="sr-only"
                 />
                 <span className="figure text-3xl leading-none text-ink">{value}</span>
-                <span>{UNIT_NAMES[value]}</span>
+                <span>{t(`units.${value}`)}</span>
                 <span className="figure text-xs">{EXAMPLE[value]}</span>
               </label>
             ))}

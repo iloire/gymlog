@@ -14,6 +14,7 @@ import {
   type SyncRow,
   type SyncTable,
 } from '@/lib/sync/types'
+import { LOCALES } from '@/lib/i18n'
 import { UNITS } from '@/lib/units'
 
 /**
@@ -41,6 +42,8 @@ const requestSchema = z.object({
   mutations: z.array(mutationSchema).max(MAX_PUSH),
   /** A display unit chosen on the device; absent when it has not changed. */
   unit: z.enum(UNITS).optional(),
+  /** The language chosen on the device; absent when it has not changed. */
+  locale: z.enum(LOCALES).optional(),
 })
 
 export async function POST(request: Request) {
@@ -54,12 +57,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'bad_request', issues: parsed.error.issues }, { status: 400 })
   }
 
-  const { cursor, globalCursor, clientId, mutations, unit: chosenUnit } = parsed.data
+  const { cursor, globalCursor, clientId, mutations, unit: chosenUnit, locale: chosenLocale } = parsed.data
   const applied: string[] = []
   const rejected: RejectedMutation[] = []
 
   const [user] = await db
-    .select({ syncRev: users.syncRev, unit: users.unit })
+    .select({ syncRev: users.syncRev, unit: users.unit, locale: users.locale })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
@@ -67,6 +70,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
   const unit = chosenUnit ?? user.unit
+  const locale = chosenLocale ?? user.locale
 
   // Validated up front so the transaction below can never need a rollback.
   if (mutations.some((m) => !Number.isFinite(Number((m.row as SyncRow).updatedAt)))) {
@@ -174,8 +178,8 @@ export async function POST(request: Request) {
       applied.push(mutation.id)
     }
 
-    if (rev !== base || chosenUnit) {
-      await tx.update(users).set({ syncRev: rev, unit }).where(eq(users.id, userId))
+    if (rev !== base || chosenUnit || chosenLocale) {
+      await tx.update(users).set({ syncRev: rev, unit, locale }).where(eq(users.id, userId))
     }
   })
 
@@ -206,6 +210,7 @@ export async function POST(request: Request) {
     cursor: rev,
     serverTime: Date.now(),
     unit,
+    locale,
     changes,
     applied,
     rejected,

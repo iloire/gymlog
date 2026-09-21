@@ -2,6 +2,7 @@
 
 import { getDb, type GymlogDexie } from '@/lib/db/dexie'
 import { newId } from '@/lib/id'
+import { type Locale, parseLocale } from '@/lib/i18n'
 import { DEFAULT_UNIT, parseUnit, type Unit } from '@/lib/units'
 import {
   MAX_PUSH,
@@ -22,9 +23,15 @@ const META_CLIENT_ID = 'clientId'
 const META_CLOCK_OFFSET = 'clockOffset'
 const META_LAST_SYNC = 'lastSyncAt'
 const META_REJECTIONS = 'rejections'
-const META_UNIT = 'unit'
-/** A unit chosen here and not yet pushed; cleared once the server has it. */
-const META_UNIT_PENDING = 'unitPending'
+/**
+ * The account settings a device can change: the display unit and the
+ * language. Each is kept in `meta` under its own name, plus a `…Pending` copy
+ * of a choice made here and not yet pushed, cleared once the server has it.
+ */
+const PREFERENCES = ['unit', 'locale'] as const
+type Preference = (typeof PREFERENCES)[number]
+type PreferenceValue = { unit: Unit; locale: Locale }
+const pendingKey = (pref: Preference) => `${pref}Pending`
 /**
  * Set once the device has re-pulled everything and re-queued what it held that
  * the server did not. Before winners were applied on a stale rejection, a
@@ -103,7 +110,7 @@ async function run(userId: string): Promise<SyncResult> {
   // session row is written before the set logs that reference it, and never
   // more than the server accepts in one request.
   const mutations = await db.outbox.orderBy('queuedAt').limit(MAX_PUSH).toArray()
-  const pendingUnit = await meta<Unit | null>(db, META_UNIT_PENDING, null)
+  const pending = await pendingPreferences(db)
   const cursor = await meta<number>(db, META_CURSOR, 0)
   // One full pull to catch up a device that drifted (see META_REPAIRED). Rows
   // the server sends from before the cursor are ones this device should hold
@@ -115,7 +122,7 @@ async function run(userId: string): Promise<SyncResult> {
     globalCursor: await meta<number>(db, META_GLOBAL_CURSOR, 0),
     clientId: await clientId(db),
     mutations,
-    ...(pendingUnit ? { unit: pendingUnit } : {}),
+    ...pending,
   }
 
   let response: Response
@@ -207,13 +214,15 @@ async function run(userId: string): Promise<SyncResult> {
       await setMeta(db, META_REJECTIONS, [...kept, ...fresh].slice(-MAX_REJECTIONS))
     }
 
-    // The server's unit is every device's unit — unless this one chose again
-    // while the request was in flight, in which case that choice still stands
-    // and goes up with the next sync.
-    const stillPending = await meta<Unit | null>(db, META_UNIT_PENDING, null)
-    if (result.unit !== undefined && (stillPending === null || stillPending === pendingUnit)) {
-      await setMeta(db, META_UNIT, parseUnit(result.unit))
-      if (stillPending !== null) await db.meta.delete(META_UNIT_PENDING)
+    // The server's unit is every device's unit, and the same for the language
+    // — unless this one chose again while the request was in flight, in which
+    // case that choice still stands and goes up with the next sync.
+    for (const pref of PREFERENCES) {
+      const stillPending = await meta<string | null>(db, pendingKey(pref), null)
+      if (result[pref] !== undefined && (stillPending === null || stillPending === pending[pref])) {
+        await setMeta(db, pref, result[pref])
+        if (stillPending !== null) await db.meta.delete(pendingKey(pref))
+      }
     }
 
     await setMeta(db, META_CURSOR, result.cursor)
@@ -248,19 +257,43 @@ export async function clearRejections(userId: string): Promise<void> {
   await getDb(userId).meta.delete(META_REJECTIONS)
 }
 
-/** The unit weights are shown in, as last synced or chosen here; kilograms until then. */
-export async function readUnit(userId: string): Promise<Unit> {
-  return parseUnit(await meta<unknown>(getDb(userId), META_UNIT, DEFAULT_UNIT))
+/** The choices made here and not yet pushed, in the shape the request carries them. */
+async function pendingPreferences(db: GymlogDexie): Promise<Partial<PreferenceValue>> {
+  const out: Partial<PreferenceValue> = {}
+  const unit = await meta<Unit | null>(db, pendingKey('unit'), null)
+  if (unit) out.unit = unit
+  const locale = await meta<Locale | null>(db, pendingKey('locale'), null)
+  if (locale) out.locale = locale
+  return out
 }
 
 /**
- * Choose the unit on this device. It applies at once, offline or not, and the
- * next sync carries it to the account so the other phone follows.
+ * Choose a preference on this device. It applies at once, offline or not, and
+ * the next sync carries it to the account so the other phone follows.
  */
-export async function setUnit(userId: string, unit: Unit): Promise<void> {
+async function setPreference<P extends Preference>(userId: string, pref: P, value: PreferenceValue[P]): Promise<void> {
   const db = getDb(userId)
   await db.transaction('rw', db.meta, async () => {
-    await setMeta(db, META_UNIT, unit)
-    await setMeta(db, META_UNIT_PENDING, unit)
+    await setMeta(db, pref, value)
+    await setMeta(db, pendingKey(pref), value)
   })
 }
+
+/** The unit weights are shown in, as last synced or chosen here; kilograms until then. */
+export async function readUnit(userId: string): Promise<Unit> {
+  return parseUnit(await meta<unknown>(getDb(userId), 'unit', DEFAULT_UNIT))
+}
+
+export const setUnit = (userId: string, unit: Unit): Promise<void> => setPreference(userId, 'unit', unit)
+
+/**
+ * The language, as last synced or chosen here — or null when this device has
+ * never heard: then the cookie the proxy set from the browser stands, rather
+ * than English overriding it before the first sync.
+ */
+export async function readLocale(userId: string): Promise<Locale | null> {
+  const value = await meta<unknown>(getDb(userId), 'locale', null)
+  return value === null ? null : parseLocale(value)
+}
+
+export const setLocale = (userId: string, locale: Locale): Promise<void> => setPreference(userId, 'locale', locale)

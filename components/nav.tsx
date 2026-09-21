@@ -3,17 +3,18 @@
 import { Dumbbell, Library, ListChecks, TrendingUp, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 import { OpenWorkoutBar } from '@/components/open-workout-bar'
 import { RestBar, useRest } from '@/components/rest-timer'
 
 const items = [
-  { href: '/', label: 'Today', icon: Dumbbell },
-  { href: '/workouts', label: 'Plan', icon: ListChecks },
-  { href: '/history', label: 'Progress', icon: TrendingUp },
-  { href: '/exercises', label: 'Exercises', icon: Library },
-  { href: '/profile', label: 'Profile', icon: UserRound },
-]
+  { href: '/', label: 'today', icon: Dumbbell },
+  { href: '/workouts', label: 'plan', icon: ListChecks },
+  { href: '/history', label: 'progress', icon: TrendingUp },
+  { href: '/exercises', label: 'exercises', icon: Library },
+  { href: '/profile', label: 'profile', icon: UserRound },
+] as const
 
 // Pages with no tab of their own, reached from the tab named here. The
 // premade programmes are browsed from the Plan tab.
@@ -23,6 +24,7 @@ const parents: Record<string, string> = {
 }
 
 export function Nav({ children }: { children?: React.ReactNode }) {
+  const t = useTranslations('common.nav')
   const path = usePathname()
   const pathname = parents[path] ?? path
   const rest = useRest()
@@ -50,7 +52,7 @@ export function Nav({ children }: { children?: React.ReactNode }) {
                   }`}
                 >
                   <Icon size={20} strokeWidth={active ? 2.4 : 1.8} aria-hidden />
-                  {label}
+                  {t(label)}
                   <span
                     className={`h-0.5 w-6 rounded-full ${active ? 'bg-plate-blue-lift' : 'bg-transparent'}`}
                   />

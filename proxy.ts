@@ -2,12 +2,26 @@ import NextAuth from 'next-auth'
 import { NextResponse } from 'next/server'
 
 import { authConfig } from '@/auth.config'
+import { LOCALE_COOKIE, LOCALE_COOKIE_ATTRIBUTES, negotiateLocale } from '@/lib/i18n'
 
 // `middleware.ts` was renamed to `proxy.ts` in Next 16.
 // Only the edge-safe config is used here — no db, no bcrypt.
 const { auth } = NextAuth(authConfig)
 
 const publicPaths = ['/login', '/signup']
+
+/**
+ * A first visit has no language cookie yet; the browser's Accept-Language
+ * picks one, and from then on the cookie is the device's word (rewritten by
+ * the Language page and by sync, never here). Set on the redirect too, so the
+ * sign-in page a visitor lands on is already in their language.
+ */
+function withLocale(req: Parameters<Parameters<typeof auth>[0]>[0], response: NextResponse): NextResponse {
+  if (!req.cookies.has(LOCALE_COOKIE)) {
+    response.cookies.set(LOCALE_COOKIE, negotiateLocale(req.headers.get('accept-language')), LOCALE_COOKIE_ATTRIBUTES)
+  }
+  return response
+}
 
 export default auth((req) => {
   const { pathname } = req.nextUrl
@@ -19,16 +33,16 @@ export default auth((req) => {
   }
 
   if (publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
-    return NextResponse.next()
+    return withLocale(req, NextResponse.next())
   }
 
   if (!req.auth) {
     const url = new URL('/login', req.nextUrl.origin)
     url.searchParams.set('callbackUrl', `${pathname}${req.nextUrl.search}`)
-    return NextResponse.redirect(url)
+    return withLocale(req, NextResponse.redirect(url))
   }
 
-  return NextResponse.next()
+  return withLocale(req, NextResponse.next())
 })
 
 export const config = {

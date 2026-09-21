@@ -98,6 +98,20 @@ Components never fetch. The sync engine is the only network caller, and it runs 
   typed (to the gram, so two phones write the same row), `tidyWeight` to move a prescription or
   history written in the other unit onto a weight the plates make (an empty 20 kg bar is 44.1 lb,
   which becomes 45). Steps and plates have a table per unit (`lib/weights.ts`, `lib/plates.ts`).
+- **The language** (`users.locale`, `en` or `es`) rides the same way: `meta.locale` plus
+  `localePending`, `locale` in the push and in every response, last device to choose wins, no rev.
+  The shared preference helper in `lib/sync/client.ts` handles both. What differs is that the
+  server has to know it before Dexie is open — for `<html lang>`, the sign-in page and the shell it
+  renders — so each device also keeps it in a cookie (`gymlog_locale`): set by `proxy.ts` from
+  `Accept-Language` on a first visit, rewritten by `LocaleProvider` whenever the shown language
+  changes, and copied onto a new account at signup. `LocaleProvider` (`components/locale-provider.tsx`)
+  starts from the cookie the layout read and then follows `meta.locale` like `useUnit` follows the
+  unit; `readLocale` is null until the account has spoken, so the browser's choice is not overridden
+  by English before the first sync. Both message bundles (`messages/<locale>/<screen>.json`,
+  assembled in `messages/index.ts`) are on the device, so switching never needs the network and a
+  key Spanish lacks reads in English; `tests/i18n.test.ts` fails the build on that gap. Nothing is
+  in the URL: the service worker, the deep links and the redirects assume one path per screen. The
+  full plan and what stays English: `docs/i18n.md`.
 
 ## Deterministic ids
 

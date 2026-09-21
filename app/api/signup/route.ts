@@ -1,6 +1,8 @@
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { LOCALE_COOKIE, parseLocale } from '@/lib/i18n'
 import { createUser } from '@/lib/users'
 
 const schema = z.object({
@@ -16,7 +18,9 @@ export async function POST(request: Request) {
   }
 
   const { email, password, name } = parsed.data
-  const result = await createUser(email, password, name?.length ? name : null)
+  // The device's language, set by the proxy from the browser before there was an account.
+  const locale = parseLocale((await cookies()).get(LOCALE_COOKIE)?.value)
+  const result = await createUser(email, password, name?.length ? name : null, locale)
 
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 409 })

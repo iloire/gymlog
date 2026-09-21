@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "today": "Today",
+    "plan": "Plan",
+    "progress": "Progress",
+    "exercises": "Exercises",
+    "profile": "Profile"
+  },
+  "auth": {
+    "tagline": "Your programme, your numbers, signal or no signal.",
+    "working": "Working…",
+    "language": "Language"
+  }
+}

@@ -18,7 +18,7 @@ import { daysAgo, rotation, sessionHistory } from '@/lib/history'
 import { assignDay, startNewStage } from '@/lib/program'
 import { activeProgram, dayOfWeek } from '@/lib/queries'
 import { startSession } from '@/lib/sessions'
-import { WEEKDAY_INITIALS, weekdayName } from '@/lib/week'
+import { weekdayInitials, weekdayName } from '@/lib/week'
 
 /** A, B, C… — the letter a workout wears on the week and beside its name. */
 const letter = (index: number) => String.fromCharCode(65 + index)
@@ -76,7 +76,7 @@ export default function WorkoutsPage() {
     )
 
     // A programme day pointing at a deleted workout is a rest day.
-    const week = WEEKDAY_INITIALS.map((_, weekday) => {
+    const week = weekdayInitials().map((_, weekday) => {
       const templateId = days.find((day) => day.dayOfWeek === weekday)?.templateId ?? null
       const index = workouts.findIndex((workout) => workout.id === templateId)
       return { weekday, templateId: index === -1 ? null : templateId, index }
@@ -137,7 +137,7 @@ export default function WorkoutsPage() {
               return (
                 <li key={day.weekday} className="flex flex-col items-center gap-1.5">
                   <span aria-hidden className={`text-xs ${isToday ? 'text-ink' : 'text-ink-dim'}`}>
-                    {WEEKDAY_INITIALS[day.weekday]}
+                    {weekdayInitials()[day.weekday]}
                   </span>
                   <button
                     type="button"

@@ -6,6 +6,7 @@
  * the same function. Weeks run Monday-first, like the rest of the app.
  */
 import { addDays, weekStart } from '@/lib/calendar'
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n'
 
 /**
  * `done` — a workout was logged that day. `missed` — one was planned and the
@@ -40,14 +41,27 @@ export type Week = {
   missed: WeekDay | null
 }
 
-const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+const WEEKDAY_NAMES: Record<Locale, string[]> = {
+  en: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+  es: ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'],
+}
 
-/** 'M', 'T', 'W', 'T', 'F', 'S', 'S' — the strip's initials, Monday-first. */
-export const WEEKDAY_INITIALS = WEEKDAY_NAMES.map((name) => name[0] as string)
+/**
+ * The strip's initials, Monday-first. A table, not the names' first letters:
+ * Spanish writes Wednesday as X so it does not read as a second Tuesday.
+ */
+const WEEKDAY_INITIALS: Record<Locale, string[]> = {
+  en: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+  es: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
+}
+
+export function weekdayInitials(locale: Locale = DEFAULT_LOCALE): string[] {
+  return WEEKDAY_INITIALS[locale]
+}
 
 /** The full name of a weekday index, 0 = Monday. */
-export function weekdayName(weekday: number): string {
-  return WEEKDAY_NAMES[weekday] ?? ''
+export function weekdayName(weekday: number, locale: Locale = DEFAULT_LOCALE): string {
+  return WEEKDAY_NAMES[locale][weekday] ?? ''
 }
 
 export function planWeek({
@@ -63,7 +77,7 @@ export function planWeek({
 }): Week {
   const monday = weekStart(today)
 
-  const days: WeekDay[] = WEEKDAY_NAMES.map((_, weekday) => {
+  const days: WeekDay[] = Array.from({ length: 7 }, (_, weekday) => {
     const date = addDays(monday, weekday)
     // What you actually did wins over what was on the programme: on a day you
     // trained something else, the strip should name the workout you did.

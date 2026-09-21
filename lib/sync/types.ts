@@ -1,5 +1,6 @@
 /** Wire types shared by the client sync engine and `/api/sync`. */
 
+import type { Locale } from '@/lib/i18n'
 import type { Unit } from '@/lib/units'
 
 export const SYNC_TABLES = [
@@ -90,11 +91,13 @@ export type SyncRequest = {
   clientId: string
   mutations: Mutation[]
   /**
-   * A unit chosen on this device since its last push. The one account setting
-   * a phone can change: it is not a row, so it rides beside the mutations and
+   * A unit chosen on this device since its last push. An account setting a
+   * phone can change: it is not a row, so it rides beside the mutations and
    * the server takes it as given — the last device to choose wins.
    */
   unit?: Unit
+  /** The language chosen on this device since its last push; the same rules as `unit`. */
+  locale?: Locale
 }
 
 export type RejectedMutation = {
@@ -122,6 +125,8 @@ export type SyncResponse = {
   serverTime: number
   /** `users.unit` after this push, so every device shows weights the same way. */
   unit: Unit
+  /** `users.locale` after this push, so every device reads in the same language. */
+  locale: Locale
   changes: Partial<Record<SyncTable, SyncRow[]>>
   applied: string[]
   rejected: RejectedMutation[]

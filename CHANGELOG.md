@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-21 16:02
+
+- **The app can read in Spanish.** Profile gains a Language page, English or Español, saved to the
+  account and synced like the unit so the other phone follows; the sign-in page has an EN / ES
+  toggle and a first visit starts in the browser's language. Phase 1 of `docs/i18n.md`: the
+  plumbing (`next-intl` without its routing, a cookie so the server shell and `<html lang>` are
+  right before Dexie opens, both bundles on the device so switching works offline), the sync wire
+  and a `users.locale` migration, and Spanish for the nav, the profile hub and the Language page.
+  Every other screen still reads English until its own commit. Dates, months, weekdays and weights
+  format per language (`15 sept 2026`, `77,5 kg`, `L M X J V S D`). **Prod needs
+  `npm run db:migrate:prod` before sync works.**
+
 ## 2026-09-21 15:40
 
 - **Plan for English and Spanish** in `docs/i18n.md`: the language is an account setting synced

@@ -1,0 +1,37 @@
+{
+  "title": "Perfil",
+  "back": "Perfil",
+  "rows": {
+    "appearance": "Apariencia",
+    "equipment": "Material",
+    "units": "Unidades",
+    "language": "Idioma",
+    "bodyweight": "Peso corporal",
+    "data": "Tus datos",
+    "dataValue": "Exportar e importar, un solo archivo",
+    "api": "Acceso por API",
+    "apiValue": "Tokens para ChatGPT, Claude o un script",
+    "admin": "Administración",
+    "adminValue": "Todas las cuentas"
+  },
+  "values": {
+    "notSet": "Sin configurar",
+    "noReadings": "Sin pesajes todavía",
+    "items": "{count, plural, one {# elemento} other {# elementos}}",
+    "theme": {
+      "dark": "oscuro",
+      "light": "claro",
+      "system": "según el teléfono"
+    }
+  },
+  "language": {
+    "title": "Idioma",
+    "intro": "En qué idioma se lee cada pantalla. Tus ejercicios, notas y nombres de entrenamiento quedan tal como los escribiste.",
+    "legend": "Idioma",
+    "saved": "Se guarda en tu cuenta, así que todos los dispositivos con tu sesión se leen igual."
+  },
+  "units": {
+    "kg": "Kilogramos",
+    "lb": "Libras"
+  }
+}

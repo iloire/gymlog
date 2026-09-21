@@ -1,0 +1,37 @@
+{
+  "title": "Profile",
+  "back": "Profile",
+  "rows": {
+    "appearance": "Appearance",
+    "equipment": "Equipment",
+    "units": "Units",
+    "language": "Language",
+    "bodyweight": "Bodyweight",
+    "data": "Your data",
+    "dataValue": "Export and import, one file",
+    "api": "API access",
+    "apiValue": "Tokens for ChatGPT, Claude or a script",
+    "admin": "Admin",
+    "adminValue": "Every account"
+  },
+  "values": {
+    "notSet": "Not set yet",
+    "noReadings": "No readings yet",
+    "items": "{count, plural, one {# item} other {# items}}",
+    "theme": {
+      "dark": "dark",
+      "light": "light",
+      "system": "follows the phone"
+    }
+  },
+  "language": {
+    "title": "Language",
+    "intro": "What every screen reads in. Your exercises, notes and workout names stay as you typed them.",
+    "legend": "Language",
+    "saved": "Saved to your account, so every device signed in as you reads the same."
+  },
+  "units": {
+    "kg": "Kilograms",
+    "lb": "Pounds"
+  }
+}

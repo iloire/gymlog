@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "today": "Hoy",
+    "plan": "Plan",
+    "progress": "Progreso",
+    "exercises": "Ejercicios",
+    "profile": "Perfil"
+  },
+  "auth": {
+    "tagline": "Tu programa, tus números, con o sin cobertura.",
+    "working": "Un momento…",
+    "language": "Idioma"
+  }
+}

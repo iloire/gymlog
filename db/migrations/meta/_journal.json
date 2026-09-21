@@ -50,6 +50,13 @@
       "when": 1789723522465,
       "tag": "0006_sync_conflicts",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1790006322591,
+      "tag": "0007_user_locale",
+      "breakpoints": true
     }
   ]
 }

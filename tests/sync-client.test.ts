@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { destroyDb, getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
-import { clearRejections, clientId, now, readUnit, rejections, setUnit, sync } from '@/lib/sync/client'
+import { clearRejections, clientId, now, readLocale, readUnit, rejections, setLocale, setUnit, sync } from '@/lib/sync/client'
 import { MAX_PUSH, mutationKey, type SyncRequest, type SyncResponse } from '@/lib/sync/types'
 
 const USER = 'user-1'
 
 function response(overrides: Partial<SyncResponse> = {}): SyncResponse {
-  return { cursor: 0, serverTime: Date.now(), unit: 'kg', changes: {}, applied: [], rejected: [], ...overrides }
+  return { cursor: 0, serverTime: Date.now(), unit: 'kg', locale: 'en', changes: {}, applied: [], rejected: [], ...overrides }
 }
 
 /** Stub fetch; `reply` builds the server response from the parsed request. */
@@ -397,6 +397,57 @@ describe('sync — display unit', () => {
     const { calls } = server(acceptAll)
     await sync(USER)
     expect(calls[0]).not.toHaveProperty('unit')
+  })
+})
+
+describe('sync — language', () => {
+  it('has no opinion until the server or the user says, so the cookie the browser chose stands', async () => {
+    expect(await readLocale(USER)).toBeNull()
+  })
+
+  it('takes the language the server reports, so the other phone follows a choice made here', async () => {
+    server(() => response({ locale: 'es' }))
+    await sync(USER)
+    expect(await readLocale(USER)).toBe('es')
+  })
+
+  it('applies a choice at once, pushes it on the next sync, and then stops sending it', async () => {
+    await setLocale(USER, 'es')
+    expect(await readLocale(USER)).toBe('es')
+
+    let stored: 'en' | 'es' = 'en'
+    const { calls } = server((request) => response({ locale: (stored = request.locale ?? stored) }))
+    await sync(USER)
+    await sync(USER)
+
+    expect(calls[0]?.locale).toBe('es')
+    expect(calls[1]?.locale).toBeUndefined()
+    expect(await readLocale(USER)).toBe('es')
+  })
+
+  it('keeps a choice made while the request was in flight, over what the server answered', async () => {
+    await setLocale(USER, 'es')
+    const { calls } = server(async (request) => {
+      await setLocale(USER, 'en')
+      return response({ locale: request.locale ?? 'en' })
+    })
+
+    await sync(USER)
+    expect(await readLocale(USER)).toBe('en')
+
+    await sync(USER)
+    expect(calls[1]?.locale).toBe('en')
+  })
+
+  it('carries the unit and the language in one push, and neither when nothing was chosen', async () => {
+    const { calls } = server(acceptAll)
+    await sync(USER)
+    expect(calls[0]).not.toHaveProperty('locale')
+
+    await setUnit(USER, 'lb')
+    await setLocale(USER, 'es')
+    await sync(USER)
+    expect(calls[1]).toMatchObject({ unit: 'lb', locale: 'es' })
   })
 })
 

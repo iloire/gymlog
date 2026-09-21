@@ -4,10 +4,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 
 import { addMonths, monthGrid } from '@/lib/calendar'
-import { formatDay } from '@/lib/format'
+import { formatDay, formatMonth } from '@/lib/format'
+import { weekdayInitials } from '@/lib/week'
 
-const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-const monthFormat = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 
 /**
  * A month of training at a glance. A trained day is filled like a done set
@@ -35,7 +34,7 @@ export function TrainingCalendar({
     <section aria-label="Training calendar">
       <div className="flex items-center gap-2">
         <h2 className="min-w-0 flex-1">
-          <span className="figure text-xl">{monthFormat.format(new Date(`${month}-01T00:00:00Z`))}</span>
+          <span className="figure text-xl">{formatMonth(month)}</span>
           <span className="ml-2 text-sm text-ink-dim">
             {daysThisMonth} {daysThisMonth === 1 ? 'day' : 'days'}
           </span>
@@ -51,7 +50,7 @@ export function TrainingCalendar({
       <div className="mt-3 flex gap-2" aria-hidden="true">
         <span className="w-1 shrink-0" />
         <span className="grid flex-1 grid-cols-7 gap-1.5 text-center text-xs text-ink-dim">
-          {WEEKDAYS.map((day, index) => (
+          {weekdayInitials().map((day, index) => (
             <span key={index}>{day}</span>
           ))}
         </span>

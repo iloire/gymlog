@@ -1,4 +1,4 @@
-import { describeDay, WEEKDAY_INITIALS, type WeekDay } from '@/lib/week'
+import { describeDay, weekdayInitials, type WeekDay } from '@/lib/week'
 
 /**
  * The week at a glance under Today's header: a square per day, Monday-first.
@@ -14,7 +14,7 @@ export function WeekStrip({ days }: { days: WeekDay[] }) {
         {days.map((day) => (
           <li key={day.date} className="flex flex-col items-center gap-1.5">
             <span aria-hidden="true" className={`text-xs ${day.isToday ? 'text-ink' : 'text-ink-dim'}`}>
-              {WEEKDAY_INITIALS[day.weekday]}
+              {weekdayInitials()[day.weekday]}
             </span>
             <span
               className={`flex aspect-square w-full items-center justify-center rounded-sm ${SQUARE[day.state]} ${

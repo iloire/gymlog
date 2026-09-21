@@ -47,12 +47,24 @@ function mutation(table: SyncTable, row: Record<string, unknown>): Mutation {
 
 async function sync(
   mutations: Mutation[] = [],
-  { cursor = 0, globalCursor = 0, unit }: { cursor?: number; globalCursor?: number; unit?: string } = {},
+  {
+    cursor = 0,
+    globalCursor = 0,
+    unit,
+    locale,
+  }: { cursor?: number; globalCursor?: number; unit?: string; locale?: string } = {},
 ): Promise<{ status: number; body: SyncResponse }> {
   const response = await POST(
     new Request('http://test/api/sync', {
       method: 'POST',
-      body: JSON.stringify({ cursor, globalCursor, clientId: 'device-1', mutations, ...(unit ? { unit } : {}) }),
+      body: JSON.stringify({
+        cursor,
+        globalCursor,
+        clientId: 'device-1',
+        mutations,
+        ...(unit ? { unit } : {}),
+        ...(locale ? { locale } : {}),
+      }),
     }),
   )
   return { status: response.status, body: await response.json() }
@@ -372,6 +384,31 @@ describe('POST /api/sync — pull', () => {
     const before = Date.now()
     const { body } = await sync()
     expect(body.serverTime).toBeGreaterThanOrEqual(before)
+  })
+})
+
+describe('POST /api/sync — language', () => {
+  it('reports the account language on every sync, English until chosen', async () => {
+    const { body } = await sync()
+    expect(body.locale).toBe('en')
+  })
+
+  it('stores a language chosen on the device and reports it back to every device', async () => {
+    const chosen = await sync([], { locale: 'es' })
+    expect(chosen.body.locale).toBe('es')
+
+    const [user] = await db.select().from(schema.users).where(eq(schema.users.id, ALICE))
+    expect(user?.locale).toBe('es')
+    // Not a row: the sync counter does not move for it.
+    expect(user?.syncRev).toBe(0)
+
+    const other = await sync()
+    expect(other.body.locale).toBe('es')
+  })
+
+  it('refuses a language it does not have', async () => {
+    const { status } = await sync([], { locale: 'fr' })
+    expect(status).toBe(400)
   })
 })
 
