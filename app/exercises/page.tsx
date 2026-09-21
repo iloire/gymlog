@@ -22,9 +22,11 @@ import {
 import { FavoriteButton } from '@/components/favorite-button'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
+import { useLocale } from '@/components/locale-provider'
 import { BODY_PARTS, bodyPartsOf } from '@/lib/body-parts'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
 import { exerciseEquipment } from '@/lib/equipment'
+import { exerciseName } from '@/lib/exercise-i18n'
 import { favoriteExerciseIds } from '@/lib/favorites'
 import { exerciseRank, NO_RANK } from '@/lib/queries'
 
@@ -37,6 +39,7 @@ const PAGE = 60
 export default function ExercisesPage() {
   const t = useTranslations('exercises')
   const label = useLibraryLabel()
+  const locale = useLocale()
   const userId = useUserId()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState(NO_FILTER)
@@ -61,8 +64,8 @@ export default function ExercisesPage() {
   const have = useMemo(() => (equipment ? new Set(equipment) : null), [equipment])
 
   const results = useMemo(
-    () => filterExercises(exercises, filter, query, favorites, have, rank, (part) => label('bodyPart', part)),
-    [exercises, filter, query, favorites, have, rank, label],
+    () => filterExercises(exercises, filter, query, favorites, have, rank, (part) => label('bodyPart', part), locale),
+    [exercises, filter, query, favorites, have, rank, label, locale],
   )
   const narrowed = isFiltered(filter) || query.trim() !== ''
 
@@ -189,14 +192,14 @@ export default function ExercisesPage() {
                     <FavoriteButton
                       userId={userId}
                       exerciseId={exercise.id}
-                      exerciseName={exercise.name}
+                      exerciseName={exerciseName(exercise, locale)}
                       favorite={favorites.has(exercise.id)}
                       className="absolute top-1.5 right-1.5 z-10 rounded-full bg-ground/70 p-2 text-ink backdrop-blur-sm"
                     />
                   )}
                   <Link href={`/exercises/${exercise.id}`} className="block">
                     <ExerciseFrames exercise={exercise} className="aspect-square w-full" />
-                    <span className="mt-2 block text-sm leading-snug">{exercise.name}</span>
+                    <span className="mt-2 block text-sm leading-snug">{exerciseName(exercise, locale)}</span>
                     <span className="block text-xs text-ink-dim">
                       {label('equipment', exerciseEquipment(exercise))}
                     </span>

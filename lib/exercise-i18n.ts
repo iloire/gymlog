@@ -19,9 +19,14 @@ type Named = { id: string; name: string }
 
 const NAMES: Record<Locale, Record<string, string>> = { en: {}, es: names }
 
+/** A library id's name in the language, or `fallback` (the row's own name) when the library has no word for it. */
+export function libraryName(id: string, fallback: string, locale: Locale): string {
+  return NAMES[locale][id] ?? fallback
+}
+
 /** The exercise's name in the language, or as typed when the library has no word for it. */
 export function exerciseName(exercise: Named, locale: Locale): string {
-  return NAMES[locale][exercise.id] ?? exercise.name
+  return libraryName(exercise.id, exercise.name, locale)
 }
 
 /** Both names, for search: the one on screen and the library's English one. */

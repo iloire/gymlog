@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useTranslations } from 'next-intl'
 
 import { useLocale } from '@/components/locale-provider'
+import { libraryName } from '@/lib/exercise-i18n'
 import { Loading, Placeholder } from '@/components/loading'
 import { SessionSets } from '@/components/session-sets'
 import { useUnit } from '@/components/use-unit'
@@ -131,7 +132,7 @@ export function WorkoutSummary({
           <ul className="mt-2 divide-y divide-line border-y border-line">
             {beaten.map((record) => (
               <li key={record.exerciseId} className="flex items-baseline justify-between gap-3 py-3">
-                <span className="min-w-0 truncate text-[15px]">{record.name}</span>
+                <span className="min-w-0 truncate text-[15px]">{libraryName(record.exerciseId, record.name, locale)}</span>
                 <span className="shrink-0 text-right">
                   <span className="figure block text-[15px] text-plate-red">{recordHeadline(record, unit, locale)}</span>
                   <span className="figure block text-sm text-ink-dim">
@@ -146,7 +147,7 @@ export function WorkoutSummary({
 
       {firsts.length > 0 && (
         <p className="mt-6 text-[15px] text-ink-dim">
-          {t('firstTime', { names: firsts.map((record) => record.name).join(', '), count: firsts.length })}
+          {t('firstTime', { names: firsts.map((record) => libraryName(record.exerciseId, record.name, locale)).join(', '), count: firsts.length })}
         </p>
       )}
 

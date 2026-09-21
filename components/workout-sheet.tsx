@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useId, useRef } from 'react'
 
 import type { LocalSetLog } from '@/lib/db/dexie'
+import { libraryName } from '@/lib/exercise-i18n'
+import { useLocale } from '@/components/locale-provider'
 
 /**
  * The whole workout from the gym screen: every exercise with its sets as
@@ -32,6 +34,7 @@ export function WorkoutSheet({
   const titleId = useId()
   const t = useTranslations('plan.workoutSheet')
 
+  const locale = useLocale()
   useEffect(() => {
     const dialog = ref.current
     dialog?.showModal()
@@ -82,7 +85,7 @@ export function WorkoutSheet({
                 >
                   <span className="figure w-6 shrink-0 text-sm text-ink-dim">{index + 1}</span>
                   <span className={`min-w-0 flex-1 truncate text-[15px] ${finished ? 'text-ink-dim' : ''}`}>
-                    {exercise.name}
+                    {libraryName(exercise.logs[0]?.exerciseId ?? '', exercise.name, locale)}
                     {index === current && <span className="ml-2 text-xs text-ink-dim">{t('now')}</span>}
                   </span>
                   <span className="flex shrink-0 gap-1" aria-hidden>

@@ -6,7 +6,9 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
 import { useUserId } from '@/components/session-boot'
+import { useLocale } from '@/components/locale-provider'
 import { getDb } from '@/lib/db/dexie'
+import { libraryName } from '@/lib/exercise-i18n'
 import { today } from '@/lib/queries'
 import { openWorkout } from '@/lib/sessions'
 
@@ -20,6 +22,7 @@ export function OpenWorkoutBar() {
   const t = useTranslations('today.openBar')
   const userId = useUserId()
 
+  const locale = useLocale()
   const open = useLiveQuery(async () => {
     if (!userId) return null
     const db = getDb(userId)
@@ -51,7 +54,7 @@ export function OpenWorkoutBar() {
         <span className="text-ink-dim">{open.name} · </span>
         {open.next
           ? t.rich('next', {
-              exercise: open.next.exerciseName,
+              exercise: libraryName(open.next.exerciseId, open.next.exerciseName, locale),
               setIndex: open.next.setIndex,
               sets: open.next.sets,
               n: (chunks) => <span className="figure">{chunks}</span>,

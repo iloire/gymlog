@@ -118,7 +118,7 @@ export function nextSet(logs: LocalSetLog[]): LocalSetLog | undefined {
 
 export type OpenWorkout = {
   /** The next set to do, and how many sets its exercise has; null once every set is logged. */
-  next: { exerciseName: string; setIndex: number; sets: number } | null
+  next: { exerciseId: string; exerciseName: string; setIndex: number; sets: number } | null
 }
 
 /**
@@ -134,7 +134,7 @@ export function openWorkout(logs: LocalSetLog[]): OpenWorkout | null {
   const next = nextSet(logs)
   if (!next) return { next: null }
   const sets = Math.max(...logs.filter((log) => log.exerciseId === next.exerciseId).map((log) => log.setIndex))
-  return { next: { exerciseName: next.exerciseName, setIndex: next.setIndex, sets } }
+  return { next: { exerciseId: next.exerciseId, exerciseName: next.exerciseName, setIndex: next.setIndex, sets } }
 }
 
 /**

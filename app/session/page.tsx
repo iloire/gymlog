@@ -18,6 +18,7 @@ import { PlateRail } from '@/components/plate-rail'
 import { RemoveExercise } from '@/components/remove-exercise'
 import { RestBar, RestTakeover, useRest } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
+import { libraryName } from '@/lib/exercise-i18n'
 import { SetSquares } from '@/components/set-squares'
 import { Stepper } from '@/components/stepper'
 import { UndoToast } from '@/components/undo-toast'
@@ -354,7 +355,7 @@ function Session() {
     : groupLogs[0]
   // Nothing left to log and nothing picked to fix: Finish takes the Log button's place.
   const finishing = allDone && data.session.completedAt === null && selectedId === null
-  const exerciseName = groupLogs[0]?.exerciseName ?? t('workoutFallback')
+  const exerciseName = groupLogs[0] ? libraryName(groupLogs[0].exerciseId, groupLogs[0].exerciseName, locale) : t('workoutFallback')
 
   return (
     <div className="flex flex-1 flex-col">
@@ -386,7 +387,7 @@ function Session() {
           name={data.session.templateName}
           exercises={positions.map((at) => {
             const logs = data.logs.filter((log) => log.position === at)
-            return { position: at, name: logs[0]?.exerciseName ?? t('exerciseFallback'), logs }
+            return { position: at, name: logs[0] ? libraryName(logs[0].exerciseId, logs[0].exerciseName, locale) : t('exerciseFallback'), logs }
           })}
           current={position}
           onPick={(index) => {

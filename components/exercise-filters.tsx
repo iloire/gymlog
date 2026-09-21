@@ -4,7 +4,9 @@ import { useCallback, useState } from 'react'
 
 import { BODY_PARTS, bodyPartsOf, labelKey } from '@/lib/body-parts'
 import type { LocalExercise } from '@/lib/db/dexie'
+import { compareExerciseNames, exerciseNames } from '@/lib/exercise-i18n'
 import { exerciseEquipment, missingEquipment } from '@/lib/equipment'
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n'
 import { type ExerciseRank, NO_RANK } from '@/lib/queries'
 
 /**
@@ -88,7 +90,9 @@ export function filterExercises(
   rank: ExerciseRank = NO_RANK,
   /** A body part's name in the current language, so "piernas" finds the legs too. */
   partLabel: (part: string) => string = (part) => part,
+  locale: Locale = DEFAULT_LOCALE,
 ): LocalExercise[] {
+  const byName = compareExerciseNames(locale)
   const tier = (exercise: LocalExercise) => rankTier(exercise, favorites, rank)
   const recency = (exercise: LocalExercise) => rank.lastDone.get(exercise.id) ?? 0
 
@@ -107,14 +111,14 @@ export function filterExercises(
     )
     .filter((exercise) => {
       // A body part counts as a word of the name: "abs" finds every Abs exercise.
-      const name = exercise.name.toLowerCase()
+      const names = exerciseNames(exercise, locale).map((name) => name.toLowerCase())
       const parts = bodyPartsOf(exercise).flatMap((part) => [part.toLowerCase(), partLabel(part).toLowerCase()])
-      return words.every((word) => word.some((form) => name.includes(form) || parts.includes(form)))
+      return words.every((word) => word.some((form) => names.some((name) => name.includes(form)) || parts.includes(form)))
     })
     .sort((a, b) => {
       if (tier(a) !== tier(b)) return tier(a) - tier(b)
       if (tier(a) === 2 && recency(a) !== recency(b)) return recency(b) - recency(a)
-      return a.name.localeCompare(b.name)
+      return byName(a, b)
     })
 }
 

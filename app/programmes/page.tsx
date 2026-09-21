@@ -14,6 +14,7 @@ import { Loading, Placeholder } from '@/components/loading'
 import { useLocale } from '@/components/locale-provider'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
+import { exerciseName } from '@/lib/exercise-i18n'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
 import { equipmentName, presetFor } from '@/lib/equipment'
 import {
@@ -304,7 +305,7 @@ function ProgrammeDetail({
           <ol className="mt-3 divide-y divide-line border-y border-line">
             {workout.choices.map((choice, index) => {
               const exercise = library.get(choice.exerciseId)
-              const name = exercise?.name ?? choice.exerciseId
+              const name = exercise ? exerciseName(exercise, locale) : choice.exerciseId
 
               return (
                 <li key={`${choice.exerciseId}-${index}`}>
@@ -315,7 +316,7 @@ function ProgrammeDetail({
                     className="flex w-full items-center gap-3 py-3 text-left"
                   >
                     <ExerciseFrames
-                      exercise={{ name, images: exercise?.images ?? null }}
+                      exercise={{ id: choice.exerciseId, name, images: exercise?.images ?? null }}
                       className="aspect-[3/2] w-16 shrink-0 md:w-32"
                       animate="md"
                     />

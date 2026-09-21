@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react'
 
 import { useEquipment } from '@/components/equipment-picker'
 import { useUserId } from '@/components/session-boot'
+import { useLocale } from '@/components/locale-provider'
 import {
   ExerciseFilterChips,
   facetOptions,
@@ -18,6 +19,7 @@ import {
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
 import { exerciseEquipment } from '@/lib/equipment'
+import { exerciseName } from '@/lib/exercise-i18n'
 import { favoriteExerciseIds } from '@/lib/favorites'
 import { exerciseRank, NO_RANK } from '@/lib/queries'
 
@@ -31,6 +33,7 @@ export function ExercisePicker({
   const userId = useUserId()
   const t = useTranslations('plan.picker')
   const label = useLibraryLabel()
+  const locale = useLocale()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState(NO_FILTER)
   const equipment = useEquipment()
@@ -54,8 +57,8 @@ export function ExercisePicker({
   const have = useMemo(() => (equipment ? new Set(equipment) : null), [equipment])
 
   const results = useMemo(
-    () => filterExercises(exercises, filter, query, favorites, have, rank).slice(0, 80),
-    [exercises, filter, query, favorites, have, rank],
+    () => filterExercises(exercises, filter, query, favorites, have, rank, (part) => label('bodyPart', part), locale).slice(0, 80),
+    [exercises, filter, query, favorites, have, rank, label, locale],
   )
 
   return (
@@ -97,7 +100,7 @@ export function ExercisePicker({
             >
               <ExerciseFrames exercise={exercise} className="h-14 w-14 shrink-0" animate={false} />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[15px]">{exercise.name}</span>
+                <span className="block truncate text-[15px]">{exerciseName(exercise, locale)}</span>
                 <span className="block truncate text-sm capitalize text-ink-dim">
                   {label('equipment', exerciseEquipment(exercise))}
                 </span>

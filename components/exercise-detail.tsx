@@ -7,6 +7,7 @@ import type { ReactNode } from 'react'
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { FavoriteButton } from '@/components/favorite-button'
 import { useLocale } from '@/components/locale-provider'
+import { exerciseName } from '@/lib/exercise-i18n'
 import { Placeholder } from '@/components/loading'
 import { StrengthChart } from '@/components/strength-chart'
 import { useUnit } from '@/components/use-unit'
@@ -93,12 +94,12 @@ export function ExerciseDetail({
 
       <div className="mt-5 flex items-start justify-between gap-3">
         <h1 id={titleId} className="figure text-3xl leading-tight">
-          {exercise.name}
+          {exerciseName(exercise, locale)}
         </h1>
         <FavoriteButton
           userId={userId}
           exerciseId={exercise.id}
-          exerciseName={exercise.name}
+          exerciseName={exerciseName(exercise, locale)}
           favorite={note?.favoritedAt != null}
           className="-mr-2 shrink-0 p-2 text-ink-dim"
         />

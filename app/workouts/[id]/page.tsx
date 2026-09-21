@@ -15,6 +15,7 @@ import { Loading, Placeholder } from '@/components/loading'
 import { useLocale } from '@/components/locale-provider'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
+import { exerciseName } from '@/lib/exercise-i18n'
 import { UndoToast } from '@/components/undo-toast'
 import { useReorder } from '@/components/use-reorder'
 import { CARDIO_ITEM, isCardio } from '@/lib/cardio'
@@ -56,7 +57,7 @@ export default function WorkoutEditorPage() {
         const exercise = await db.exercises.get(item.exerciseId)
         return {
           ...item,
-          exerciseName: exercise?.name ?? fallbackName,
+          exerciseName: exercise ? exerciseName(exercise, locale) : fallbackName,
           exerciseImages: exercise?.images ?? null,
           cardio: isCardio(exercise) || item.targetDurationSec != null,
         }
@@ -194,7 +195,7 @@ export default function WorkoutEditorPage() {
                 label={t('editor.edit', { name: item.exerciseName })}
               >
                 <ExerciseFrames
-                  exercise={{ name: item.exerciseName, images: item.exerciseImages }}
+                  exercise={{ id: item.exerciseId, name: item.exerciseName, images: item.exerciseImages }}
                   className="aspect-[3/2] w-14 shrink-0 md:w-32"
                   animate="md"
                 />

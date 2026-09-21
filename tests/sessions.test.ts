@@ -640,12 +640,12 @@ describe('openWorkout', () => {
   })
 
   it('names the next set once one is logged', () => {
-    expect(openWorkout(workout({ '1-1': 10 }))?.next).toEqual({ exerciseName: 'Exercise 1', setIndex: 2, sets: 3 })
+    expect(openWorkout(workout({ '1-1': 10 }))?.next).toEqual({ exerciseId: 'ex1', exerciseName: 'Exercise 1', setIndex: 2, sets: 3 })
   })
 
   it('counts skipped sets in the total, so the set number never exceeds it', () => {
     expect(openWorkout(workout({ '2-1': 10 }, ['1-1', '1-2']))?.next).toEqual({
-      exerciseName: 'Exercise 1', setIndex: 3, sets: 3,
+      exerciseId: 'ex1', exerciseName: 'Exercise 1', setIndex: 3, sets: 3,
     })
   })
 

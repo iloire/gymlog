@@ -1,6 +1,8 @@
 'use client'
 
+import { useLocale } from '@/components/locale-provider'
 import type { LocalExercise } from '@/lib/db/dexie'
+import { exerciseName } from '@/lib/exercise-i18n'
 
 /**
  * The exercise library ships two photos per movement — the start and the end
@@ -20,10 +22,11 @@ export function ExerciseFrames({
   className = '',
   animate = true,
 }: {
-  exercise: Pick<LocalExercise, 'name' | 'images'>
+  exercise: Pick<LocalExercise, 'id' | 'name' | 'images'>
   className?: string
   animate?: boolean | 'md'
 }) {
+  const locale = useLocale()
   const [start, end] = exercise.images ?? []
 
   if (!start) {
@@ -35,7 +38,7 @@ export function ExerciseFrames({
       {/* eslint-disable-next-line @next/next/no-img-element -- local static files, already sized */}
       <img
         src={`/${start}`}
-        alt={exercise.name}
+        alt={exerciseName(exercise, locale)}
         loading="lazy"
         className="absolute inset-0 h-full w-full object-cover object-[50%_35%]"
       />

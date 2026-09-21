@@ -12,6 +12,7 @@ import { Loading, Placeholder } from '@/components/loading'
 import { Nav } from '@/components/nav'
 import { SessionSets } from '@/components/session-sets'
 import { useUserId } from '@/components/session-boot'
+import { libraryName } from '@/lib/exercise-i18n'
 import { StrengthChart } from '@/components/strength-chart'
 import { TrainingCalendar } from '@/components/training-calendar'
 import { useUnit } from '@/components/use-unit'
@@ -134,7 +135,7 @@ export default function ProgressPage() {
                             active ? 'bg-ink text-ground' : 'border border-line text-ink-dim'
                           }`}
                         >
-                          {record.name}
+                          {libraryName(record.exerciseId, record.name, locale)}
                         </button>
                       </li>
                     )
@@ -221,7 +222,7 @@ function RecordRow({ record }: { record: PersonalRecord }) {
     <li className="flex items-baseline justify-between gap-3 py-3">
       <span className="min-w-0">
         <Link href={`/exercises/${record.exerciseId}`} className="block truncate text-[15px]">
-          {record.name}
+          {libraryName(record.exerciseId, record.name, locale)}
         </Link>
         <span className="block text-sm text-ink-dim">{formatDay(epochToDate(record.performedAt), locale)}</span>
       </span>

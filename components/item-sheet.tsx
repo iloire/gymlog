@@ -62,7 +62,7 @@ export function ItemSheet({
         <div className="flex items-center gap-3">
           <button type="button" onClick={onView} aria-label={t('about', { name: item.exerciseName })} className="relative shrink-0">
             <ExerciseFrames
-              exercise={{ name: item.exerciseName, images: item.exerciseImages }}
+              exercise={{ id: item.exerciseId, name: item.exerciseName, images: item.exerciseImages }}
               className="aspect-[3/2] w-20"
               animate={false}
             />
