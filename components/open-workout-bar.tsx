@@ -3,6 +3,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 import { useUserId } from '@/components/session-boot'
 import { getDb } from '@/lib/db/dexie'
@@ -16,6 +17,7 @@ import { openWorkout } from '@/lib/sessions'
  * Today shows the workout whole with its own Continue.
  */
 export function OpenWorkoutBar() {
+  const t = useTranslations('today.openBar')
   const userId = useUserId()
 
   const open = useLiveQuery(async () => {
@@ -47,17 +49,17 @@ export function OpenWorkoutBar() {
       <span className="size-2 shrink-0 rounded-full bg-plate-blue-lift motion-safe:animate-pulse" aria-hidden />
       <span className="min-w-0 flex-1 truncate text-sm">
         <span className="text-ink-dim">{open.name} · </span>
-        {open.next ? (
-          <>
-            {open.next.exerciseName}, set <span className="figure">{open.next.setIndex}</span> of{' '}
-            <span className="figure">{open.next.sets}</span>
-          </>
-        ) : (
-          'every set logged'
-        )}
+        {open.next
+          ? t.rich('next', {
+              exercise: open.next.exerciseName,
+              setIndex: open.next.setIndex,
+              sets: open.next.sets,
+              n: (chunks) => <span className="figure">{chunks}</span>,
+            })
+          : t('allLogged')}
       </span>
       <span className="flex shrink-0 items-center gap-0.5 text-sm text-ink-dim">
-        {open.next ? 'Continue' : 'Finish'}
+        {open.next ? t('continue') : t('finish')}
         <ChevronRight size={16} aria-hidden />
       </span>
       </span>

@@ -4,12 +4,14 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronRight, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { BodyPartBadges } from '@/components/body-part-badges'
 import { DeleteSession } from '@/components/delete-session'
 import { ExercisePicker } from '@/components/exercise-picker'
 import { FinishSession } from '@/components/finish-session'
+import { useLocale } from '@/components/locale-provider'
 import { Nav } from '@/components/nav'
 import { PlanList } from '@/components/plan-list'
 import { Loading, Placeholder } from '@/components/loading'
@@ -43,10 +45,13 @@ type Missed = { day: WeekDay; templateId: string; programId: string; preview: Pl
 type Offer = Rotation & { programId: string | null; hint: string | null; rank: number }
 
 export default function TodayPage() {
+  const t = useTranslations('today')
+  const locale = useLocale()
   const userId = useUserId()
   const { status } = useSync()
   const router = useRouter()
   const [starting, setStarting] = useState(false)
+  const workoutFallback = t('workoutFallback')
 
   const plan = useLiveQuery(async () => {
     if (!userId) return null
@@ -81,7 +86,7 @@ export default function TodayPage() {
       schedule: new Map(
         [...(schedule?.days ?? [])]
           .filter(([, templateId]) => live.has(templateId))
-          .map(([weekday, templateId]) => [weekday, { templateId, name: live.get(templateId)?.name ?? 'Workout' }]),
+          .map(([weekday, templateId]) => [weekday, { templateId, name: live.get(templateId)?.name ?? workoutFallback }]),
       ),
       trained: history
         .filter((entry) => entry.session.scheduledFor >= monday && entry.session.scheduledFor <= sunday)
@@ -126,7 +131,7 @@ export default function TodayPage() {
       .first()
 
     return {
-      scheduled: { ...scheduled, name: template?.name ?? 'Workout' },
+      scheduled: { ...scheduled, name: template?.name ?? workoutFallback },
       preview: await planPreview(userId, scheduled.templateId),
       week: week.days,
       missed,
@@ -136,7 +141,7 @@ export default function TodayPage() {
       fresh,
       synced,
     }
-  }, [userId])
+  }, [userId, workoutFallback])
 
   async function start(templateId: string, programId: string | null) {
     if (!userId || starting) return
@@ -145,7 +150,7 @@ export default function TodayPage() {
     router.push(`/session?id=${id}`)
   }
 
-  const weekday = weekdayName(dayOfWeek())
+  const weekday = weekdayName(dayOfWeek(), locale)
 
   // useLiveQuery yields undefined until IndexedDB answers. Rendering the empty
   // state during that gap tells you it is a rest day when it isn't — on a cold
@@ -179,9 +184,9 @@ export default function TodayPage() {
       .map((row) => {
         const id = row.template.id
         if (scheduled && id === scheduled.templateId)
-          return { ...row, programId: scheduled.programId, hint: `Planned for ${weekday}`, rank: 0 }
+          return { ...row, programId: scheduled.programId, hint: t('plannedFor', { weekday }), rank: 0 }
         if (missed && id === missed.templateId)
-          return { ...row, programId: missed.programId, hint: `Missed on ${weekdayName(missed.day.weekday)}`, rank: 1 }
+          return { ...row, programId: missed.programId, hint: t('missedOn', { weekday: weekdayName(missed.day.weekday, locale) }), rank: 1 }
         return { ...row, programId: null, hint: null, rank: 2 }
       })
       .sort((a, b) => a.rank - b.rank)
@@ -191,7 +196,7 @@ export default function TodayPage() {
         <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
           <header className="mb-6">
             <p className="text-sm text-ink-dim">{weekday}</p>
-            <h1 className="figure mt-1 text-4xl leading-[1.05]">Today</h1>
+            <h1 className="figure mt-1 text-4xl leading-[1.05]">{t('title')}</h1>
           </header>
 
           <WeekStrip days={plan.week} />
@@ -207,7 +212,7 @@ export default function TodayPage() {
 
           {others.length > 0 && (
             <details className="mt-6">
-              <summary className="cursor-pointer text-sm text-ink-dim">Start another workout</summary>
+              <summary className="cursor-pointer text-sm text-ink-dim">{t('startAnother')}</summary>
               <WorkoutList templates={others} onStart={(id, programId) => void start(id, programId)} />
             </details>
           )}
@@ -227,13 +232,13 @@ export default function TodayPage() {
         <header className="mb-6">
           <p className="text-sm text-ink-dim">{weekday}</p>
           <h1 className="figure mt-1 text-4xl leading-[1.05]">
-            {plan?.scheduled?.name ?? catchUp?.day.name ?? 'Rest day'}
+            {plan?.scheduled?.name ?? catchUp?.day.name ?? t('restDay')}
           </h1>
           {plan?.scheduled && plan.preview ? (
             <p className="mt-1.5 text-sm text-ink-dim">{planSummary(plan.preview.lines.length, plan.preview.estimateMs)}</p>
           ) : catchUp ? (
             <p className="mt-1.5 text-[15px] text-ink-dim">
-              You missed {weekdayName(catchUp.day.weekday)}’s workout — do it today?
+              {t('missedQuestion', { weekday: weekdayName(catchUp.day.weekday, locale) })}
             </p>
           ) : null}
         </header>
@@ -253,7 +258,7 @@ export default function TodayPage() {
               disabled={starting}
               className="mt-6 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift disabled:opacity-60"
             >
-              {plan.session?.startedAt ? 'Continue workout' : 'Start workout'}
+              {plan.session?.startedAt ? t('continueWorkout') : t('startWorkout')}
             </button>
 
             {plan.missed && (
@@ -275,20 +280,23 @@ export default function TodayPage() {
               disabled={starting}
               className="mt-6 h-16 w-full rounded-md bg-plate-blue text-lg font-semibold text-white transition-colors hover:bg-plate-blue-lift disabled:opacity-60"
             >
-              Start workout
+              {t('startWorkout')}
             </button>
 
             <p className="mt-6 text-sm text-ink-dim">
-              Nothing was scheduled for {weekday}.{' '}
-              <Link href="/workouts" className="text-ink underline underline-offset-4">
-                Change your week
-              </Link>
-              .
+              {t.rich('nothingWasScheduled', {
+                weekday,
+                link: (chunks) => (
+                  <Link href="/workouts" className="text-ink underline underline-offset-4">
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </p>
 
             {plan?.templates.length ? (
               <details className="mt-4">
-                <summary className="cursor-pointer text-sm text-ink-dim">Start another workout</summary>
+                <summary className="cursor-pointer text-sm text-ink-dim">{t('startAnother')}</summary>
                 <WorkoutList templates={plan.templates} onStart={(id) => void start(id, null)} />
               </details>
             ) : null}
@@ -296,11 +304,14 @@ export default function TodayPage() {
         ) : (
           <section className="mt-6">
             <p className="text-[15px] text-ink-dim">
-              Nothing is scheduled for {weekday}.{' '}
-              <Link href="/workouts" className="text-ink underline underline-offset-4">
-                Set up your week
-              </Link>
-              , or train something anyway.
+              {t.rich('nothingScheduled', {
+                weekday,
+                link: (chunks) => (
+                  <Link href="/workouts" className="text-ink underline underline-offset-4">
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </p>
 
             {plan?.templates.length ? (
@@ -323,10 +334,16 @@ export default function TodayPage() {
  * on some other day of the week — see `planWeek`.
  */
 function MissedNote({ missed, disabled, onStart }: { missed: Missed; disabled: boolean; onStart: () => void }) {
+  const t = useTranslations('today.missedNote')
+  const locale = useLocale()
   return (
     <section className="mt-6 rounded-md border border-line p-4">
       <p className="text-[15px]">
-        You missed {weekdayName(missed.day.weekday)}’s <span className="font-semibold">{missed.day.name}</span>.
+        {t.rich('text', {
+          weekday: weekdayName(missed.day.weekday, locale),
+          name: missed.day.name ?? '',
+          b: (chunks) => <span className="font-semibold">{chunks}</span>,
+        })}
       </p>
       <p className="mt-0.5 text-sm text-ink-dim">{planSummary(missed.preview.lines.length, missed.preview.estimateMs)}</p>
       <button
@@ -335,7 +352,7 @@ function MissedNote({ missed, disabled, onStart }: { missed: Missed; disabled: b
         disabled={disabled}
         className="mt-3 h-12 w-full rounded-md border border-line text-sm font-semibold disabled:opacity-60"
       >
-        Do it today
+        {t('doToday')}
       </button>
     </section>
   )
@@ -345,16 +362,14 @@ function MissedNote({ missed, disabled, onStart }: { missed: Missed; disabled: b
  * yet, so it says what the app is for and offers the two ways to get a plan.
  */
 function Welcome() {
+  const t = useTranslations('today.welcome')
   return (
     <>
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
         <header>
-          <p className="text-sm text-ink-dim">Welcome to gymlog</p>
-          <h1 className="figure mt-1 text-4xl leading-[1.05]">Start with a plan</h1>
-          <p className="mt-3 text-[15px] text-ink-dim">
-            Good to have you. Each day this screen shows the workout you planned, and you log the
-            weight and reps you actually lifted. First it needs a plan.
-          </p>
+          <p className="text-sm text-ink-dim">{t('eyebrow')}</p>
+          <h1 className="figure mt-1 text-4xl leading-[1.05]">{t('title')}</h1>
+          <p className="mt-3 text-[15px] text-ink-dim">{t('intro')}</p>
         </header>
 
         <SetupChoices />
@@ -366,6 +381,7 @@ function Welcome() {
 
 /** The two ways to get workouts: copy a premade programme, or write your own. */
 function SetupChoices() {
+  const t = useTranslations('today.setup')
   return (
     <div className="mt-6 flex flex-col gap-3">
       <Link
@@ -373,19 +389,15 @@ function SetupChoices() {
         className="flex items-center gap-3 rounded-md bg-plate-blue px-4 py-4 text-white transition-colors hover:bg-plate-blue-lift"
       >
         <span className="min-w-0 flex-1">
-          <span className="block text-lg font-semibold">Pick a premade programme</span>
-          <span className="mt-0.5 block text-sm opacity-85">
-            A ready-made week matched to the equipment you have. Change anything afterwards.
-          </span>
+          <span className="block text-lg font-semibold">{t('premadeTitle')}</span>
+          <span className="mt-0.5 block text-sm opacity-85">{t('premadeText')}</span>
         </span>
         <ChevronRight size={20} aria-hidden className="shrink-0" />
       </Link>
       <Link href="/workouts/new" className="flex items-center gap-3 rounded-md border border-line px-4 py-4">
         <span className="min-w-0 flex-1">
-          <span className="block text-lg font-semibold">Build your own</span>
-          <span className="mt-0.5 block text-sm text-ink-dim">
-            Write a workout exercise by exercise, then put it on the days you train.
-          </span>
+          <span className="block text-lg font-semibold">{t('ownTitle')}</span>
+          <span className="mt-0.5 block text-sm text-ink-dim">{t('ownText')}</span>
         </span>
         <ChevronRight size={20} aria-hidden className="shrink-0 text-ink-dim" />
       </Link>
@@ -400,6 +412,7 @@ function WorkoutList({
   templates: (Rotation & Partial<Pick<Offer, 'programId' | 'hint'>>)[]
   onStart: (templateId: string, programId: string | null) => void
 }) {
+  const t = useTranslations('today.list')
   return (
     <ul className="mt-5 divide-y divide-line border-y border-line">
       {templates.map(({ template, lastDone, programId, hint }) => (
@@ -412,10 +425,10 @@ function WorkoutList({
             <span className="min-w-0">
               <span className="block text-[15px]">{template.name}</span>
               <span className="block text-sm text-ink-dim">
-                {[hint, lastDone ? `Last done ${daysAgo(lastDone)}` : 'Not done yet'].filter(Boolean).join(' · ')}
+                {[hint, lastDone ? t('lastDone', { when: daysAgo(lastDone) }) : t('notDone')].filter(Boolean).join(' · ')}
               </span>
             </span>
-            <span className="shrink-0 text-sm text-ink-dim">Start</span>
+            <span className="shrink-0 text-sm text-ink-dim">{t('start')}</span>
           </button>
         </li>
       ))}
@@ -425,15 +438,17 @@ function WorkoutList({
 
 /** One session trained today: what is logged so far, and the way back into it. */
 function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }) {
+  const t = useTranslations('today.session')
+  const locale = useLocale()
   const userId = useUserId()
   const unit = useUnit()
   const router = useRouter()
   const [picking, setPicking] = useState(false)
   const { session, setsDone, setsPlanned, volumeKg, cardioSec, exercises } = entry
   const totals = [
-    `${setsDone}/${setsPlanned} sets`,
-    volumeKg > 0 ? formatWeight(volumeKg, unit) : null,
-    cardioSec > 0 ? `${formatMinutes(cardioSec)} cardio` : null,
+    t('sets', { done: setsDone, planned: setsPlanned }),
+    volumeKg > 0 ? formatWeight(volumeKg, unit, locale) : null,
+    cardioSec > 0 ? t('cardio', { minutes: formatMinutes(cardioSec) }) : null,
   ].filter(Boolean)
 
   async function addExercise(picked: LocalExercise) {
@@ -460,7 +475,7 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
             href={`/session?id=${session.id}`}
             className="mt-4 flex h-14 w-full items-center justify-center rounded-md bg-plate-blue text-base font-semibold text-white transition-colors hover:bg-plate-blue-lift"
           >
-            Continue {session.templateName}
+            {t('continue', { name: session.templateName })}
           </Link>
           {/* Adding an exercise is a change to the whole workout, so it lives here
               beside the workout's own sets rather than on the one-exercise gym screen. */}
@@ -470,7 +485,7 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
             className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-md border border-line text-sm text-ink-dim"
           >
             <Plus size={16} aria-hidden />
-            Add exercise
+            {t('addExercise')}
           </button>
           {/* Ending it is about the whole workout too, and the gym screen only offers
               Finish once every set is logged — this is the way out of one cut short. */}
@@ -489,7 +504,7 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
           {/* Done is done: the totals say enough, and every set is a tap away for
               the glance back — or for spotting the one that needs fixing. */}
           <details className="mt-3">
-            <summary className="cursor-pointer text-sm text-ink-dim">Show the sets</summary>
+            <summary className="cursor-pointer text-sm text-ink-dim">{t('showSets')}</summary>
             <div className="mt-3">
               <SessionSets exercises={exercises} />
             </div>
@@ -498,7 +513,7 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
             href={`/session?id=${session.id}`}
             className="mt-3 inline-block text-sm text-ink-dim underline underline-offset-4"
           >
-            Finished · open to fix a set
+            {t('finished')}
           </Link>
         </>
       )}

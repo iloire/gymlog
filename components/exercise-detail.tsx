@@ -1,10 +1,12 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
 import { ExerciseFrames } from '@/components/exercise-frames'
 import { FavoriteButton } from '@/components/favorite-button'
+import { useLocale } from '@/components/locale-provider'
 import { Placeholder } from '@/components/loading'
 import { StrengthChart } from '@/components/strength-chart'
 import { useUnit } from '@/components/use-unit'
@@ -12,6 +14,7 @@ import type { LocalSetLog } from '@/lib/db/dexie'
 import { getDb } from '@/lib/db/dexie'
 import { writeRow } from '@/lib/db/write'
 import { formatAgo, formatDay, formatMinutes, formatSet } from '@/lib/format'
+import { INTL_TAG, type Locale } from '@/lib/i18n'
 import { exerciseNoteId } from '@/lib/id'
 import { strengthSeries } from '@/lib/progress'
 import { epochToDate } from '@/lib/queries'
@@ -47,6 +50,8 @@ export function ExerciseDetail({
   /** Shown under the name — the exercise page's "Do this now". */
   action?: ReactNode
 }) {
+  const t = useTranslations('today.exerciseDetail')
+  const locale = useLocale()
   const unit = useUnit()
   const data = useLiveQuery(async () => {
     const db = getDb(userId)
@@ -106,41 +111,41 @@ export function ExerciseDetail({
       {action}
 
       {last && lastTop ? (
-        <section className="mt-6 grid grid-cols-2 gap-3" aria-label="Last time and best">
+        <section className="mt-6 grid grid-cols-2 gap-3" aria-label={t('tilesLabel')}>
           <div className="rounded-md border border-line p-4">
-            <p className="text-sm text-ink-dim">Last time · {formatAgo(lastTop.performedAt)}</p>
+            <p className="text-sm text-ink-dim">{t('lastTime', { when: formatAgo(lastTop.performedAt, undefined, locale) ?? '' })}</p>
             {/* Red when last time was your best: the same red the summary uses for beating it. */}
-            <SetFigure set={lastTop} unit={unit} className={best && lastTop.id === best.id ? 'text-plate-red' : ''} />
-            <p className="figure mt-1 truncate text-xs text-ink-dim">{last.map((set) => formatSet(set, unit)).join('  ')}</p>
+            <SetFigure set={lastTop} unit={unit} locale={locale} className={best && lastTop.id === best.id ? 'text-plate-red' : ''} />
+            <p className="figure mt-1 truncate text-xs text-ink-dim">{last.map((set) => formatSet(set, unit, locale)).join('  ')}</p>
           </div>
           {best && (
             <div className="rounded-md border border-line p-4">
-              <p className="text-sm text-ink-dim">Best · {formatDay(epochToDate(best.performedAt))}</p>
-              <SetFigure set={best} unit={unit} />
+              <p className="text-sm text-ink-dim">{t('best', { date: formatDay(epochToDate(best.performedAt), locale) })}</p>
+              <SetFigure set={best} unit={unit} locale={locale} />
               {bestE1rm !== null && (
                 <p className="figure mt-1 text-xs text-ink-dim">
-                  e1RM {Math.round(displayWeight(bestE1rm, unit))} {unit}
+                  {t('e1rm', { weight: Math.round(displayWeight(bestE1rm, unit)), unit })}
                 </p>
               )}
             </div>
           )}
         </section>
       ) : (
-        <p className="mt-6 text-[15px] text-ink-dim">Not logged yet. Your weight and reps show here once you have.</p>
+        <p className="mt-6 text-[15px] text-ink-dim">{t('notLogged')}</p>
       )}
 
       {history.length > 0 && (
         <section className="mt-7">
-          <h2 className="mb-2 text-sm text-ink-dim">Your progress</h2>
+          <h2 className="mb-2 text-sm text-ink-dim">{t('progress')}</h2>
           <StrengthChart series={series} className="mb-4" />
           <ul className="divide-y divide-line border-y border-line">
             {history.map((sets) => (
               <li key={sets[0]?.id} className="py-3">
                 <span className="flex items-baseline justify-between gap-4">
                   <span className="text-sm text-ink-dim">
-                    {formatDay(epochToDate(sets[0]?.performedAt ?? 0))}
+                    {formatDay(epochToDate(sets[0]?.performedAt ?? 0), locale)}
                   </span>
-                  <span className="figure text-right text-[15px]">{sets.map((set) => formatSet(set, unit)).join('  ')}</span>
+                  <span className="figure text-right text-[15px]">{sets.map((set) => formatSet(set, unit, locale)).join('  ')}</span>
                 </span>
                 {sets.find((set) => set.notes) && (
                   <span className="mt-1 block text-sm italic text-ink-dim">“{sets.find((set) => set.notes)?.notes}”</span>
@@ -153,11 +158,11 @@ export function ExerciseDetail({
 
       {/* Open when you have written some; an empty box is not worth the height. */}
       <details className="mt-7" open={Boolean(note?.notes)}>
-        <summary className="cursor-pointer text-sm text-ink-dim">Your cues</summary>
+        <summary className="cursor-pointer text-sm text-ink-dim">{t('cues')}</summary>
         <textarea
           defaultValue={note?.notes ?? ''}
           rows={3}
-          placeholder="Knees out, brace before you unrack."
+          placeholder={t('cuesPlaceholder')}
           onBlur={(event) =>
             void writeRow(userId, 'exerciseNotes', {
               id: exerciseNoteId(userId, exerciseId),
@@ -171,7 +176,7 @@ export function ExerciseDetail({
 
       {steps.length > 0 && (
         <details className="mt-4">
-          <summary className="cursor-pointer text-sm text-ink-dim">How to do it</summary>
+          <summary className="cursor-pointer text-sm text-ink-dim">{t('howTo')}</summary>
           <ol className="mt-2 space-y-3">
             {steps.map((step, index) => (
               <li key={index} className="flex gap-3 text-[15px] leading-relaxed">
@@ -187,13 +192,24 @@ export function ExerciseDetail({
 }
 
 /** One set as the tile's big number: the weight with the reps small beside it, the reps alone, or the time. */
-function SetFigure({ set, unit, className = '' }: { set: LocalSetLog; unit: Unit; className?: string }) {
+function SetFigure({
+  set,
+  unit,
+  locale,
+  className = '',
+}: {
+  set: LocalSetLog
+  unit: Unit
+  locale: Locale
+  className?: string
+}) {
+  const t = useTranslations('today.exerciseDetail')
   const figure = `figure mt-1 text-3xl leading-none ${className}`
   if (set.durationSec != null) return <p className={figure}>{formatMinutes(set.durationSec)}</p>
   if (set.weightKg) {
     return (
       <p className={figure}>
-        {displayWeight(set.weightKg, unit)}
+        {displayWeight(set.weightKg, unit).toLocaleString(INTL_TAG[locale])}
         <span className="text-lg text-ink-dim">×{set.reps ?? 0}</span>
       </p>
     )
@@ -201,7 +217,7 @@ function SetFigure({ set, unit, className = '' }: { set: LocalSetLog; unit: Unit
   return (
     <p className={figure}>
       {set.reps ?? 0}
-      <span className="text-lg text-ink-dim"> reps</span>
+      <span className="text-lg text-ink-dim">{t('reps')}</span>
     </p>
   )
 }

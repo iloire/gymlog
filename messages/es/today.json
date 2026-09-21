@@ -1,1 +1,69 @@
-{}
+{
+  "title": "Hoy",
+  "workoutFallback": "Entrenamiento",
+  "restDay": "Día de descanso",
+  "plannedFor": "Previsto para el {weekday}",
+  "missedOn": "Pendiente del {weekday}",
+  "startAnother": "Empezar otro entrenamiento",
+  "missedQuestion": "Te saltaste el entrenamiento del {weekday}. ¿Lo haces hoy?",
+  "continueWorkout": "Continuar entrenamiento",
+  "startWorkout": "Empezar entrenamiento",
+  "nothingWasScheduled": "No había nada previsto para el {weekday}. <link>Cambia tu semana</link>.",
+  "nothingScheduled": "No hay nada previsto para el {weekday}. <link>Organiza tu semana</link> o entrena algo de todos modos.",
+  "missedNote": {
+    "text": "Te saltaste <b>{name}</b> del {weekday}.",
+    "doToday": "Hazlo hoy"
+  },
+  "welcome": {
+    "eyebrow": "Bienvenido a gymlog",
+    "title": "Empieza con un plan",
+    "intro": "Qué bien tenerte aquí. Cada día esta pantalla muestra el entrenamiento que planificaste, y tú apuntas el peso y las repeticiones que hiciste de verdad. Primero hace falta un plan."
+  },
+  "setup": {
+    "premadeTitle": "Elige un programa listo",
+    "premadeText": "Una semana ya hecha, ajustada al material que tienes. Cambia lo que quieras después.",
+    "ownTitle": "Crea el tuyo",
+    "ownText": "Escribe un entrenamiento ejercicio a ejercicio y ponlo en los días que entrenas."
+  },
+  "list": {
+    "lastDone": "Última vez {when}",
+    "notDone": "Sin hacer todavía",
+    "start": "Empezar"
+  },
+  "session": {
+    "sets": "{done}/{planned} series",
+    "cardio": "{minutes} cardio",
+    "continue": "Continuar {name}",
+    "addExercise": "Añadir ejercicio",
+    "showSets": "Ver las series",
+    "finished": "Terminado · abrir para corregir una serie"
+  },
+  "weekStrip": {
+    "label": "Esta semana"
+  },
+  "openBar": {
+    "next": "{exercise}, serie <n>{setIndex}</n> de <n>{sets}</n>",
+    "allLogged": "todas las series apuntadas",
+    "continue": "Continuar",
+    "finish": "Terminar"
+  },
+  "planList": {
+    "last": " · última ",
+    "firstTime": " · primera vez"
+  },
+  "exerciseDialog": {
+    "close": "Cerrar"
+  },
+  "exerciseDetail": {
+    "tilesLabel": "Última vez y mejor marca",
+    "lastTime": "Última vez · {when}",
+    "best": "Mejor · {date}",
+    "e1rm": "e1RM {weight} {unit}",
+    "reps": " reps",
+    "notLogged": "Sin apuntar todavía. Tu peso y tus repeticiones aparecerán aquí cuando lo hagas.",
+    "progress": "Tu progreso",
+    "cues": "Tus apuntes",
+    "cuesPlaceholder": "Rodillas hacia fuera, aprieta el core antes de sacar la barra.",
+    "howTo": "Cómo se hace"
+  }
+}

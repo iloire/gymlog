@@ -1,6 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useEffect, useId, useRef } from 'react'
 
 import { ExerciseDetail } from '@/components/exercise-detail'
@@ -19,6 +20,7 @@ export function ExerciseDialog({
   exerciseId: string
   onClose: () => void
 }) {
+  const t = useTranslations('today.exerciseDialog')
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
 
@@ -51,7 +53,7 @@ export function ExerciseDialog({
     >
       <div className="px-5 pt-3 pb-6">
         <div className="flex justify-end">
-          <button type="button" onClick={close} aria-label="Close" className="-mr-2 p-2 text-ink-dim">
+          <button type="button" onClick={close} aria-label={t('close')} className="-mr-2 p-2 text-ink-dim">
             <X size={22} aria-hidden />
           </button>
         </div>

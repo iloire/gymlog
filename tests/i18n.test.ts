@@ -22,7 +22,23 @@ function leaves(tree: Tree, prefix = ''): Map<string, string> {
   return out
 }
 
-const placeholders = (message: string) => [...message.matchAll(/\{(\w+)/g)].map((m) => m[1]).sort()
+/** The argument names a message takes — `{name}`, `{count, plural, …}` — parsed, so a plural branch's text is not mistaken for one. */
+function placeholders(message: string, locale: string): string[] {
+  const names = new Set<string>()
+  const walk = (elements: unknown[]): void => {
+    for (const element of elements as Array<{ type: number; value?: string; options?: Record<string, { value: unknown[] }> }>) {
+      if (element.type === 0) continue // literal text
+      if (element.value) names.add(element.value)
+      if (element.options) for (const branch of Object.values(element.options)) walk(branch.value)
+    }
+  }
+  try {
+    walk(new IntlMessageFormat(message, locale).getAst())
+  } catch {
+    return ['<invalid ICU>']
+  }
+  return [...names].sort()
+}
 
 const MESSAGES_DIR = path.join(process.cwd(), 'messages')
 const files = (locale: string) => readdirSync(path.join(MESSAGES_DIR, locale)).filter((f) => f.endsWith('.json'))
@@ -47,7 +63,7 @@ describe('messages', () => {
 
         it(`${locale} keeps the placeholders of every message`, () => {
           for (const [key, message] of en) {
-            expect(placeholders(other.get(key) ?? ''), key).toEqual(placeholders(message))
+            expect(placeholders(other.get(key) ?? '', locale), key).toEqual(placeholders(message, 'en'))
           }
         })
       }

@@ -117,9 +117,16 @@ export function planWeek({
   return { days, missed }
 }
 
+const DAY_WORDS: Record<Locale, { today: string; restDay: string } & Record<Exclude<DayState, 'rest'>, string>> = {
+  en: { today: 'today', restDay: 'rest day', done: 'done', missed: 'missed', planned: 'planned' },
+  es: { today: 'hoy', restDay: 'descanso', done: 'hecho', missed: 'pendiente', planned: 'previsto' },
+}
+
 /** What a strip square says to a screen reader: 'Wednesday, Full body B, missed'. */
-export function describeDay(day: WeekDay): string {
-  const when = day.isToday ? `${weekdayName(day.weekday)}, today` : weekdayName(day.weekday)
-  if (day.state === 'rest') return `${when}, rest day`
-  return `${when}, ${day.name}, ${day.state}`
+export function describeDay(day: WeekDay, locale: Locale = DEFAULT_LOCALE): string {
+  const words = DAY_WORDS[locale]
+  const name = weekdayName(day.weekday, locale)
+  const when = day.isToday ? `${name}, ${words.today}` : name
+  if (day.state === 'rest') return `${when}, ${words.restDay}`
+  return `${when}, ${day.name}, ${words[day.state]}`
 }

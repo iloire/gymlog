@@ -1,3 +1,8 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+
+import { useLocale } from '@/components/locale-provider'
 import { describeDay, weekdayInitials, type WeekDay } from '@/lib/week'
 
 /**
@@ -8,13 +13,15 @@ import { describeDay, weekdayInitials, type WeekDay } from '@/lib/week'
  * carries the ring, the same as a day on the History calendar.
  */
 export function WeekStrip({ days }: { days: WeekDay[] }) {
+  const t = useTranslations('today.weekStrip')
+  const locale = useLocale()
   return (
-    <section aria-label="This week">
+    <section aria-label={t('label')}>
       <ol className="grid grid-cols-7 gap-1.5">
         {days.map((day) => (
           <li key={day.date} className="flex flex-col items-center gap-1.5">
             <span aria-hidden="true" className={`text-xs ${day.isToday ? 'text-ink' : 'text-ink-dim'}`}>
-              {weekdayInitials()[day.weekday]}
+              {weekdayInitials(locale)[day.weekday]}
             </span>
             <span
               className={`flex aspect-square w-full items-center justify-center rounded-sm ${SQUARE[day.state]} ${
@@ -23,7 +30,7 @@ export function WeekStrip({ days }: { days: WeekDay[] }) {
             >
               {day.state === 'rest' && <span className="size-1 rounded-full bg-line" />}
             </span>
-            <span className="sr-only">{describeDay(day)}</span>
+            <span className="sr-only">{describeDay(day, locale)}</span>
           </li>
         ))}
       </ol>

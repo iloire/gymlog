@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { ExerciseDialog } from '@/components/exercise-dialog'
@@ -15,6 +16,7 @@ import type { PlanLine } from '@/lib/plan'
  * leaves you where you were: about to start.
  */
 export function PlanList({ lines }: { lines: PlanLine[] }) {
+  const t = useTranslations('today.planList')
   const userId = useUserId()
   const [viewingExerciseId, setViewingExerciseId] = useState<string | null>(null)
 
@@ -45,11 +47,11 @@ export function PlanList({ lines }: { lines: PlanLine[] }) {
                   <span className="figure">{line.target}</span>
                   {line.last ? (
                     <>
-                      {' · last '}
+                      {t('last')}
                       <span className="figure">{line.last}</span>
                     </>
                   ) : (
-                    ' · first time'
+                    t('firstTime')
                   )}
                 </span>
               </span>

@@ -120,4 +120,10 @@ describe('describeDay', () => {
   it('calls a day off a rest day', () => {
     expect(describeDay(day(FRIDAY, 1))).toBe('Tuesday, rest day')
   })
+
+  it('speaks Spanish when asked', () => {
+    expect(describeDay(day(FRIDAY, 2), 'es')).toBe('miércoles, Full body B, pendiente')
+    expect(describeDay(day(FRIDAY, 4), 'es')).toBe('viernes, hoy, Full body A, previsto')
+    expect(describeDay(day(FRIDAY, 1), 'es')).toBe('martes, descanso')
+  })
 })

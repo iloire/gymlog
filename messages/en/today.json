@@ -1,1 +1,69 @@
-{}
+{
+  "title": "Today",
+  "workoutFallback": "Workout",
+  "restDay": "Rest day",
+  "plannedFor": "Planned for {weekday}",
+  "missedOn": "Missed on {weekday}",
+  "startAnother": "Start another workout",
+  "missedQuestion": "You missed {weekday}’s workout — do it today?",
+  "continueWorkout": "Continue workout",
+  "startWorkout": "Start workout",
+  "nothingWasScheduled": "Nothing was scheduled for {weekday}. <link>Change your week</link>.",
+  "nothingScheduled": "Nothing is scheduled for {weekday}. <link>Set up your week</link>, or train something anyway.",
+  "missedNote": {
+    "text": "You missed {weekday}’s <b>{name}</b>.",
+    "doToday": "Do it today"
+  },
+  "welcome": {
+    "eyebrow": "Welcome to gymlog",
+    "title": "Start with a plan",
+    "intro": "Good to have you. Each day this screen shows the workout you planned, and you log the weight and reps you actually lifted. First it needs a plan."
+  },
+  "setup": {
+    "premadeTitle": "Pick a premade programme",
+    "premadeText": "A ready-made week matched to the equipment you have. Change anything afterwards.",
+    "ownTitle": "Build your own",
+    "ownText": "Write a workout exercise by exercise, then put it on the days you train."
+  },
+  "list": {
+    "lastDone": "Last done {when}",
+    "notDone": "Not done yet",
+    "start": "Start"
+  },
+  "session": {
+    "sets": "{done}/{planned} sets",
+    "cardio": "{minutes} cardio",
+    "continue": "Continue {name}",
+    "addExercise": "Add exercise",
+    "showSets": "Show the sets",
+    "finished": "Finished · open to fix a set"
+  },
+  "weekStrip": {
+    "label": "This week"
+  },
+  "openBar": {
+    "next": "{exercise}, set <n>{setIndex}</n> of <n>{sets}</n>",
+    "allLogged": "every set logged",
+    "continue": "Continue",
+    "finish": "Finish"
+  },
+  "planList": {
+    "last": " · last ",
+    "firstTime": " · first time"
+  },
+  "exerciseDialog": {
+    "close": "Close"
+  },
+  "exerciseDetail": {
+    "tilesLabel": "Last time and best",
+    "lastTime": "Last time · {when}",
+    "best": "Best · {date}",
+    "e1rm": "e1RM {weight} {unit}",
+    "reps": " reps",
+    "notLogged": "Not logged yet. Your weight and reps show here once you have.",
+    "progress": "Your progress",
+    "cues": "Your cues",
+    "cuesPlaceholder": "Knees out, brace before you unrack.",
+    "howTo": "How to do it"
+  }
+}
