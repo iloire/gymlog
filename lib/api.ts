@@ -62,7 +62,7 @@ export const exercisesQuery = z.object({
 
 export async function apiProfile(userId: string) {
   const [user] = await db
-    .select({ name: users.name, unit: users.unit })
+    .select({ name: users.name, unit: users.unit, locale: users.locale })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
@@ -96,6 +96,8 @@ export async function apiProfile(userId: string) {
   return {
     name: user?.name ?? null,
     preferredUnit: user?.unit ?? 'kg',
+    /** The language the person reads the app in; the API itself is English. */
+    language: user?.locale ?? 'en',
     weightsAreIn: 'kg',
     currentProgramme: program
       ? {

@@ -237,6 +237,7 @@ export function openApiSpec(origin: string) {
                 properties: {
                   name: nullable('string'),
                   preferredUnit: { type: 'string', enum: ['kg', 'lb'] },
+                  language: { type: 'string', enum: ['en', 'es'], description: 'The language the person reads the app in.' },
                   weightsAreIn: { type: 'string', const: 'kg' },
                   currentProgramme: ref('Programme'),
                 },

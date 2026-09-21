@@ -319,7 +319,7 @@ describe('GET /workouts, /profile, /exercises, /bodyweight', () => {
     expect((await call('GET', '/workouts/{id}', token, { params: { id: 'tBob' } })).status).toBe(404)
 
     const { body: profile } = await get('/profile', token)
-    expect(profile).toMatchObject({ weightsAreIn: 'kg', preferredUnit: 'kg' })
+    expect(profile).toMatchObject({ weightsAreIn: 'kg', preferredUnit: 'kg', language: 'en' })
     expect(profile.currentProgramme.week).toEqual([
       { day: 'Monday', workoutId: 'tA', workout: 'Full body A' },
       { day: 'Wednesday', workoutId: 'tA', workout: 'Full body A' },
