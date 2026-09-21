@@ -1,7 +1,9 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
+import { useLocale } from '@/components/locale-provider'
 import { useUserId } from '@/components/session-boot'
 import type { LocalSession } from '@/lib/db/dexie'
 import { formatDay } from '@/lib/format'
@@ -15,6 +17,8 @@ import { deleteSession } from '@/lib/sessions'
  */
 export function DeleteSession({ session }: { session: LocalSession }) {
   const userId = useUserId()
+  const locale = useLocale()
+  const t = useTranslations('history.delete')
   const [confirming, setConfirming] = useState(false)
 
   if (!userId) return null
@@ -26,7 +30,7 @@ export function DeleteSession({ session }: { session: LocalSession }) {
         onClick={() => setConfirming(true)}
         className="text-sm text-ink-dim underline underline-offset-4"
       >
-        Delete workout
+        {t('button')}
       </button>
     )
   }
@@ -38,12 +42,9 @@ export function DeleteSession({ session }: { session: LocalSession }) {
       className="w-full rounded-md border border-plate-red p-4"
     >
       <p id={`delete-session-${session.id}`} className="text-[15px]">
-        Delete this {session.templateName} workout?
+        {t('question', { name: session.templateName })}
       </p>
-      <p className="mt-1 text-sm text-ink-dim">
-        Everything logged on {formatDay(session.scheduledFor)} goes with it. The workout itself stays
-        in your programme.
-      </p>
+      <p className="mt-1 text-sm text-ink-dim">{t('detail', { date: formatDay(session.scheduledFor, locale) })}</p>
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
@@ -51,14 +52,14 @@ export function DeleteSession({ session }: { session: LocalSession }) {
           onClick={() => setConfirming(false)}
           className="h-12 rounded-md border border-line text-sm"
         >
-          Cancel
+          {t('cancel')}
         </button>
         <button
           type="button"
           onClick={() => void deleteSession(userId, session.id)}
           className="h-12 rounded-md bg-plate-red text-sm font-semibold text-white"
         >
-          Delete
+          {t('confirm')}
         </button>
       </div>
     </div>

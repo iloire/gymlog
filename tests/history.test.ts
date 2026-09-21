@@ -192,6 +192,9 @@ describe('daysAgo', () => {
     expect(daysAgo('2026-09-15', '2026-09-15')).toBe('today')
     expect(daysAgo('2026-09-14', '2026-09-15')).toBe('yesterday')
     expect(daysAgo('2026-09-01', '2026-09-15')).toBe('14 days ago')
+    expect(daysAgo('2026-09-15', '2026-09-15', 'es')).toBe('hoy')
+    expect(daysAgo('2026-09-14', '2026-09-15', 'es')).toBe('ayer')
+    expect(daysAgo('2026-09-01', '2026-09-15', 'es')).toBe('hace 14 días')
   })
 
   it('is exact across a daylight-saving change', () => {

@@ -1,7 +1,11 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
+
+import { useLocale } from '@/components/locale-provider'
 import { useUnit } from '@/components/use-unit'
 import { formatDay } from '@/lib/format'
+import { INTL_TAG } from '@/lib/i18n'
 import type { StrengthPoint } from '@/lib/progress'
 import { epochToDate } from '@/lib/queries'
 import { displayWeight } from '@/lib/units'
@@ -13,6 +17,8 @@ import { displayWeight } from '@/lib/units'
  */
 export function StrengthChart({ series, className = '' }: { series: StrengthPoint[]; className?: string }) {
   const unit = useUnit()
+  const locale = useLocale()
+  const t = useTranslations('history.chart')
   const width = 100
   const height = 34
   const inset = 1.5
@@ -20,12 +26,13 @@ export function StrengthChart({ series, className = '' }: { series: StrengthPoin
   if (series.length < 2) return null
 
   // performedAt is local midnight; formatDay on a raw epoch reads it in UTC and lands a day early east of Greenwich.
-  const day = (epochMs: number) => formatDay(epochToDate(epochMs))
+  const day = (epochMs: number) => formatDay(epochToDate(epochMs), locale)
 
   const first = series[0]!
   const last = series.at(-1)!
-  const firstTop = displayWeight(first.topKg, unit)
-  const lastTop = displayWeight(last.topKg, unit)
+  const firstTop = displayWeight(first.topKg, unit).toLocaleString(INTL_TAG[locale])
+  const lastTop = displayWeight(last.topKg, unit).toLocaleString(INTL_TAG[locale])
+  const lastMax = Math.round(displayWeight(last.e1rmKg, unit))
   const values = series.flatMap((point) => [point.topKg, point.e1rmKg])
   const min = Math.min(...values)
   const max = Math.max(...values)
@@ -43,7 +50,7 @@ export function StrengthChart({ series, className = '' }: { series: StrengthPoin
         preserveAspectRatio="none"
         className="h-28 w-full"
         role="img"
-        aria-label={`Top set from ${firstTop} ${unit} on ${day(first.performedAt)} to ${lastTop} ${unit} on ${day(last.performedAt)}`}
+        aria-label={t('label', { from: firstTop, to: lastTop, unit, fromDay: day(first.performedAt), toDay: day(last.performedAt) })}
       >
         <path
           d={path((point) => point.e1rmKg)}
@@ -71,8 +78,15 @@ export function StrengthChart({ series, className = '' }: { series: StrengthPoin
       <figcaption className="mt-1.5 flex justify-between text-xs text-ink-dim">
         <span>{day(first.performedAt)}</span>
         <span>
-          <span className="figure text-ink">{firstTop}</span> → <span className="figure text-ink">{lastTop}</span> {unit} top set ·
-          e1RM <span className="figure">{Math.round(displayWeight(last.e1rmKg, unit))}</span>
+          {t.rich('caption', {
+            first: firstTop,
+            last: lastTop,
+            unit,
+            e1rm: lastMax,
+            from: (chunks) => <span className="figure text-ink">{chunks}</span>,
+            to: (chunks) => <span className="figure text-ink">{chunks}</span>,
+            max: (chunks) => <span className="figure">{chunks}</span>,
+          })}
         </span>
         <span>{day(last.performedAt)}</span>
       </figcaption>

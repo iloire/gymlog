@@ -1,1 +1,22 @@
-{}
+{
+  "back": "Profile",
+  "title": "Weight",
+  "summary": {
+    "average": "{value} {unit} on a 7-day average",
+    "averageWithChange": "{value} {unit} on a 7-day average — {direction, select, up {up} other {down}} {change} {unit} since you started",
+    "tip": "Weigh yourself at the same time of day. One reading means nothing; the trend is the thing."
+  },
+  "form": {
+    "weight": "Weight ({unit})",
+    "date": "Date",
+    "save": "Save weight"
+  },
+  "delete": "Delete {date}",
+  "chart": "Bodyweight from {from} to {to}, {range}",
+  "weighIn": {
+    "label": "Weigh-in",
+    "prompt": "<link>Weight</link> today?",
+    "input": "Bodyweight in {unit}",
+    "save": "Save"
+  }
+}

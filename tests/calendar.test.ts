@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { addDays, addMonths, monthGrid, streakMessage, weekStart, weekStreak } from '@/lib/calendar'
+import { addDays, addMonths, monthGrid, streakHint, weekStart, weekStreak } from '@/lib/calendar'
 
 describe('weekStart', () => {
   it('returns the Monday of the week', () => {
@@ -62,12 +62,12 @@ describe('weekStreak', () => {
   })
 })
 
-describe('streakMessage', () => {
+describe('streakHint', () => {
   it('names what keeps the streak going', () => {
-    expect(streakMessage({ current: 0, best: 4, thisWeek: 0 })).toBe('One workout this week starts a new streak.')
-    expect(streakMessage({ current: 3, best: 4, thisWeek: 0 })).toBe('One workout this week makes it 4.')
-    expect(streakMessage({ current: 1, best: 1, thisWeek: 2 })).toBe('Streak started. Train next week to keep it going.')
-    expect(streakMessage({ current: 5, best: 5, thisWeek: 1 })).toBe('Your best run yet.')
-    expect(streakMessage({ current: 2, best: 6, thisWeek: 1 })).toBe('Your best is 6 weeks.')
+    expect(streakHint({ current: 0, best: 4, thisWeek: 0 })).toEqual({ key: 'newStreak', count: 0 })
+    expect(streakHint({ current: 3, best: 4, thisWeek: 0 })).toEqual({ key: 'nextMakes', count: 4 })
+    expect(streakHint({ current: 1, best: 1, thisWeek: 2 })).toEqual({ key: 'started', count: 1 })
+    expect(streakHint({ current: 5, best: 5, thisWeek: 1 })).toEqual({ key: 'bestYet', count: 5 })
+    expect(streakHint({ current: 2, best: 6, thisWeek: 1 })).toEqual({ key: 'bestIs', count: 6 })
   })
 })

@@ -1,12 +1,13 @@
 'use client'
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
+import { useLocale } from '@/components/locale-provider'
 import { addMonths, monthGrid } from '@/lib/calendar'
 import { formatDay, formatMonth } from '@/lib/format'
 import { weekdayInitials } from '@/lib/week'
-
 
 /**
  * A month of training at a glance. A trained day is filled like a done set
@@ -25,24 +26,24 @@ export function TrainingCalendar({
   selected: string | null
   onSelect: (date: string | null) => void
 }) {
+  const t = useTranslations('history.calendar')
+  const locale = useLocale()
   const thisMonth = today.slice(0, 7)
   const [month, setMonth] = useState(thisMonth)
   const firstMonth = [...trained].sort()[0]?.slice(0, 7) ?? thisMonth
   const daysThisMonth = [...trained].filter((date) => date.startsWith(month)).length
 
   return (
-    <section aria-label="Training calendar">
+    <section aria-label={t('label')}>
       <div className="flex items-center gap-2">
         <h2 className="min-w-0 flex-1">
-          <span className="figure text-xl">{formatMonth(month)}</span>
-          <span className="ml-2 text-sm text-ink-dim">
-            {daysThisMonth} {daysThisMonth === 1 ? 'day' : 'days'}
-          </span>
+          <span className="figure text-xl">{formatMonth(month, locale)}</span>
+          <span className="ml-2 text-sm text-ink-dim">{t('days', { count: daysThisMonth })}</span>
         </h2>
-        <MonthButton label="Previous month" disabled={month <= firstMonth} onClick={() => setMonth(addMonths(month, -1))}>
+        <MonthButton label={t('previous')} disabled={month <= firstMonth} onClick={() => setMonth(addMonths(month, -1))}>
           <ChevronLeft className="size-5" />
         </MonthButton>
-        <MonthButton label="Next month" disabled={month >= thisMonth} onClick={() => setMonth(addMonths(month, 1))}>
+        <MonthButton label={t('next')} disabled={month >= thisMonth} onClick={() => setMonth(addMonths(month, 1))}>
           <ChevronRight className="size-5" />
         </MonthButton>
       </div>
@@ -50,7 +51,7 @@ export function TrainingCalendar({
       <div className="mt-3 flex gap-2" aria-hidden="true">
         <span className="w-1 shrink-0" />
         <span className="grid flex-1 grid-cols-7 gap-1.5 text-center text-xs text-ink-dim">
-          {weekdayInitials().map((day, index) => (
+          {weekdayInitials(locale).map((day, index) => (
             <span key={index}>{day}</span>
           ))}
         </span>
@@ -104,6 +105,8 @@ function Day({
   selected: boolean
   onSelect: () => void
 }) {
+  const t = useTranslations('history.calendar')
+  const locale = useLocale()
   const number = Number(date.slice(8))
   const shape = 'figure flex aspect-square items-center justify-center rounded-sm text-sm'
   const todayRing = isToday ? 'ring-2 ring-ink ring-inset' : ''
@@ -111,7 +114,7 @@ function Day({
   if (!trained) {
     return (
       <span className={`${shape} ${todayRing} ${future ? 'text-ink-dim/40' : 'text-ink-dim'}`}>
-        <span className="sr-only">{formatDay(date)}</span>
+        <span className="sr-only">{formatDay(date, locale)}</span>
         <span aria-hidden="true">{number}</span>
       </span>
     )
@@ -122,7 +125,7 @@ function Day({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      aria-label={`${formatDay(date)}, trained`}
+      aria-label={t('trained', { date: formatDay(date, locale) })}
       className={`${shape} bg-plate-blue text-white outline-none transition-colors hover:bg-plate-blue-lift focus-visible:ring-2 focus-visible:ring-plate-blue-lift focus-visible:ring-offset-2 focus-visible:ring-offset-ground ${
         selected ? 'ring-2 ring-offset-2 ring-plate-blue-lift ring-offset-ground' : todayRing
       }`}

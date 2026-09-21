@@ -1,6 +1,7 @@
 'use client'
 
 import { getDb, type LocalSetLog, type LocalWorkoutTemplate } from '@/lib/db/dexie'
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n'
 import { dateToEpoch, today } from '@/lib/queries'
 import { summariseSession, type HistoryEntry } from '@/lib/session-summary'
 
@@ -78,9 +79,15 @@ export function daysBetween(from: string, to: string): number {
 }
 
 /** 'today', 'yesterday', '4 days ago' for a calendar date. */
-export function daysAgo(date: string, now = today()): string {
+export function daysAgo(date: string, now = today(), locale: Locale = DEFAULT_LOCALE): string {
   const days = daysBetween(date, now)
-  if (days <= 0) return 'today'
-  if (days === 1) return 'yesterday'
-  return `${days} days ago`
+  const words = AGO[locale]
+  if (days <= 0) return words.today
+  if (days === 1) return words.yesterday
+  return words.days(days)
+}
+
+const AGO: Record<Locale, { today: string; yesterday: string; days: (n: number) => string }> = {
+  en: { today: 'today', yesterday: 'yesterday', days: (n) => `${n} days ago` },
+  es: { today: 'hoy', yesterday: 'ayer', days: (n) => `hace ${n} días` },
 }

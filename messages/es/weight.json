@@ -1,1 +1,22 @@
-{}
+{
+  "back": "Perfil",
+  "title": "Peso",
+  "summary": {
+    "average": "{value} {unit} de media en 7 días",
+    "averageWithChange": "{value} {unit} de media en 7 días — {direction, select, up {has subido} other {has bajado}} {change} {unit} desde que empezaste",
+    "tip": "Pésate a la misma hora del día. Un solo pesaje no dice nada; lo que cuenta es la tendencia."
+  },
+  "form": {
+    "weight": "Peso ({unit})",
+    "date": "Fecha",
+    "save": "Guardar peso"
+  },
+  "delete": "Eliminar {date}",
+  "chart": "Peso corporal de {from} a {to}, {range}",
+  "weighIn": {
+    "label": "Pesaje",
+    "prompt": "¿<link>Peso</link> de hoy?",
+    "input": "Peso corporal en {unit}",
+    "save": "Guardar"
+  }
+}

@@ -1,6 +1,7 @@
 import { isLowerBody } from '@/lib/body-parts'
 import type { LocalExercise } from '@/lib/db/dexie'
-import { fromUnit, type Unit } from '@/lib/units'
+import { DEFAULT_LOCALE, INTL_TAG, type Locale } from '@/lib/i18n'
+import { displayWeight, fromUnit, type Unit } from '@/lib/units'
 
 /**
  * How weight moves for each kind of equipment. One constant of 2.5 kg served
@@ -54,4 +55,9 @@ export function progressionIncrementKg(exercise?: Equipped | null, unit: Unit = 
 /** `value` rounded to the nearest multiple of `step`, never below zero. */
 export function roundToStep(value: number, step: number): number {
   return Math.max(0, Math.round(value / step) * step)
+}
+
+/** A bodyweight to one decimal, always — '75.0', '75,0' in Spanish — so a column of readings lines up. */
+export function displayOneDecimal(kg: number, unit: Unit, locale: Locale = DEFAULT_LOCALE): string {
+  return displayWeight(kg, unit).toLocaleString(INTL_TAG[locale], { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 }

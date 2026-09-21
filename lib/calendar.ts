@@ -78,14 +78,35 @@ export function weekStreak(dates: Iterable<string>, today: string): Streak {
 }
 
 /**
- * One encouraging line under the streak count — what keeps it going, never
- * what was missed. The count itself is shown beside it, so this never repeats it.
+ * Which encouraging line goes under the streak count — what keeps it going,
+ * never what was missed — and the number it mentions. The words are in
+ * `messages/<locale>/history.json` under `streak.hint`; the count itself is
+ * shown beside it, so no hint repeats it.
  */
-export function streakMessage({ current, best, thisWeek }: Streak): string {
-  if (thisWeek === 0) {
-    return current === 0 ? 'One workout this week starts a new streak.' : `One workout this week makes it ${current + 1}.`
+export type StreakHint = { key: 'newStreak' | 'nextMakes' | 'started' | 'bestYet' | 'bestIs'; count: number }
+
+/**
+ * English only. Kept until components/workout-summary.tsx (the session
+ * screen's translation) reads `streakHint` and `history.streak.hint`; then
+ * delete this.
+ */
+export function streakMessage(streak: Streak): string {
+  const { key, count } = streakHint(streak)
+  const words: Record<StreakHint['key'], string> = {
+    newStreak: 'One workout this week starts a new streak.',
+    nextMakes: `One workout this week makes it ${count}.`,
+    started: 'Streak started. Train next week to keep it going.',
+    bestYet: 'Your best run yet.',
+    bestIs: `Your best is ${count} weeks.`,
   }
-  if (current === 1) return 'Streak started. Train next week to keep it going.'
-  if (current === best) return 'Your best run yet.'
-  return `Your best is ${best} weeks.`
+  return words[key]
+}
+
+export function streakHint({ current, best, thisWeek }: Streak): StreakHint {
+  if (thisWeek === 0) {
+    return current === 0 ? { key: 'newStreak', count: 0 } : { key: 'nextMakes', count: current + 1 }
+  }
+  if (current === 1) return { key: 'started', count: 1 }
+  if (current === best) return { key: 'bestYet', count: best }
+  return { key: 'bestIs', count: best }
 }

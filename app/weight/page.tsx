@@ -3,8 +3,10 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronLeft, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
+import { useLocale } from '@/components/locale-provider'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
 import { useUnit } from '@/components/use-unit'
@@ -14,11 +16,14 @@ import { formatDay, parseNumber } from '@/lib/format'
 import { bodyWeightSeries, today } from '@/lib/queries'
 import { recordBodyWeight } from '@/lib/sessions'
 import { bodyWeightId } from '@/lib/id'
-import { displayWeight, fromUnit } from '@/lib/units'
+import { fromUnit } from '@/lib/units'
+import { displayOneDecimal } from '@/lib/weights'
 
 export default function WeightPage() {
   const userId = useUserId()
   const unit = useUnit()
+  const locale = useLocale()
+  const t = useTranslations('weight')
   const [value, setValue] = useState('')
   const [date, setDate] = useState(today())
 
@@ -46,26 +51,23 @@ export default function WeightPage() {
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
         <Link href="/profile" className="flex items-center gap-1 text-sm text-ink-dim">
           <ChevronLeft size={18} aria-hidden />
-          Profile
+          {t('back')}
         </Link>
-        <h1 className="figure mt-2 text-4xl">Weight</h1>
+        <h1 className="figure mt-2 text-4xl">{t('title')}</h1>
 
         {latest ? (
           <p className="mt-2 text-sm text-ink-dim">
-            {displayWeight(latest.rolling, unit).toFixed(1)} {unit} on a 7-day average
-            {series.length > 6 && change !== 0 && (
-              <>
-                {' '}
-                — {change > 0 ? 'up' : 'down'} {displayWeight(Math.abs(change), unit).toFixed(1)} {unit} since you
-                started
-              </>
-            )}
+            {series.length > 6 && change !== 0
+              ? t('summary.averageWithChange', {
+                  value: displayOneDecimal(latest.rolling, unit, locale),
+                  unit,
+                  direction: change > 0 ? 'up' : 'down',
+                  change: displayOneDecimal(Math.abs(change), unit, locale),
+                })
+              : t('summary.average', { value: displayOneDecimal(latest.rolling, unit, locale), unit })}
           </p>
         ) : (
-          <p className="mt-2 text-sm text-ink-dim">
-            Weigh yourself at the same time of day. One reading means nothing; the trend is the
-            thing.
-          </p>
+          <p className="mt-2 text-sm text-ink-dim">{t('summary.tip')}</p>
         )}
 
         {series.length > 1 && <WeightChart series={series} />}
@@ -73,17 +75,17 @@ export default function WeightPage() {
         <form onSubmit={submit} className="mt-8 border-t border-line pt-5">
           <div className="flex gap-2">
             <label className="block flex-1">
-              <span className="mb-1 block text-xs text-ink-dim">Weight ({unit})</span>
+              <span className="mb-1 block text-xs text-ink-dim">{t('form.weight', { unit })}</span>
               <input
                 inputMode="decimal"
                 value={value}
                 onChange={(event) => setValue(event.target.value)}
-                placeholder={latest ? displayWeight(latest.weightKg, unit).toFixed(1) : unit === 'lb' ? '165' : '75'}
+                placeholder={latest ? displayOneDecimal(latest.weightKg, unit, locale) : unit === 'lb' ? '165' : '75'}
                 className="figure h-14 w-full rounded-md border border-line bg-surface px-3 text-2xl outline-none focus-visible:border-plate-blue-lift"
               />
             </label>
             <label className="block flex-1">
-              <span className="mb-1 block text-xs text-ink-dim">Date</span>
+              <span className="mb-1 block text-xs text-ink-dim">{t('form.date')}</span>
               <input
                 type="date"
                 value={date}
@@ -98,7 +100,7 @@ export default function WeightPage() {
             disabled={value.trim() === ''}
             className="mt-3 h-14 w-full rounded-md bg-plate-blue text-base font-semibold text-white disabled:opacity-40"
           >
-            Save weight
+            {t('form.save')}
           </button>
         </form>
 
@@ -106,12 +108,12 @@ export default function WeightPage() {
           <ul className="mt-8 divide-y divide-line border-y border-line">
             {[...series].reverse().slice(0, 30).map((entry) => (
               <li key={entry.measuredOn} className="flex items-center justify-between py-3">
-                <span className="text-sm text-ink-dim">{formatDay(entry.measuredOn)}</span>
+                <span className="text-sm text-ink-dim">{formatDay(entry.measuredOn, locale)}</span>
                 <span className="flex items-center gap-4">
-                  <span className="figure text-lg">{displayWeight(entry.weightKg, unit).toFixed(1)}</span>
+                  <span className="figure text-lg">{displayOneDecimal(entry.weightKg, unit, locale)}</span>
                   <button
                     type="button"
-                    aria-label={`Delete ${formatDay(entry.measuredOn)}`}
+                    aria-label={t('delete', { date: formatDay(entry.measuredOn, locale) })}
                     onClick={() =>
                       userId &&
                       void deleteRow(userId, 'bodyWeights', bodyWeightId(userId, entry.measuredOn))

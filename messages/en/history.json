@@ -1,1 +1,60 @@
-{}
+{
+  "title": "Progress",
+  "intro": {
+    "empty": "Every workout you log shows up here.",
+    "logged": "{count, plural, one {# workout} other {# workouts}} logged"
+  },
+  "week": {
+    "label": "This week",
+    "daysOfPlanned": "days trained of planned",
+    "moved": "Moved",
+    "unitThisWeek": "{unit} this week",
+    "fallbackWorkout": "Workout"
+  },
+  "lifts": {
+    "label": "Lifts",
+    "title": "Your lifts",
+    "everySet": "Every set of {name}"
+  },
+  "records": {
+    "label": "Records",
+    "title": "Records",
+    "e1rm": "e1RM {value} {unit}"
+  },
+  "streak": {
+    "label": "Streak",
+    "weeksInARow": "{count, plural, one {week} other {weeks}} in a row",
+    "daysThisWeek": "· {count, plural, one {# day} other {# days}} this week",
+    "hint": {
+      "newStreak": "One workout this week starts a new streak.",
+      "nextMakes": "One workout this week makes it {count}.",
+      "started": "Streak started. Train next week to keep it going.",
+      "bestYet": "Your best run yet.",
+      "bestIs": "Your best is {count} weeks."
+    }
+  },
+  "past": {
+    "title": "Past workouts",
+    "sets": "{done}/{planned} sets",
+    "openToFix": "Open to fix a set"
+  },
+  "empty": "Nothing logged yet. <link>Start today's workout</link>.",
+  "calendar": {
+    "label": "Training calendar",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "previous": "Previous month",
+    "next": "Next month",
+    "trained": "{date}, trained"
+  },
+  "chart": {
+    "label": "Top set from {from} {unit} on {fromDay} to {to} {unit} on {toDay}",
+    "caption": "<from>{first}</from> → <to>{last}</to> {unit} top set · e1RM <max>{e1rm}</max>"
+  },
+  "delete": {
+    "button": "Delete workout",
+    "question": "Delete this {name} workout?",
+    "detail": "Everything logged on {date} goes with it. The workout itself stays in your programme.",
+    "cancel": "Cancel",
+    "confirm": "Delete"
+  }
+}

@@ -1,1 +1,60 @@
-{}
+{
+  "title": "Progreso",
+  "intro": {
+    "empty": "Cada entrenamiento que registres aparece aquí.",
+    "logged": "{count, plural, one {# entrenamiento registrado} other {# entrenamientos registrados}}"
+  },
+  "week": {
+    "label": "Esta semana",
+    "daysOfPlanned": "días entrenados de los previstos",
+    "moved": "Movido",
+    "unitThisWeek": "{unit} esta semana",
+    "fallbackWorkout": "Entrenamiento"
+  },
+  "lifts": {
+    "label": "Levantamientos",
+    "title": "Tus levantamientos",
+    "everySet": "Todas las series de {name}"
+  },
+  "records": {
+    "label": "Marcas",
+    "title": "Mejores marcas",
+    "e1rm": "e1RM {value} {unit}"
+  },
+  "streak": {
+    "label": "Racha",
+    "weeksInARow": "{count, plural, one {semana seguida} other {semanas seguidas}}",
+    "daysThisWeek": "· {count, plural, one {# día} other {# días}} esta semana",
+    "hint": {
+      "newStreak": "Un entrenamiento esta semana empieza una racha nueva.",
+      "nextMakes": "Un entrenamiento esta semana la deja en {count}.",
+      "started": "Racha empezada. Entrena la semana que viene para mantenerla.",
+      "bestYet": "Tu mejor racha hasta ahora.",
+      "bestIs": "Tu mejor racha es de {count} semanas."
+    }
+  },
+  "past": {
+    "title": "Entrenamientos anteriores",
+    "sets": "{done}/{planned} series",
+    "openToFix": "Abrir para corregir una serie"
+  },
+  "empty": "Nada registrado todavía. <link>Empieza el entrenamiento de hoy</link>.",
+  "calendar": {
+    "label": "Calendario de entrenamiento",
+    "days": "{count, plural, one {# día} other {# días}}",
+    "previous": "Mes anterior",
+    "next": "Mes siguiente",
+    "trained": "{date}, entrenado"
+  },
+  "chart": {
+    "label": "Serie máxima de {from} {unit} el {fromDay} a {to} {unit} el {toDay}",
+    "caption": "<from>{first}</from> → <to>{last}</to> {unit} serie máxima · e1RM <max>{e1rm}</max>"
+  },
+  "delete": {
+    "button": "Eliminar entrenamiento",
+    "question": "¿Eliminar este entrenamiento de {name}?",
+    "detail": "Todo lo registrado el {date} se va con él. El entrenamiento sigue en tu programa.",
+    "cancel": "Cancelar",
+    "confirm": "Eliminar"
+  }
+}

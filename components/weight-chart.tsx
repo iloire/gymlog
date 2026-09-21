@@ -1,8 +1,11 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
+
+import { useLocale } from '@/components/locale-provider'
 import { useUnit } from '@/components/use-unit'
 import { formatDay } from '@/lib/format'
-import { displayWeight } from '@/lib/units'
+import { displayOneDecimal } from '@/lib/weights'
 
 type Entry = { measuredOn: string; weightKg: number; rolling: number }
 
@@ -16,12 +19,14 @@ type Entry = { measuredOn: string; weightKg: number; rolling: number }
  */
 export function WeightChart({ series }: { series: Entry[] }) {
   const unit = useUnit()
+  const locale = useLocale()
+  const t = useTranslations('weight')
   const width = 100
   const height = 34
   // Inset so dots on the first and last day are not clipped by the SVG edge.
   const inset = 1.5
 
-  const dayOf = (entry: Entry | undefined) => (entry ? formatDay(entry.measuredOn) : '')
+  const dayOf = (entry: Entry | undefined) => (entry ? formatDay(entry.measuredOn, locale) : '')
   const first = dayOf(series[0])
   const last = dayOf(series.at(-1))
 
@@ -29,7 +34,7 @@ export function WeightChart({ series }: { series: Entry[] }) {
   const min = Math.min(...values)
   const max = Math.max(...values)
   const span = max - min || 1
-  const range = `${displayWeight(min, unit).toFixed(1)}–${displayWeight(max, unit).toFixed(1)} ${unit}`
+  const range = `${displayOneDecimal(min, unit, locale)}–${displayOneDecimal(max, unit, locale)} ${unit}`
 
   const x = (index: number) => inset + (index / Math.max(1, series.length - 1)) * (width - inset * 2)
   const y = (value: number) => inset + (1 - (value - min) / span) * (height - inset * 2)
@@ -45,7 +50,7 @@ export function WeightChart({ series }: { series: Entry[] }) {
         preserveAspectRatio="none"
         className="h-36 w-full"
         role="img"
-        aria-label={`Bodyweight from ${first} to ${last}, ${range}`}
+        aria-label={t('chart', { from: first, to: last, range })}
       >
         {series.map((entry, index) => (
           <circle
