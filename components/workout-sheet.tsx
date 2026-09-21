@@ -4,6 +4,7 @@ import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useId, useRef } from 'react'
 
+import { ExerciseThumb } from '@/components/exercise-frames'
 import type { LocalSetLog } from '@/lib/db/dexie'
 import { libraryName } from '@/lib/exercise-i18n'
 import { useLocale } from '@/components/locale-provider'
@@ -24,8 +25,8 @@ export function WorkoutSheet({
   onClose,
 }: {
   name: string
-  /** One entry per position, in order, each with its set logs. */
-  exercises: { position: number; name: string; logs: LocalSetLog[] }[]
+  /** One entry per position, in order, each with its set logs and its photos. */
+  exercises: { position: number; name: string; images: string[] | null; logs: LocalSetLog[] }[]
   current: number
   onPick: (index: number) => void
   onClose: () => void
@@ -83,7 +84,10 @@ export function WorkoutSheet({
                   aria-current={index === current ? 'true' : undefined}
                   className="flex w-full items-center gap-3 py-3 text-left"
                 >
-                  <span className="figure w-6 shrink-0 text-sm text-ink-dim">{index + 1}</span>
+                  <ExerciseThumb
+                    exercise={{ id: exercise.logs[0]?.exerciseId ?? '', name: exercise.name, images: exercise.images }}
+                    animate={false}
+                  />
                   <span className={`min-w-0 flex-1 truncate text-[15px] ${finished ? 'text-ink-dim' : ''}`}>
                     {libraryName(exercise.logs[0]?.exerciseId ?? '', exercise.name, locale)}
                     {index === current && <span className="ml-2 text-xs text-ink-dim">{t('now')}</span>}

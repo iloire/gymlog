@@ -95,10 +95,17 @@ change. No all-caps labels, no monospace for data.
   a phone, 56rem from 48rem viewports so a workout on a desk is a page rather than a strip down
   the middle. Sheets and dialogs keep their own `max-w-lg`: they are centred over the page, not
   part of it. Nothing sets a column width inline.
-- **Both frames on a desk.** A list row's thumbnail (`ExerciseFrames` with `pair`) is the start
-  position on a phone and, from the medium breakpoint, the start and end positions side by side at
-  four times the width: the movement reads from the row without a tap. Sheets keep the single
-  frame. The library grid goes from two tiles across to four for the same reason.
+- **An exercise row starts with its picture.** Wherever exercises are listed — the picker, the
+  workout editor, a programme's rows, the sets logged on Today and in History, the summary's
+  records, the in-workout sheet — the row is `ExerciseThumb` first, then the name, then whatever
+  the row is for. One component, one size (3:2, 64px wide on a phone, 128px from the medium
+  breakpoint), so the picture is in the same place at the same size on every screen and an
+  exercise is recognised before its name is read. The two-column library grid is the one place
+  the picture sits above the name: it is a gallery to browse, not a list to scan.
+- **Both frames on a desk.** The row thumbnail is the start position on a phone and, from the
+  medium breakpoint, the start and end positions cross-fading at twice the width: the movement
+  reads from the row without a tap. Sheets keep the single frame. The library grid goes from two
+  tiles across to four for the same reason.
 - **No card kit.** The session screen is a full-bleed stack: one exercise fills the viewport.
   Lists are rows on hairlines, never boxes. Where something has to read as a control or a raised
   thing — a stepper, a weigh-in field, a quiet button, a note — it sits on `--surface` with no

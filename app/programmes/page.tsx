@@ -9,7 +9,7 @@ import { Suspense, useMemo, useState } from 'react'
 
 import { EquipmentPicker, useEquipment } from '@/components/equipment-picker'
 import { ExerciseDialog } from '@/components/exercise-dialog'
-import { ExerciseFrames } from '@/components/exercise-frames'
+import { ExerciseThumb } from '@/components/exercise-frames'
 import { Loading, Placeholder } from '@/components/loading'
 import { useLocale } from '@/components/locale-provider'
 import { Nav } from '@/components/nav'
@@ -318,11 +318,7 @@ function ProgrammeDetail({
                     onClick={() => setViewingExerciseId(choice.exerciseId)}
                     className="flex w-full items-center gap-3 py-3 text-left"
                   >
-                    <ExerciseFrames
-                      exercise={{ id: choice.exerciseId, name, images: exercise?.images ?? null }}
-                      className="aspect-[3/2] w-16 shrink-0 md:w-32"
-                      animate="md"
-                    />
+                    <ExerciseThumb exercise={{ id: choice.exerciseId, name, images: exercise?.images ?? null }} />
                     <span className="min-w-0 flex-1">
                       <span className="block text-[15px]">{name}</span>
                       {!choice.doable ? (

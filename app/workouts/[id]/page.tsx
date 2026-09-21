@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useRef, useState } from 'react'
 
 import { ExerciseDialog } from '@/components/exercise-dialog'
-import { ExerciseFrames } from '@/components/exercise-frames'
+import { ExerciseThumb } from '@/components/exercise-frames'
 import { ExercisePicker } from '@/components/exercise-picker'
 import { ItemSheet, type EditableItem } from '@/components/item-sheet'
 import { Loading, Placeholder } from '@/components/loading'
@@ -194,11 +194,7 @@ export default function WorkoutEditorPage() {
                 onRemove={() => void remove(item)}
                 label={t('editor.edit', { name: item.exerciseName })}
               >
-                <ExerciseFrames
-                  exercise={{ id: item.exerciseId, name: item.exerciseName, images: item.exerciseImages }}
-                  className="aspect-[3/2] w-14 shrink-0 md:w-32"
-                  animate="md"
-                />
+                <ExerciseThumb exercise={{ id: item.exerciseId, name: item.exerciseName, images: item.exerciseImages }} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[15px]">{item.exerciseName}</span>
                   <span className="block text-sm text-ink-dim">

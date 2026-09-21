@@ -10,7 +10,9 @@ import { FinishSession } from '@/components/finish-session'
 import { useLocale } from '@/components/locale-provider'
 import { Loading, Placeholder } from '@/components/loading'
 import { Nav } from '@/components/nav'
+import { ExerciseThumb } from '@/components/exercise-frames'
 import { SessionSets } from '@/components/session-sets'
+import { useExercises } from '@/components/use-exercises'
 import { useUserId } from '@/components/session-boot'
 import { libraryName } from '@/lib/exercise-i18n'
 import { StrengthChart } from '@/components/strength-chart'
@@ -74,6 +76,7 @@ export default function ProgressPage() {
 
     return { history, logs, records, lifts, week: weekProgress(week.days, history) }
   }, [userId, fallbackWorkout])
+  const library = useExercises(data?.records.slice(0, 6).map((record) => record.exerciseId) ?? [])
 
   if (!userId || !data) {
     return (
@@ -91,6 +94,7 @@ export default function ProgressPage() {
   const streak = weekStreak(trained, date)
   const hint = streakHint(streak)
   const shownLift = lifts.find((record) => record.exerciseId === lift) ?? lifts[0] ?? null
+  const shownRecords = records.slice(0, 6)
   const series = shownLift ? strengthSeries(logs.filter((log) => log.exerciseId === shownLift.exerciseId)) : []
 
   return (
@@ -167,8 +171,8 @@ export default function ProgressPage() {
               <section className="mt-8" aria-label={t('records.label')}>
                 <h2 className="text-sm text-ink-dim">{t('records.title')}</h2>
                 <ul className="mt-2 divide-y divide-line border-y border-line">
-                  {records.slice(0, 6).map((record) => (
-                    <RecordRow key={record.exerciseId} record={record} />
+                  {shownRecords.map((record) => (
+                    <RecordRow key={record.exerciseId} record={record} images={library.get(record.exerciseId)?.images ?? null} />
                   ))}
                 </ul>
               </section>
@@ -226,13 +230,14 @@ export default function ProgressPage() {
 }
 
 /** The heaviest set of one lift, and the estimated max it implies. */
-function RecordRow({ record }: { record: PersonalRecord }) {
+function RecordRow({ record, images }: { record: PersonalRecord; images: string[] | null }) {
   const unit = useUnit()
   const locale = useLocale()
   const t = useTranslations('history')
   return (
-    <li className="flex items-baseline justify-between gap-3 py-3">
-      <span className="min-w-0">
+    <li className="flex items-center gap-3 py-3">
+      <ExerciseThumb exercise={{ id: record.exerciseId, name: record.name, images }} />
+      <span className="min-w-0 flex-1">
         <Link href={`/exercises/${record.exerciseId}`} className="block truncate text-[15px]">
           {libraryName(record.exerciseId, record.name, locale)}
         </Link>

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { ExerciseDialog } from '@/components/exercise-dialog'
+import { ExerciseThumb } from '@/components/exercise-frames'
 import { useUserId } from '@/components/session-boot'
 import type { PlanLine } from '@/lib/plan'
 
@@ -38,11 +39,9 @@ export function PlanList({ lines }: { lines: PlanLine[] }) {
               onClick={() => setViewingExerciseId(line.exerciseId)}
               className="flex w-full items-center gap-3 py-3 text-left transition-colors hover:bg-surface"
             >
-              <span className="figure w-6 shrink-0 self-baseline pt-0.5 text-sm text-ink-dim">
-                {index + 1}
-              </span>
+              <ExerciseThumb exercise={{ id: line.exerciseId, name: line.name, images: line.images }} />
               <span className="min-w-0 flex-1">
-                <span className="block text-[15px]">{line.name}</span>
+                <span className="block truncate text-[15px]">{line.name}</span>
                 <span className="mt-0.5 block text-sm text-ink-dim">
                   <span className="figure">{line.target}</span>
                   {line.last ? (

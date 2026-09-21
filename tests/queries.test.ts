@@ -226,7 +226,7 @@ describe('planPreview', () => {
 
     const { lines, estimateMs } = await planPreview(USER, 'workout-a')
 
-    expect(lines).toEqual([{ exerciseId: SQUAT, name: 'Barbell Squat', target: '3×5', last: '60 kg' }])
+    expect(lines).toEqual([{ exerciseId: SQUAT, name: 'Barbell Squat', target: '3×5', last: '60 kg', images: null }])
     expect(estimateMs).toBe((3 * (45 + 120) - 120) * 1000)
   })
 

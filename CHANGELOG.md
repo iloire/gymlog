@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-21 22:17
+
+- **Every exercise row starts with its picture.** The set lists on Today, in History and on the
+  finish screen, the records on Progress and the finish screen, and the in-workout sheet were
+  names only, while the picker, the editor and a programme's rows each put a thumbnail on the left
+  at their own size. One component, `ExerciseThumb`, now opens every row at one size: 3:2, 64px
+  wide on a phone, cross-fading at 128px on a desk, a still in a sheet. Rows built from set logs
+  or records carry the name but not the photos, so `useExercises` looks them up by id off Dexie.
+  The library grid keeps its picture above the name; it is a gallery, not a list.
+
 ## 2026-09-21 22:05
 
 - **A second coat on every screen.** The plate palette, the four styles and the type stay; what

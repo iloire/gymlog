@@ -57,3 +57,21 @@ export function ExerciseFrames({
     </div>
   )
 }
+
+/**
+ * The thumbnail a list row starts with. Every list of exercises in the app —
+ * the picker, the workout editor, a programme's rows, the sets logged on Today
+ * and in History, the summary's records — puts it first, at this one size, so
+ * an exercise is recognised by its picture in the same place on every screen
+ * before its name is read. 3:2 is the library photos' own shape. A sheet passes
+ * `animate={false}` and keeps the still.
+ */
+export function ExerciseThumb({
+  exercise,
+  animate = 'md',
+}: {
+  exercise: Pick<LocalExercise, 'id' | 'name' | 'images'>
+  animate?: boolean | 'md'
+}) {
+  return <ExerciseFrames exercise={exercise} className="aspect-[3/2] w-16 shrink-0 md:w-32" animate={animate} />
+}

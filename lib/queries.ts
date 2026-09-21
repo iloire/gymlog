@@ -103,6 +103,7 @@ export async function planPreview(userId: string, templateId: string, locale: Lo
         name: exercise ? exerciseName(exercise, locale) : 'Exercise',
         target: formatTarget(item),
         last: last ? formatLast(last.topSet, unit, locale) : null,
+        images: exercise?.images ?? null,
       }
     }),
   )

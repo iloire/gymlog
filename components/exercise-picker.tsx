@@ -16,7 +16,7 @@ import {
   bodyPartOptions,
   useLibraryLabel,
 } from '@/components/exercise-filters'
-import { ExerciseFrames } from '@/components/exercise-frames'
+import { ExerciseThumb } from '@/components/exercise-frames'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
 import { exerciseEquipment } from '@/lib/equipment'
 import { exerciseName } from '@/lib/exercise-i18n'
@@ -98,7 +98,7 @@ export function ExercisePicker({
               onClick={() => onPick(exercise)}
               className="flex w-full items-center gap-3 px-4 py-3 text-left"
             >
-              <ExerciseFrames exercise={exercise} className="h-14 w-14 shrink-0" animate={false} />
+              <ExerciseThumb exercise={exercise} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[15px]">{exerciseName(exercise, locale)}</span>
                 <span className="block truncate text-sm capitalize text-ink-dim">

@@ -413,7 +413,12 @@ function Session() {
           name={data.session.templateName}
           exercises={positions.map((at) => {
             const logs = data.logs.filter((log) => log.position === at)
-            return { position: at, name: logs[0] ? libraryName(logs[0].exerciseId, logs[0].exerciseName, locale) : t('exerciseFallback'), logs }
+            return {
+              position: at,
+              name: logs[0] ? libraryName(logs[0].exerciseId, logs[0].exerciseName, locale) : t('exerciseFallback'),
+              images: logs[0] ? (data.exercises.get(logs[0].exerciseId)?.images ?? null) : null,
+              logs,
+            }
           })}
           current={position}
           onPick={(index) => {

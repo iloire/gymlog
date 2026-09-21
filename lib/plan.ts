@@ -25,6 +25,8 @@ export type PlanLine = {
   target: string
   /** The headline number from last time — '60 kg', '12 reps', '8 min'; null the first time. */
   last: string | null
+  /** The library's photos, for the row's thumbnail. */
+  images: string[] | null
 }
 
 /**
