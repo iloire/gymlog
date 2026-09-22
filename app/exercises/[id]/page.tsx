@@ -7,6 +7,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Suspense, useState } from 'react'
 
+import { DeleteExercise } from '@/components/delete-exercise'
 import { ExerciseDetail, ExerciseDetailLoading } from '@/components/exercise-detail'
 import { Loading } from '@/components/loading'
 import { Nav } from '@/components/nav'
@@ -77,6 +78,12 @@ function ExerciseDetailPage() {
             </button>
           }
         />
+
+        {exercise?.userId === userId && exercise.deletedAt === null && (
+          <div className="mt-8 flex justify-center">
+            <DeleteExercise exercise={exercise} />
+          </div>
+        )}
       </main>
       <Nav tab={origin.href} />
     </>

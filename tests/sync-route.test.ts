@@ -266,6 +266,29 @@ describe('POST /api/sync — push', () => {
     expect(row?.name).toBe('Barbell_Squat')
   })
 
+  it("accepts an exercise of the user's own beside the read-only library, and pulls it back", async () => {
+    await insertExercise('Barbell_Squat', null)
+
+    const { body } = await sync([
+      mutation('exercises', {
+        id: 'own-1',
+        name: 'Kettlebell Swings',
+        slug: 'kettlebell-swings',
+        equipment: 'kettlebells',
+        primaryMuscles: ['hamstrings'],
+        images: [],
+        updatedAt: 1000,
+      }),
+    ])
+
+    expect(body.applied).toEqual(['exercises:own-1'])
+    const own = await db.select().from(schema.exercises).where(eq(schema.exercises.id, 'own-1'))
+    expect(own[0]).toMatchObject({ userId: ALICE, name: 'Kettlebell Swings', rev: 1 })
+
+    const pulled = await sync([], { cursor: 0 })
+    expect(pulled.body.changes.exercises?.map((row) => row.id).sort()).toEqual(['Barbell_Squat', 'own-1'])
+  })
+
   it('stores a delete as a tombstone', async () => {
     await sync([template('t1', { updatedAt: 1000 })])
     await sync([template('t1', { updatedAt: 2000, deletedAt: 2000 })])

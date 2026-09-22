@@ -1,7 +1,7 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Search } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -72,15 +72,17 @@ export default function ExercisesPage() {
   const [shown, setShown] = useState(PAGE)
   const more = useRef<HTMLButtonElement>(null)
 
-  // Unnarrowed, the grid is sections: your exercises first, then the rest of
-  // the library under the body part each is mostly about. Narrowed, one grid.
-  // A title is the section's id — 'Yours' or a body part — named at render.
+  // Unnarrowed, the grid is sections: your exercises first — starred, in the
+  // programme, lifted lately, or ones you added — then the rest of the library
+  // under the body part each is mostly about. Narrowed, one grid. A title is
+  // the section's id — 'Yours' or a body part — named at render.
   const sections = useMemo(() => {
     if (narrowed) return [{ title: null, exercises: results }]
-    const yours = results.filter((exercise) => rankTier(exercise, favorites, rank) < 3)
+    const isYours = (exercise: LocalExercise) => rankTier(exercise, favorites, rank) < 3 || exercise.userId !== null
+    const yours = results.filter(isYours)
     const groups = new Map<string, LocalExercise[]>()
     for (const exercise of results) {
-      if (rankTier(exercise, favorites, rank) < 3) continue
+      if (isYours(exercise)) continue
       const part = bodyPartsOf(exercise)[0] ?? 'Other'
       groups.set(part, [...(groups.get(part) ?? []), exercise])
     }
@@ -132,7 +134,16 @@ export default function ExercisesPage() {
   return (
     <>
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
-        <h1 className="figure text-4xl">{t('title')}</h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="figure text-4xl">{t('title')}</h1>
+          <Link
+            href="/exercises/new"
+            className="mt-1.5 flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-line bg-surface px-3 text-sm font-medium text-ink"
+          >
+            <Plus size={16} aria-hidden />
+            {t('add')}
+          </Link>
+        </div>
         <p className="mt-2 text-sm text-ink-dim">
           {exercises.length ? t('intro', { count: exercises.length }) : t('fetching')}
         </p>
@@ -172,6 +183,15 @@ export default function ExercisesPage() {
         {results.length === 0 && exercises.length > 0 && (
           <p className="mt-6 border-y border-line py-6 text-[15px] text-ink-dim">
             {filter.favoritesOnly && favorites.size === 0 ? t('noFavorites') : t('noMatch')}
+            {query.trim() !== '' && !filter.favoritesOnly && (
+              // What was searched for is what the library lacks; the form opens with it typed.
+              <Link
+                href={`/exercises/new?name=${encodeURIComponent(query.trim())}`}
+                className="mt-2 block text-ink underline underline-offset-4"
+              >
+                {t('addNamed', { name: query.trim() })}
+              </Link>
+            )}
           </p>
         )}
 

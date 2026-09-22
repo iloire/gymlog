@@ -6,9 +6,20 @@ Config you edit by hand. Each file is bundled into the app, so everything here w
 | File | What it drives |
 |---|---|
 | `exercise-filter.json` | Which exercises `npm run exercises:import` brings in |
+| `exercise-extras.json` | Global exercises the source library lacks, appended by the same import |
 | `login-images.json` | The sign in pictures — see `docs/login-images.md` |
 | `equipment.json` | Equipment you can tick, its presets, and what exercises need |
 | `programmes/*.json` | The premade programmes on `/programmes` |
+
+## Exercise extras
+
+`exercise-extras.json` is a list of seed rows written by hand, for a movement free-exercise-db does
+not have (the plain two-hand kettlebell swing). Each entry has the library's fields minus `slug`
+and `images`: `id` (unique, `Title_Case_With_Underscores` like the library's), `name`, `category`,
+`level`, `force`, `mechanic`, `equipment`, `primaryMuscles`, `secondaryMuscles`, `instructions`.
+They are global (`userId IS NULL`), have no photos, and get their slug from the importer. After
+editing, run `npm run exercises:import`, then `npm run db:seed` (and `db:seed:prod`); a Spanish
+name goes in `exercise-names.es.json` and steps in `exercise-instructions.es.json`.
 
 ## Premade programmes
 

@@ -36,5 +36,27 @@
     "startFrom": "Empieza desde",
     "whatYouHave": "Lo que tienes",
     "note": "Se guarda solo en este dispositivo. Los ejercicios de peso corporal no necesitan nada."
+  },
+  "add": "Añadir el tuyo",
+  "addNamed": "¿No está en la biblioteca? Añade “{name}” como ejercicio tuyo.",
+  "new": {
+    "title": "Tu propio ejercicio",
+    "intro": "Para un movimiento que la biblioteca no tiene. Aparece en todos los selectores y se sincroniza con tus otros dispositivos, sin fotos.",
+    "name": "Nombre",
+    "namePlaceholder": "Balanceo con kettlebell",
+    "exists": "Ya existe: <link>ábrelo</link> en vez de añadirlo dos veces.",
+    "equipment": "Necesita",
+    "muscle": "Trabaja sobre todo",
+    "muscleNone": "No estoy seguro",
+    "category": "Tipo",
+    "cardioHint": "El cardio se registra en tiempo, no en peso y repeticiones.",
+    "save": "Añadir ejercicio"
+  },
+  "delete": {
+    "button": "Eliminar este ejercicio",
+    "question": "¿Eliminar {name}?",
+    "detail": "Las series que registraste con él se quedan en tu historial.",
+    "cancel": "Cancelar",
+    "confirm": "Eliminar"
   }
 }

@@ -144,8 +144,8 @@ direction talks to `/api/sync` itself, so both work with no signal.
 
 - **What the file holds**: every user-owned row of the nine synced tables, minus tombstones, minus
   the global exercise library — every account already has it, it is read-only, and writing those
-  rows back would be `forbidden`. Your own exercises are in, since they are the same table with a
-  `userId`. Per-row `userId` and `rev` are stripped: the account is decided on import and the
+  rows back would be `forbidden`. Your own exercises (`/exercises/new`, `lib/exercises.ts`) are in,
+  since they are the same table with a `userId`. Per-row `userId` and `rev` are stripped: the account is decided on import and the
   revision by the server.
 - **Your own backup keeps its ids.** Every row lands back on itself, so a restore is exact and
   importing twice is a no-op.

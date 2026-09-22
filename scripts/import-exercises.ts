@@ -10,6 +10,9 @@
  * Images are vendored rather than hot-linked so the library works in a gym
  * basement with no signal. Re-running is idempotent: existing files are skipped.
  *
+ * `data/exercise-extras.json` holds the movements the source lacks; they are
+ * appended after the library, so editing that file also means re-running this.
+ *
  *   npm run exercises:import
  */
 import { existsSync } from 'node:fs'
@@ -21,7 +24,10 @@ import sharp from 'sharp'
 import {
   matchesFilter,
   uniqueSlug,
+  withExtras,
   type ExerciseFilter,
+  type ExtraExercise,
+  type SeedExercise,
   type SourceExercise,
 } from '../lib/exercise-import'
 
@@ -32,24 +38,10 @@ type Filter = ExerciseFilter & {
   imageQuality: number
 }
 
-export type SeedExercise = {
-  id: string
-  name: string
-  slug: string
-  category: string | null
-  level: string | null
-  force: string | null
-  mechanic: string | null
-  equipment: string | null
-  primaryMuscles: string[]
-  secondaryMuscles: string[]
-  instructions: string[]
-  images: string[]
-}
-
 const ROOT = path.resolve(__dirname, '..')
 const MEDIA_DIR = path.join(ROOT, 'public', 'exercise-media')
 const OUT_FILE = path.join(ROOT, 'db', 'seed-exercises.json')
+const EXTRAS_FILE = path.join(ROOT, 'data', 'exercise-extras.json')
 
 async function vendorImage(
   sourceUrl: string,
@@ -132,8 +124,11 @@ async function main() {
     }
   }
 
-  await writeFile(OUT_FILE, `${JSON.stringify(seeds, null, 2)}\n`)
-  console.log(`wrote ${seeds.length} exercises to db/seed-exercises.json`)
+  const extras: ExtraExercise[] = JSON.parse(await readFile(EXTRAS_FILE, 'utf8'))
+  const library = withExtras(seeds, extras)
+
+  await writeFile(OUT_FILE, `${JSON.stringify(library, null, 2)}\n`)
+  console.log(`wrote ${library.length} exercises to db/seed-exercises.json (${extras.length} from data/exercise-extras.json)`)
   console.log(`vendored ${downloaded} new images into public/exercise-media/`)
 }
 

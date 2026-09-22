@@ -29,8 +29,14 @@ export function ExerciseFrames({
   const locale = useLocale()
   const [start, end] = exercise.images ?? []
 
+  // An exercise of your own has no photos. Its box holds the initial of its
+  // name, so it is still a picture to recognise it by in a list.
   if (!start) {
-    return <div className={`rounded-sm bg-surface ${className}`} aria-hidden />
+    return (
+      <div className={`figure flex items-center justify-center rounded-sm bg-surface text-2xl text-ink-dim ${className}`} aria-hidden>
+        {exerciseName(exercise, locale).trim().charAt(0).toUpperCase()}
+      </div>
+    )
   }
 
   return (

@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import seeds from '@/db/seed-exercises.json'
 import filterConfig from '@/data/exercise-filter.json'
-import { matchesFilter, slugify, uniqueSlug, type SourceExercise } from '@/lib/exercise-import'
+import extras from '@/data/exercise-extras.json'
+import { matchesFilter, slugify, uniqueSlug, withExtras, type SeedExercise, type SourceExercise } from '@/lib/exercise-import'
 
 const exercise = (overrides: Partial<SourceExercise> = {}): SourceExercise => ({
   id: 'Barbell_Squat',
@@ -97,9 +98,15 @@ describe('the committed exercise library', () => {
     expect(new Set(seeds.map((s) => s.slug)).size).toBe(seeds.length)
   })
 
-  it('gives every exercise its start and end photo', () => {
-    const missing = seeds.filter((s) => s.images.length !== 2)
+  it('gives every library exercise its start and end photo', () => {
+    const extraIds = new Set(extras.map((extra) => extra.id))
+    const missing = seeds.filter((s) => !extraIds.has(s.id) && s.images.length !== 2)
     expect(missing).toEqual([])
+  })
+
+  it('ends with data/exercise-extras.json as written, so editing that file without re-importing fails here', () => {
+    const library = seeds.slice(0, seeds.length - extras.length) as SeedExercise[]
+    expect(seeds.slice(-extras.length)).toEqual(withExtras(library, extras).slice(-extras.length))
   })
 
   it('only contains what data/exercise-filter.json allows', () => {
@@ -116,5 +123,22 @@ describe('the committed exercise library', () => {
   it('points photos at /exercise-media, never at the /exercises route', () => {
     const wrong = seeds.flatMap((s) => s.images).filter((p) => !p.startsWith('exercise-media/'))
     expect(wrong).toEqual([])
+  })
+})
+
+describe('withExtras', () => {
+  const library: SeedExercise[] = [
+    { id: 'Swing', name: 'Kettlebell Swings', slug: 'kettlebell-swings', category: 'strength', level: 'beginner', force: 'pull', mechanic: 'compound', equipment: 'kettlebells', primaryMuscles: [], secondaryMuscles: [], instructions: [], images: ['a', 'b'] },
+  ]
+  const extra = { id: 'Swing_2h', name: 'Kettlebell Swings', category: 'strength', level: null, force: null, mechanic: null, equipment: 'kettlebells', primaryMuscles: ['hamstrings'], secondaryMuscles: [], instructions: [] }
+
+  it('appends after the library, with a slug that stays clear of its slugs and no photos', () => {
+    const all = withExtras(library, [extra])
+    expect(all.map((row) => row.id)).toEqual(['Swing', 'Swing_2h'])
+    expect(all[1]).toMatchObject({ slug: 'kettlebell-swings-kettlebells', images: [] })
+  })
+
+  it('refuses an extra whose id the library already has', () => {
+    expect(() => withExtras(library, [{ ...extra, id: 'Swing' }])).toThrow(/already in the library/)
   })
 })

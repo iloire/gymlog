@@ -24,6 +24,9 @@ const BODY_PART: Record<string, string> = {
   abdominals: 'Abs',
 }
 
+/** Every muscle the library tags, legs first and in the body parts' order — what an exercise of your own can name. */
+export const MUSCLES = Object.keys(BODY_PART)
+
 /** Every body part, in the order the library's chips and headers show them. */
 export const BODY_PARTS = ['Legs', 'Chest', 'Back', 'Shoulders', 'Arms', 'Abs', 'Cardio'] as const
 

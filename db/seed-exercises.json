@@ -23486,5 +23486,31 @@
       "exercise-media/Zottman_Preacher_Curl/0.webp",
       "exercise-media/Zottman_Preacher_Curl/1.webp"
     ]
+  },
+  {
+    "id": "Kettlebell_Swings",
+    "name": "Kettlebell Swings",
+    "slug": "kettlebell-swings",
+    "category": "strength",
+    "level": "beginner",
+    "force": "pull",
+    "mechanic": "compound",
+    "equipment": "kettlebells",
+    "primaryMuscles": [
+      "hamstrings"
+    ],
+    "secondaryMuscles": [
+      "glutes",
+      "lower back",
+      "shoulders",
+      "abdominals"
+    ],
+    "instructions": [
+      "Stand with your feet a little wider than shoulder width, the kettlebell on the floor a foot in front of you.",
+      "Hinge at the hips with a flat back, grip the handle with both hands and hike it back between your legs.",
+      "Drive your hips forward hard, squeezing the glutes, so the bell swings up to about chest height with straight arms.",
+      "Let it fall back between your legs, hinging at the hips again rather than squatting, and go straight into the next rep."
+    ],
+    "images": []
   }
 ]

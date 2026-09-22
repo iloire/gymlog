@@ -59,3 +59,34 @@ export function uniqueSlug(name: string, equipment: string | null, used: Set<str
   used.add(slug)
   return slug
 }
+
+/**
+ * A global exercise the source library lacks — a plain two-hand kettlebell
+ * swing, say — written by hand in `data/exercise-extras.json`. It has no
+ * photos, and it is otherwise a seed row: the same fields, `userId IS NULL`,
+ * shared and read-only.
+ */
+export type ExtraExercise = Omit<SourceExercise, 'images' | 'level' | 'category'> & {
+  level: string | null
+  category: string | null
+}
+
+export type SeedExercise = ExtraExercise & { slug: string; images: string[] }
+
+/**
+ * The extras go in after the source library, so a re-import keeps them and
+ * their slugs still cannot clash with a library one. An extra whose id the
+ * library already has is a mistake, not an override: the row would be seeded
+ * twice under one id.
+ */
+export function withExtras(seeds: SeedExercise[], extras: ExtraExercise[]): SeedExercise[] {
+  const ids = new Set(seeds.map((seed) => seed.id))
+  const used = new Set(seeds.map((seed) => seed.slug))
+  const added = extras.map((extra) => {
+    if (ids.has(extra.id)) throw new Error(`exercise-extras: ${extra.id} is already in the library`)
+    ids.add(extra.id)
+    const { id, name, ...rest } = extra
+    return { id, name, slug: uniqueSlug(name, extra.equipment, used), ...rest, images: [] }
+  })
+  return [...seeds, ...added]
+}

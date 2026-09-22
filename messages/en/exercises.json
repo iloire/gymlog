@@ -36,5 +36,27 @@
     "startFrom": "Start from",
     "whatYouHave": "What you have",
     "note": "Saved on this device only. Bodyweight exercises need nothing."
+  },
+  "add": "Add your own",
+  "addNamed": "Not in the library? Add “{name}” as your own.",
+  "new": {
+    "title": "Your own exercise",
+    "intro": "For a movement the library lacks. It goes in every picker and syncs to your other devices, without photos.",
+    "name": "Name",
+    "namePlaceholder": "Kettlebell swings",
+    "exists": "Already here: <link>open it</link> instead of adding it twice.",
+    "equipment": "Needs",
+    "muscle": "Mostly works",
+    "muscleNone": "Not sure",
+    "category": "Type",
+    "cardioHint": "Cardio is logged as time, not weight and reps.",
+    "save": "Add exercise"
+  },
+  "delete": {
+    "button": "Delete this exercise",
+    "question": "Delete {name}?",
+    "detail": "The sets you logged with it stay in your history.",
+    "cancel": "Cancel",
+    "confirm": "Delete"
   }
 }

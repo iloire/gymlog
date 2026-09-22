@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-22 12:30
+
+- **Add your own exercise.** The library had no way in for a movement it lacks. *Add your own*
+  on Exercises, and the link under an empty search, open `/exercises/new`: a name, what it
+  needs, what it mostly works and its type make a row of yours in the same table, so it syncs,
+  backs up and shows in every picker. It sits under *Yours* with its initial for a photo, warns
+  when the name is already here, and its own page can delete it, keeping the sets logged with it.
+- **Kettlebell Swings in the library.** The source only had the one-arm swing. A new
+  `data/exercise-extras.json` holds hand-written global rows the importer appends after the
+  library, with a Spanish name and steps; a test fails if the file drifts from the seed. Prod
+  needs `npm run db:seed:prod` to pick it up.
+
 ## 2026-09-21 22:35
 
 - **A logged set carries its unit.** `formatSet` wrote '30×20', which had to be read twice to
