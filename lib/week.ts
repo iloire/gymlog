@@ -55,6 +55,28 @@ const WEEKDAY_INITIALS: Record<Locale, string[]> = {
   es: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
 }
 
+/** A, B, C… — the letter a workout wears on the week and beside its name. */
+export function workoutLetter(index: number): string {
+  return String.fromCharCode(65 + index)
+}
+
+/**
+ * Every workout's letter by id, in the order Plan lists them — so a square on
+ * Today's strip and the cell on Plan say the same letter for the same workout,
+ * and the letter is the one thing you have to learn once. Archived and deleted
+ * workouts are left out, as they are on Plan, rather than shifting the letters
+ * of the ones still in use.
+ */
+export function workoutLetters(
+  templates: { id: string; deletedAt: number | null; archivedAt: number | null }[],
+): Map<string, string> {
+  return new Map(
+    templates
+      .filter((template) => template.deletedAt === null && template.archivedAt === null)
+      .map((template, index) => [template.id, workoutLetter(index)]),
+  )
+}
+
 export function weekdayInitials(locale: Locale = DEFAULT_LOCALE): string[] {
   return WEEKDAY_INITIALS[locale]
 }

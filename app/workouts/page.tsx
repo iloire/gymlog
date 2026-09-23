@@ -20,10 +20,7 @@ import { daysAgo, rotation, sessionHistory } from '@/lib/history'
 import { assignDay, startNewStage } from '@/lib/program'
 import { activeProgram, dayOfWeek } from '@/lib/queries'
 import { startSession } from '@/lib/sessions'
-import { weekdayInitials, weekdayName } from '@/lib/week'
-
-/** A, B, C… — the letter a workout wears on the week and beside its name. */
-const letter = (index: number) => String.fromCharCode(65 + index)
+import { weekdayInitials, weekdayName, workoutLetter } from '@/lib/week'
 
 /**
  * The Plan tab, whole: the week along the top, a cell per day wearing the
@@ -165,7 +162,7 @@ export default function WorkoutsPage() {
                       name ? 'bg-plate-blue text-white' : 'border border-line text-ink-dim'
                     } ${isToday ? 'ring-2 ring-ink ring-inset' : ''} disabled:opacity-50`}
                   >
-                    {name ? letter(day.index) : <span className="size-1 rounded-full bg-line" />}
+                    {name ? workoutLetter(day.index) : <span className="size-1 rounded-full bg-line" />}
                   </button>
                 </li>
               )
@@ -184,7 +181,7 @@ export default function WorkoutsPage() {
                     }`}
                     aria-hidden
                   >
-                    {letter(index)}
+                    {workoutLetter(index)}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[15px]">{workout.name}</span>

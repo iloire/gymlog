@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { describeDay, planWeek, type ScheduledDay, type TrainedDay } from '@/lib/week'
+import { describeDay, planWeek, workoutLetters, type ScheduledDay, type TrainedDay } from '@/lib/week'
 
 // Monday 14 September 2026 through Sunday the 20th.
 const MONDAY = '2026-09-14'
@@ -125,5 +125,37 @@ describe('describeDay', () => {
     expect(describeDay(day(FRIDAY, 2), 'es')).toBe('miércoles, Full body B, pendiente')
     expect(describeDay(day(FRIDAY, 4), 'es')).toBe('viernes, hoy, Full body A, previsto')
     expect(describeDay(day(FRIDAY, 1), 'es')).toBe('martes, descanso')
+  })
+})
+
+describe('workoutLetters', () => {
+  const template = (id: string, over: { deletedAt?: number; archivedAt?: number } = {}) => ({
+    id,
+    deletedAt: over.deletedAt ?? null,
+    archivedAt: over.archivedAt ?? null,
+  })
+
+  it('letters the workouts A, B, C in the order Plan lists them', () => {
+    const letters = workoutLetters([template('a'), template('b'), template('c')])
+    expect([...letters]).toEqual([
+      ['a', 'A'],
+      ['b', 'B'],
+      ['c', 'C'],
+    ])
+  })
+
+  it('leaves out a deleted or archived workout without shifting the rest', () => {
+    // Plan lists neither, so lettering them would give Today a B that Plan
+    // never shows — and the letter is only worth anything if it is the same one.
+    const letters = workoutLetters([
+      template('a'),
+      template('gone', { deletedAt: 1 }),
+      template('old', { archivedAt: 1 }),
+      template('b'),
+    ])
+    expect([...letters]).toEqual([
+      ['a', 'A'],
+      ['b', 'B'],
+    ])
   })
 })

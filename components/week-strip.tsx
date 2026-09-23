@@ -11,8 +11,14 @@ import { describeDay, weekdayInitials, type WeekDay } from '@/lib/week'
  * Filled blue is a day you trained, an outline is one still to come, a grey
  * block is a planned day that went by empty, and a rest day is a dot. Today
  * carries the ring, the same as a day on the History calendar.
+ *
+ * The square wears its workout's letter — the same A, B, C the workout wears
+ * on Plan — so the week says *which* workout was done and which is coming,
+ * not merely that there was one. `letters` maps a workout's id to its letter;
+ * a day whose workout is not in it, such as one trained off the programme,
+ * keeps the bare square.
  */
-export function WeekStrip({ days }: { days: WeekDay[] }) {
+export function WeekStrip({ days, letters }: { days: WeekDay[]; letters: Map<string, string> }) {
   const t = useTranslations('today.weekStrip')
   const locale = useLocale()
   return (
@@ -24,11 +30,16 @@ export function WeekStrip({ days }: { days: WeekDay[] }) {
               {weekdayInitials(locale)[day.weekday]}
             </span>
             <span
-              className={`flex aspect-square w-full items-center justify-center rounded-sm ${SQUARE[day.state]} ${
-                day.isToday ? 'ring-2 ring-ink ring-inset' : ''
-              }`}
+              aria-hidden="true"
+              className={`figure flex aspect-square w-full items-center justify-center rounded-sm text-lg ${
+                SQUARE[day.state]
+              } ${day.isToday ? 'ring-2 ring-ink ring-inset' : ''}`}
             >
-              {day.state === 'rest' && <span className="size-1 rounded-full bg-line" />}
+              {day.state === 'rest' ? (
+                <span className="size-1 rounded-full bg-line" />
+              ) : (
+                (day.templateId && letters.get(day.templateId)) || null
+              )}
             </span>
             <span className="sr-only">{describeDay(day, locale)}</span>
           </li>
@@ -39,8 +50,8 @@ export function WeekStrip({ days }: { days: WeekDay[] }) {
 }
 
 const SQUARE: Record<WeekDay['state'], string> = {
-  done: 'bg-plate-blue',
-  missed: 'bg-line',
-  planned: 'border border-line',
+  done: 'bg-plate-blue text-white',
+  missed: 'bg-line text-ink-dim',
+  planned: 'border border-line text-ink-dim',
   rest: '',
 }

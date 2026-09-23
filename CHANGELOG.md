@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-23 12:47
+
+- **Every day on Today's week strip wears its workout's letter.** The squares said only that a
+  day was done, missed, planned or off — a lot of paint for one bit of information. Each now
+  carries the A, B, C its workout already wears on Plan, so the week says *which* workout: the
+  Upper A done today, the Lower A missed on Tuesday, the Upper B coming on Thursday. Colour still
+  says the state, and a day trained off the programme keeps the bare square. `workoutLetter()`
+  and `workoutLetters()` move into `lib/week.ts` so Plan and Today letter a workout the same way.
+
 ## 2026-09-23 12:19
 
 - **How long the workout took, on Today.** Progress has printed a session's length beside its

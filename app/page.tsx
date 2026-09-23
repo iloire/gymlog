@@ -32,7 +32,7 @@ import { dayOfWeek, planPreview, today, weekSchedule, type PlanPreview } from '@
 import { addToSession, startSession } from '@/lib/sessions'
 import { lastSyncAt } from '@/lib/sync/client'
 import { formatWeight } from '@/lib/units'
-import { planWeek, weekdayName, type WeekDay } from '@/lib/week'
+import { planWeek, weekdayName, workoutLetters, type WeekDay } from '@/lib/week'
 
 /** A workout planned for a day that went by without it. */
 type Missed = { day: WeekDay; templateId: string; programId: string; preview: PlanPreview }
@@ -120,7 +120,18 @@ export default function TodayPage() {
     )
 
     if (!scheduled) {
-      return { scheduled: null, preview: null, week: week.days, missed, templates, trained, session: null, fresh, synced }
+      return {
+        scheduled: null,
+        preview: null,
+        week: week.days,
+        letters: workoutLetters(allTemplates),
+        missed,
+        templates,
+        trained,
+        session: null,
+        fresh,
+        synced,
+      }
     }
 
     const template = await db.workoutTemplates.get(scheduled.templateId)
@@ -134,6 +145,7 @@ export default function TodayPage() {
       scheduled: { ...scheduled, name: template?.name ?? workoutFallback },
       preview: await planPreview(userId, scheduled.templateId, locale),
       week: week.days,
+      letters: workoutLetters(allTemplates),
       missed,
       templates,
       trained,
@@ -199,7 +211,7 @@ export default function TodayPage() {
             <h1 className="figure mt-1 text-4xl leading-[1.05]">{t('title')}</h1>
           </header>
 
-          <WeekStrip days={plan.week} />
+          <WeekStrip days={plan.week} letters={plan.letters} />
 
           <SyncBadge />
           <WeighIn />
@@ -243,7 +255,7 @@ export default function TodayPage() {
           ) : null}
         </header>
 
-        {plan && <WeekStrip days={plan.week} />}
+        {plan && <WeekStrip days={plan.week} letters={plan.letters} />}
 
         <SyncBadge />
         <WeighIn />
