@@ -136,8 +136,8 @@ describe('theme script styles', () => {
   })
 
   it('applies a stored style before first paint, independently of the mode', () => {
-    const page = boot({ stored: 'light', storedStyle: 'whiteboard' })
-    expect(page.style()).toBe('whiteboard')
+    const page = boot({ stored: 'light', storedStyle: 'studio' })
+    expect(page.style()).toBe('studio')
     expect(page.isLight()).toBe(true)
   })
 
@@ -168,7 +168,8 @@ describe('parseTheme', () => {
 
 describe('parseStyle', () => {
   it('accepts only known styles', () => {
-    expect(parseStyle('whiteboard')).toBe('whiteboard')
+    expect(parseStyle('studio')).toBe('studio')
+    expect(parseStyle('whiteboard')).toBe(DEFAULT_STYLE)
     expect(parseStyle('Iron')).toBe(DEFAULT_STYLE)
     expect(parseStyle(undefined)).toBe(DEFAULT_STYLE)
   })

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Archivo, Big_Shoulders, Kalam, Nunito } from 'next/font/google'
+import { Archivo, Big_Shoulders, Nunito } from 'next/font/google'
 import { getLocale, getTranslations } from 'next-intl/server'
 
 import { LocaleProvider } from '@/components/locale-provider'
@@ -18,7 +18,6 @@ const archivo = Archivo({
 
 // The other styles' faces. Not preloaded: a browser only downloads a face once
 // the chosen style uses it, and the service worker caches it from then on.
-const kalam = Kalam({ variable: '--font-kalam', subsets: ['latin'], weight: ['400', '700'], preload: false })
 const bigShoulders = Big_Shoulders({
   variable: '--font-big-shoulders',
   subsets: ['latin'],
@@ -26,7 +25,7 @@ const bigShoulders = Big_Shoulders({
   preload: false,
 })
 const nunito = Nunito({ variable: '--font-nunito', subsets: ['latin'], preload: false })
-const fontVariables = [archivo, kalam, bigShoulders, nunito].map((font) => font.variable).join(' ')
+const fontVariables = [archivo, bigShoulders, nunito].map((font) => font.variable).join(' ')
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('common.meta')

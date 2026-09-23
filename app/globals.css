@@ -129,7 +129,7 @@
   }
 }
 /* ---------------------------------------------------------------- gymlog
-   Four styles, each with a dark and a light version. Every style keeps the
+   Three styles, each with a dark and a light version. Every style keeps the
    three meanings from the sport: --plate-blue is the action, --plate-red is
    "you beat last time", --plate-yellow is rest running. The names come from
    Plate, the original style; in the others they are roles, not hues.
@@ -176,42 +176,6 @@
   --ink: #12171c;
   --ink-dim: #5a6773;
   --plate-yellow: #b38600;
-}
-
-/* Whiteboard — the box's workout board: marker on gloss, chalk on slate in the
-   dark. Numbers are hand-written, the way the coach writes the weights up. */
-[data-style='whiteboard'] {
-  --ground: #1f2b27;
-  --surface: #27352f;
-  --surface-high: #2f3f39;
-  --line: #3d5048;
-  --ink: #eef1ea;
-  --ink-dim: #a0b1a8;
-  --plate-blue: #2c68b8;
-  --plate-blue-lift: #5192e6;
-  --plate-red: #d9463e;
-  --plate-yellow: #f0d65c;
-  --radius: 0.25rem;
-  --body-font: var(--font-archivo);
-  --body-width: 'wdth' 100;
-  --figure-font: var(--font-kalam);
-  --figure-weight: 700;
-  --figure-width: normal;
-  --figure-tracking: 0;
-}
-
-.light[data-style='whiteboard'],
-.light [data-style='whiteboard'] {
-  --ground: #f6f8f9;
-  --surface: #ffffff;
-  --surface-high: #e7ecef;
-  --line: #cfd8de;
-  --ink: #1b2230;
-  --ink-dim: #5f6b78;
-  --plate-blue: #1d5fc4;
-  --plate-blue-lift: #2f74dc;
-  --plate-red: #cf2f28;
-  --plate-yellow: #12834f;
 }
 
 /* Iron — an old barbell club: cast iron, bone-white type, enamel green on the

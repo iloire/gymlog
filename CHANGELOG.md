@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-23 14:08
+
+- **Whiteboard is gone.** The style dressed the numbers in a marker hand (Kalam) and stood them on
+  a green-grey slate; in light mode it was Plate with worse figures, and the handwriting made a
+  weight read as a sketch of a weight. Three styles are left — Plate, Iron, Studio — and a device
+  still set to Whiteboard falls back to Plate on its own, because `parseStyle` only accepts a style
+  that exists. Kalam is no longer downloaded by anyone.
+
 ## 2026-09-23 13:29
 
 - **The README shows the light theme too.** The one hero image was dark, and nothing on the page

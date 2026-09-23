@@ -48,7 +48,7 @@ a colour. Nothing is coloured for decoration.
 
 ## Styles
 
-Plate is one of four styles, picked on the profile page next to the mode and stored per device
+Plate is one of three styles, picked on the profile page next to the mode and stored per device
 (`gymlog:style`). The theme script sets `data-style` on `<html>`; each style is a block in
 `app/globals.css` for dark and one for `.light`, setting every token so no style inherits half of
 another. The picker previews each style by putting `data-style` on its own tile.
@@ -61,7 +61,6 @@ fill with white text, so it must stay a dark enough red), `--plate-yellow` rest 
 | Style | Idea | Action / beat / rest (dark) | Figures | Body | Radius |
 |---|---|---|---|---|---|
 | Plate | Competition plates on graphite | `#0057B8` / `#D22630` / `#F2C300` | Archivo `wdth 112` | Archivo | `0.5rem` |
-| Whiteboard | The box's workout board; chalk on slate in dark | `#2C68B8` / `#D9463E` / `#F0D65C` | Kalam 700 | Archivo | `0.25rem` |
 | Iron | An old barbell club: cast iron and enamel | `#2B6E4C` / `#C0392B` / `#E8A317` | Big Shoulders 800 | Archivo `wdth 85` | `0` |
 | Studio | Soft and calm | `#5452D0` / `#D9507F` / `#F0B43C` | Nunito 800 | Nunito | `1rem` |
 

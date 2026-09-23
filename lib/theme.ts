@@ -18,7 +18,7 @@
 export const THEMES = ['dark', 'light', 'system'] as const
 export type Theme = (typeof THEMES)[number]
 
-export const STYLES = ['plate', 'whiteboard', 'iron', 'studio'] as const
+export const STYLES = ['plate', 'iron', 'studio'] as const
 export type Style = (typeof STYLES)[number]
 
 export const DEFAULT_THEME: Theme = 'dark'
@@ -31,7 +31,6 @@ const CHANGE_EVENT = 'gymlog:theme'
 /** Browser chrome colour for each style and resolved mode — its `--ground` token. */
 export const THEME_COLORS = {
   plate: { dark: '#12171c', light: '#eef1f4' },
-  whiteboard: { dark: '#1f2b27', light: '#f6f8f9' },
   iron: { dark: '#1a1917', light: '#e2e0db' },
   studio: { dark: '#191a2b', light: '#f1f0f7' },
 } as const satisfies Record<Style, Record<'dark' | 'light', string>>

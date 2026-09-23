@@ -43,10 +43,6 @@
         "label": "Disco",
         "description": "Colores de los discos de competición"
       },
-      "whiteboard": {
-        "label": "Pizarra",
-        "description": "Rotulador en la pizarra del box"
-      },
       "iron": {
         "label": "Hierro",
         "description": "Hierro fundido, cuadrado y alto"

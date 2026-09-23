@@ -43,10 +43,6 @@
         "label": "Plate",
         "description": "Competition plate colours"
       },
-      "whiteboard": {
-        "label": "Whiteboard",
-        "description": "Marker on the box board"
-      },
       "iron": {
         "label": "Iron",
         "description": "Cast iron, square and tall"
