@@ -85,10 +85,17 @@ export function useRest(): RestState {
 
 /**
  * The rest as a rule that drains across the bottom edge, with +30 s and Skip
- * beside the clock where the thumb already is. `link` is for every screen but
- * the session: the label takes you back to the workout.
+ * beside the clock where the thumb already is. The screen's only clock, so it
+ * is the one that names what the rest is for: `after` is the exercise just
+ * finished, when the screen has already moved on to the next one. `link` is
+ * for every screen but the session: the label takes you back to the workout.
  */
-export function RestBar({ rest, remaining, link = false }: RestState & { link?: boolean }) {
+export function RestBar({
+  rest,
+  remaining,
+  link = false,
+  after,
+}: RestState & { link?: boolean; after?: string }) {
   const userId = useUserId()
   const t = useTranslations('session.restTimer')
   if (!rest || remaining === 0 || !userId) return null
@@ -99,10 +106,12 @@ export function RestBar({ rest, remaining, link = false }: RestState & { link?: 
     <>
       {t('backToWorkout')} <ChevronRight size={16} aria-hidden />
     </>
+  ) : after ? (
+    <span className="truncate">{t('restAfter', { name: after })}</span>
   ) : (
     t('rest')
   )
-  const labelClass = 'flex min-h-14 items-center gap-1 pl-5 text-sm text-ink-dim'
+  const labelClass = 'flex min-h-14 min-w-0 items-center gap-1 pl-5 text-sm text-ink-dim'
 
   return (
     <div className="border-t border-line bg-surface">
@@ -123,11 +132,11 @@ export function RestBar({ rest, remaining, link = false }: RestState & { link?: 
         ) : (
           <span className={labelClass}>{label}</span>
         )}
-        <div className="flex items-stretch">
+        <div className="flex shrink-0 items-stretch">
           <button
             type="button"
             onClick={() => void extendRest(userId)}
-            className="figure px-3 text-sm text-ink-dim"
+            className="figure px-3 text-sm whitespace-nowrap text-ink-dim"
           >
             {t('extend', { seconds: EXTEND_SEC })}
           </button>
@@ -252,53 +261,6 @@ export function RestTakeover({
           {t('skipRest')}
         </button>
       </div>
-    </section>
-  )
-}
-
-/**
- * The rest carried over from the exercise before. Its last set moves the
- * screen on to the next exercise while the clock runs, and what the rest is
- * for looking at is that exercise's weight and reps; so the clock sits in a
- * strip above the steppers, named after the exercise it follows, instead of
- * taking their place. +30 s and Skip stay in the bar at the bottom.
- */
-export function RestCarried({
-  rest,
-  remaining,
-  after,
-  children,
-}: RestState & {
-  /** The exercise the rest follows — the one just finished, not the one on screen. */
-  after: string
-  /** About the set just done — how it felt — under the clock. */
-  children?: React.ReactNode
-}) {
-  const t = useTranslations('session.restTimer')
-  if (!rest || remaining === 0) return null
-
-  const progress = Math.min(1, remaining / rest.totalSec)
-
-  return (
-    <section className="mb-5" aria-label={t('restAfter', { name: after })}>
-      <div className="flex items-baseline justify-between gap-3">
-        <p className="min-w-0 truncate text-sm text-ink-dim">{t('restAfter', { name: after })}</p>
-        <p
-          className="figure shrink-0 text-4xl leading-none text-plate-yellow"
-          role="timer"
-          aria-live="off"
-          aria-label={t('secondsLeft', { count: remaining })}
-        >
-          {formatRest(remaining)}
-        </p>
-      </div>
-      <div className="mt-2 h-1 w-full rounded-full bg-line" aria-hidden>
-        <div
-          className="h-full rounded-full bg-plate-yellow transition-[width] duration-200 ease-linear"
-          style={{ width: `${progress * 100}%` }}
-        />
-      </div>
-      {children}
     </section>
   )
 }

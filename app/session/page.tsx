@@ -15,7 +15,7 @@ import { ExerciseFrames } from '@/components/exercise-frames'
 import { Placeholder } from '@/components/loading'
 import { OverflowMenu } from '@/components/overflow-menu'
 import { RemoveExercise } from '@/components/remove-exercise'
-import { RestBar, RestCarried, RestTakeover, useRest } from '@/components/rest-timer'
+import { RestBar, RestTakeover, useRest } from '@/components/rest-timer'
 import { useUserId } from '@/components/session-boot'
 import { libraryName } from '@/lib/exercise-i18n'
 import { SetSquares } from '@/components/set-squares'
@@ -350,8 +350,9 @@ function Session() {
   // Between sets the clock takes the steppers' place. Tapping a done square to
   // fix it mid-rest brings the steppers back, with the bar at the bottom. So
   // does a rest carried over from the exercise before: the new exercise's
-  // weight and reps are what the rest is for looking at, so the clock shrinks
-  // to a strip above them rather than standing in their place.
+  // weight and reps are what the rest is for looking at, so the clock stays in
+  // the bar, named after the exercise it follows, rather than standing in
+  // their place — one clock on screen, never two.
   const takeover = restingBeforeSet && !carried
   const noteLog = carried
     ? (data.logs.find((log) => log.position === carried.position) ?? carried)
@@ -603,10 +604,11 @@ function Session() {
           </section>
         ) : activeSet ? (
           <section className="mt-4">
+            {/* The rest carried over from the exercise before is counted by the
+                bar at the bottom, which names it; all that belongs up here is
+                how the set it follows felt. */}
             {carried && carriedName && (
-              <RestCarried rest={rest} remaining={remaining} after={carriedName}>
-                <EffortChips userId={userId} log={carried} exerciseName={carriedName} className="mt-3" />
-              </RestCarried>
+              <EffortChips userId={userId} log={carried} exerciseName={carriedName} className="mb-5" />
             )}
             {/* Stacked, not side by side: two steppers across a phone leave ~58px for
                 the number, which truncates 77.5 and anything over 100 kg. */}
@@ -751,7 +753,7 @@ function Session() {
             onDismiss={dismissUndoable}
           />
         )}
-        {!takeover && <RestBar rest={rest} remaining={remaining} />}
+        {!takeover && <RestBar rest={rest} remaining={remaining} after={carriedName} />}
       </div>
     </div>
   )

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-23 12:03
+
+- **One rest clock on the session screen, not two.** Logging the last set of an exercise moved
+  the screen on to the next one and drew the carried rest twice: a named strip with the clock and
+  its drain above the steppers, and the bar at the bottom counting the same seconds. The strip
+  goes; the bar is the only clock, and it takes the name — *Rest after Dumbbell Shoulder Press* —
+  so it still says which exercise the rest follows. How the set felt stays above the steppers,
+  where the chips already name the exercise and the set.
+
 ## 2026-09-22 12:30
 
 - **Add your own exercise.** The library had no way in for a movement it lacks. *Add your own*
