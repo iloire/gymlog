@@ -147,16 +147,24 @@ export default function WorkoutsPage() {
                       day: weekdayName(day.weekday, locale),
                       workout: name ?? t('week.rest'),
                     })}
-                    className={`figure flex aspect-square w-full items-center justify-center rounded-sm text-lg ${
-                      name ? 'bg-plate-blue text-white' : 'border border-line text-ink-dim'
+                    className={`figure flex aspect-square w-full items-center justify-center rounded-sm text-lg transition-opacity active:opacity-70 ${
+                      name
+                        ? 'bg-plate-blue text-white'
+                        : 'border border-dashed border-line text-ink-dim'
                     } ${isToday ? 'ring-2 ring-ink ring-inset' : ''} disabled:opacity-50`}
                   >
-                    {name ? workoutLetter(day.index) : <span className="size-1 rounded-full bg-line" />}
+                    {/* A day off is an empty slot with a +, not a dot: the same
+                        square on Today only reports the week, and nothing but
+                        the plus says this one can be filled in. */}
+                    {name ? workoutLetter(day.index) : <Plus size={16} aria-hidden />}
                   </button>
                 </li>
               )
             })}
           </ol>
+          {/* Said once, quietly, under the week: the squares are buttons here and
+              read-only on Today, and nothing about a filled square shows which. */}
+          {workouts.length > 0 && <p className="mt-2 text-xs text-ink-dim">{t('week.hint')}</p>}
         </section>
 
         {workouts.length ? (

@@ -7,6 +7,7 @@
   },
   "week": {
     "label": "Your week",
+    "hint": "Tap a day to change its workout",
     "dayLabel": "{day}: {workout}. Change",
     "dayLabelToday": "{day}, today: {workout}. Change",
     "rest": "rest"

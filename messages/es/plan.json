@@ -7,6 +7,7 @@
   },
   "week": {
     "label": "Tu semana",
+    "hint": "Toca un día para cambiar su entrenamiento",
     "dayLabel": "{day}: {workout}. Cambiar",
     "dayLabelToday": "{day}, hoy: {workout}. Cambiar",
     "rest": "descanso"

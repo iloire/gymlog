@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-23 13:08
+
+- **The week on Plan looks like the editor it is.** Its squares were the same squares Today
+  shows, which only report the week, so nothing said a day could be changed here. A day off is
+  now a dashed square with a **+** rather than a dot, the squares dim as they are pressed, and
+  one quiet line under the week says *Tap a day to change its workout* (shown only once there is
+  a workout to put on a day).
+
 ## 2026-09-23 12:56
 
 - **Quieter rows on Plan.** Every workout spent four or five lines on itself: its name, the days
