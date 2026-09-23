@@ -33,7 +33,7 @@ deployed to production** — the workflow waits for Vercel's verdict and smoke-t
 - **Bodyweight** — one field on Today each morning, charted as a 7-day average because single
   readings are noise.
 - **Accounts** — every user sees only their own data; the exercise library is shared.
-- **Dark or light** — and four styles to pick from, set on Profile. The choice is per device, not
+- **Dark or light** — and six styles to pick from, set on Profile. The choice is per device, not
   per account, so the phone can be dark and the laptop light; it is applied before the first paint,
   so a light theme never flashes dark on the way in.
 - **Kilograms or pounds** — one setting on Profile, saved to the account so every phone follows;

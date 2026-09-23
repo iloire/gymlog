@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-23 14:16
+
+- **Three more styles: Lane, Court and Signal.** Two of the three that were left were dark and
+  cool, so the picker offered a mood rather than a choice. **Lane** is the pool room — deep water
+  in the dark, white tile in the light, teal action, and Outfit's circular figures. **Court** is a
+  sports hall: maple under varnish with the lines painted navy and red, and the weights set in
+  Archivo's widest cut, the way a number is set on a vest. **Signal** is black and white at full
+  contrast for a bright gym — pure black or pure white ground, nothing tinted, corners nearly
+  square, figures at Archivo 900 pulled tight. Every palette was checked against the two rules the
+  fills impose: white text on the action and on "beat last time" reads at 4.5:1 or better, and the
+  rest clock at 3:1 on its ground. `tests/theme.test.ts` now reads `globals.css` and fails if a
+  style is missing a block, a token, or the ground `THEME_COLORS` claims for it.
+
 ## 2026-09-23 14:08
 
 - **Whiteboard is gone.** The style dressed the numbers in a marker hand (Kalam) and stood them on

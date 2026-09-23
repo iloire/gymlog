@@ -48,7 +48,7 @@ a colour. Nothing is coloured for decoration.
 
 ## Styles
 
-Plate is one of three styles, picked on the profile page next to the mode and stored per device
+Plate is one of six styles, picked on the profile page next to the mode and stored per device
 (`gymlog:style`). The theme script sets `data-style` on `<html>`; each style is a block in
 `app/globals.css` for dark and one for `.light`, setting every token so no style inherits half of
 another. The picker previews each style by putting `data-style` on its own tile.
@@ -63,6 +63,9 @@ fill with white text, so it must stay a dark enough red), `--plate-yellow` rest 
 | Plate | Competition plates on graphite | `#0057B8` / `#D22630` / `#F2C300` | Archivo `wdth 112` | Archivo | `0.5rem` |
 | Iron | An old barbell club: cast iron and enamel | `#2B6E4C` / `#C0392B` / `#E8A317` | Big Shoulders 800 | Archivo `wdth 85` | `0` |
 | Studio | Soft and calm | `#5452D0` / `#D9507F` / `#F0B43C` | Nunito 800 | Nunito | `1rem` |
+| Lane | The pool room: water and white tile | `#0B6E88` / `#D63A4A` / `#F2C85A` | Outfit 700 | Outfit | `0.75rem` |
+| Court | A sports hall: maple and painted lines | `#2F6FBB` / `#CF4436` / `#E9A53A` | Archivo `wdth 118` 800 | Archivo | `0.25rem` |
+| Signal | Black and white at full contrast | `#1D4ED8` / `#DC2626` / `#FFD400` | Archivo 900 | Archivo | `0.125rem` |
 
 Type is set through tokens rather than classes: `--body-font` and `--body-width` for everything,
 and `--figure-font`, `--figure-weight`, `--figure-width`, `--figure-tracking` for `.figure`.
@@ -71,9 +74,16 @@ sizes. Only Archivo is preloaded; the other faces download the first time a styl
 the service worker caches them from then on, so a style first picked with no signal shows a
 system fallback until the next time online.
 
+Every action colour carries white text (`--primary-foreground` is white for all styles, and
+components set `text-white` on a plate-coloured fill), so a style's action and "beat" must stay
+dark enough to read white on: at least 4.5:1. Rest is read at 4.5rem, so 3:1 on its ground is
+enough — which is why it is bright on dark and ochre on light.
+
 To add a style: a dark and a `.light` block in `globals.css`, its name in `STYLES` and its two
-grounds in `THEME_COLORS` (`lib/theme.ts`), a tile in `components/theme-picker.tsx`, and any new
-face loaded with `preload: false` in `app/layout.tsx`.
+grounds in `THEME_COLORS` (`lib/theme.ts`), its label and description in
+`messages/<locale>/profile.json`, a tile in `components/theme-picker.tsx`, and any new face loaded
+with `preload: false` in `app/layout.tsx`. `tests/theme.test.ts` reads `globals.css` and fails if a
+style is missing a block, a token, or the ground its browser chrome claims.
 
 ## Type
 

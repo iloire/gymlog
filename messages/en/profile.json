@@ -50,6 +50,18 @@
       "studio": {
         "label": "Studio",
         "description": "Soft and rounded"
+      },
+      "lane": {
+        "label": "Lane",
+        "description": "Pool tile and water"
+      },
+      "court": {
+        "label": "Court",
+        "description": "Maple floor, painted lines"
+      },
+      "signal": {
+        "label": "Signal",
+        "description": "Black and white, full contrast"
       }
     },
     "modes": {

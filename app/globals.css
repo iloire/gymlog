@@ -129,7 +129,7 @@
   }
 }
 /* ---------------------------------------------------------------- gymlog
-   Three styles, each with a dark and a light version. Every style keeps the
+   Six styles, each with a dark and a light version. Every style keeps the
    three meanings from the sport: --plate-blue is the action, --plate-red is
    "you beat last time", --plate-yellow is rest running. The names come from
    Plate, the original style; in the others they are roles, not hues.
@@ -250,6 +250,115 @@
   --plate-blue-lift: #5f5cdb;
   --plate-red: #c43a6e;
   --plate-yellow: #a86a00;
+}
+
+/* Lane — the pool room next door: water in the dark, white tile in the light,
+   and the lane number painted in a geometric face with circular counters. */
+[data-style='lane'] {
+  --ground: #0c1b22;
+  --surface: #12272f;
+  --surface-high: #1a333d;
+  --line: #22444f;
+  --ink: #e6f1f4;
+  --ink-dim: #8ba8b2;
+  --plate-blue: #0b6e88;
+  --plate-blue-lift: #0e8ea9;
+  --plate-red: #d63a4a;
+  --plate-yellow: #f2c85a;
+  --radius: 0.75rem;
+  --body-font: var(--font-outfit);
+  --body-width: normal;
+  --figure-font: var(--font-outfit);
+  --figure-weight: 700;
+  --figure-width: normal;
+  --figure-tracking: -0.01em;
+}
+
+.light[data-style='lane'],
+.light [data-style='lane'] {
+  --ground: #e8f1f3;
+  --surface: #ffffff;
+  --surface-high: #d7e7eb;
+  --line: #c2d8de;
+  --ink: #0b1c22;
+  --ink-dim: #4e6b74;
+  --plate-blue: #0a6479;
+  --plate-blue-lift: #0d7d97;
+  --plate-red: #c32f3f;
+  --plate-yellow: #8a6a12;
+}
+
+/* Court — a sports hall: maple under varnish, the lines painted navy and red.
+   Figures take Archivo's widest cut, the way a number is set on a vest. */
+[data-style='court'] {
+  --ground: #1a1510;
+  --surface: #231c15;
+  --surface-high: #2e251b;
+  --line: #3c3125;
+  --ink: #f4ebdd;
+  --ink-dim: #a89680;
+  --plate-blue: #2f6fbb;
+  --plate-blue-lift: #4180cc;
+  --plate-red: #cf4436;
+  --plate-yellow: #e9a53a;
+  --radius: 0.25rem;
+  --body-font: var(--font-archivo);
+  --body-width: 'wdth' 100;
+  --figure-font: var(--font-archivo);
+  --figure-weight: 800;
+  --figure-width: 'wdth' 118;
+  --figure-tracking: -0.015em;
+}
+
+.light[data-style='court'],
+.light [data-style='court'] {
+  --ground: #f0e5d0;
+  --surface: #fdf8ef;
+  --surface-high: #e3d5bb;
+  --line: #d0c0a1;
+  --ink: #221a10;
+  --ink-dim: #6a5a42;
+  --plate-blue: #1b4f8f;
+  --plate-blue-lift: #2a66ad;
+  --plate-red: #b03226;
+  --plate-yellow: #8a5a10;
+}
+
+/* Signal — black and white at full contrast, for a bright gym or a phone held
+   at arm's length. Nothing is tinted, the corners are nearly square, and the
+   figures are Archivo's heaviest weight pulled tight. */
+[data-style='signal'] {
+  --ground: #000000;
+  --surface: #101010;
+  --surface-high: #1d1d1d;
+  --line: #303030;
+  --ink: #ffffff;
+  --ink-dim: #a3a3a3;
+  --plate-blue: #1d4ed8;
+  --plate-blue-lift: #3b6ef5;
+  --plate-red: #dc2626;
+  --plate-yellow: #ffd400;
+  --radius: 0.125rem;
+  --body-font: var(--font-archivo);
+  --body-width: 'wdth' 100;
+  --figure-font: var(--font-archivo);
+  --figure-weight: 900;
+  --figure-width: 'wdth' 100;
+  --figure-tracking: -0.04em;
+}
+
+.light[data-style='signal'],
+.light [data-style='signal'] {
+  --ground: #ffffff;
+  --surface: #fafafa;
+  --surface-high: #ebebeb;
+  --line: #b8b8b8;
+  --ink: #000000;
+  --ink-dim: #585858;
+  --plate-blue: #123fbb;
+  --plate-blue-lift: #1d4ed8;
+  --plate-red: #c01616;
+  --plate-yellow: #7a5c00;
 }
 
 /* Map the shadcn surface tokens onto the palette so its components inherit

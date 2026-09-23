@@ -21,7 +21,7 @@ const modes: { value: Theme; icon: typeof Sun }[] = [
   { value: 'system', icon: SunMoon },
 ]
 
-const styles: Style[] = ['plate', 'iron', 'studio']
+const styles: Style[] = ['plate', 'iron', 'studio', 'lane', 'court', 'signal']
 
 const option =
   'cursor-pointer rounded-md border border-line bg-surface text-sm text-ink-dim has-checked:border-plate-blue-lift has-checked:text-ink has-focus-visible:ring-2 has-focus-visible:ring-ring'

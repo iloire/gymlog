@@ -1,8 +1,18 @@
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { runInNewContext } from 'node:vm'
 
 import { describe, expect, it } from 'vitest'
 
-import { DEFAULT_STYLE, DEFAULT_THEME, parseStyle, parseTheme, THEME_COLORS, themeScript } from '@/lib/theme'
+import {
+  DEFAULT_STYLE,
+  DEFAULT_THEME,
+  parseStyle,
+  parseTheme,
+  STYLES,
+  THEME_COLORS,
+  themeScript,
+} from '@/lib/theme'
 
 /**
  * Runs the real inline <head> script against just enough of a browser to see
@@ -155,6 +165,61 @@ describe('theme script styles', () => {
     expect(page.themeColor()).toBe(THEME_COLORS.iron.light)
     page.setOsLight(false)
     expect(page.themeColor()).toBe(THEME_COLORS.iron.dark)
+  })
+})
+
+/**
+ * A style is only finished when every place that has to know about it does:
+ * its two blocks in the stylesheet, every token in the dark one, and the same
+ * ground in `THEME_COLORS` that the CSS paints. Miss one and the style looks
+ * right on the screen someone tested and inherits the previous style's corners,
+ * or the browser chrome around it is the wrong colour.
+ */
+describe('every style is wired up end to end', () => {
+  const css = readFileSync(path.join(process.cwd(), 'app/globals.css'), 'utf8')
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((rule) => ({
+    selector: (rule[1] ?? '').replace(/\/\*[\s\S]*?\*\//g, '').trim(),
+    body: rule[2] ?? '',
+  }))
+  const blockFor = (style: string, mode: 'dark' | 'light') =>
+    rules.find(({ selector }) => {
+      const mentions = selector.includes(`[data-style='${style}']`)
+      return mode === 'light' ? mentions && selector.includes('.light') : mentions && !selector.includes('.light')
+    })?.body ?? ''
+  const ground = (block: string) => block.match(/--ground:\s*([^;]+);/)?.[1]?.trim()
+
+  const everyToken = [
+    '--ground',
+    '--surface',
+    '--surface-high',
+    '--line',
+    '--ink',
+    '--ink-dim',
+    '--plate-blue',
+    '--plate-blue-lift',
+    '--plate-red',
+    '--plate-yellow',
+    '--radius',
+    '--body-font',
+    '--body-width',
+    '--figure-font',
+    '--figure-weight',
+    '--figure-width',
+    '--figure-tracking',
+  ]
+
+  it.each(STYLES)('%s sets every token, so it inherits nothing from another style', (style) => {
+    const block = blockFor(style, 'dark')
+    expect(block, `no [data-style='${style}'] block in app/globals.css`).not.toBe('')
+    for (const token of everyToken) expect(block).toContain(`${token}:`)
+  })
+
+  it.each(STYLES)('%s paints the browser chrome the ground it actually uses', (style) => {
+    const dark = blockFor(style, 'dark')
+    const light = blockFor(style, 'light')
+    expect(light, `no .light block for ${style} in app/globals.css`).not.toBe('')
+    expect(ground(dark)).toBe(THEME_COLORS[style].dark)
+    expect(ground(light)).toBe(THEME_COLORS[style].light)
   })
 })
 

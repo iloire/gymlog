@@ -50,6 +50,18 @@
       "studio": {
         "label": "Estudio",
         "description": "Suave y redondeado"
+      },
+      "lane": {
+        "label": "Calle",
+        "description": "Azulejo de piscina y agua"
+      },
+      "court": {
+        "label": "Pista",
+        "description": "Suelo de arce y líneas pintadas"
+      },
+      "signal": {
+        "label": "Señal",
+        "description": "Blanco y negro, contraste máximo"
       }
     },
     "modes": {

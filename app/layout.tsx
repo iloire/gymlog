@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Archivo, Big_Shoulders, Nunito } from 'next/font/google'
+import { Archivo, Big_Shoulders, Nunito, Outfit } from 'next/font/google'
 import { getLocale, getTranslations } from 'next-intl/server'
 
 import { LocaleProvider } from '@/components/locale-provider'
@@ -25,7 +25,8 @@ const bigShoulders = Big_Shoulders({
   preload: false,
 })
 const nunito = Nunito({ variable: '--font-nunito', subsets: ['latin'], preload: false })
-const fontVariables = [archivo, bigShoulders, nunito].map((font) => font.variable).join(' ')
+const outfit = Outfit({ variable: '--font-outfit', subsets: ['latin'], preload: false })
+const fontVariables = [archivo, bigShoulders, nunito, outfit].map((font) => font.variable).join(' ')
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('common.meta')
