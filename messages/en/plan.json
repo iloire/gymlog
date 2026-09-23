@@ -13,8 +13,6 @@
   },
   "workout": {
     "noSetDay": "No set day",
-    "lastDone": "last done {when}",
-    "notDoneYet": "not done yet",
     "exercises": "{count, plural, one {# exercise} other {# exercises}}",
     "start": "Start",
     "startLabel": "Start {name}"

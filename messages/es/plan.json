@@ -13,8 +13,6 @@
   },
   "workout": {
     "noSetDay": "Sin día fijo",
-    "lastDone": "última vez {when}",
-    "notDoneYet": "aún no hecho",
     "exercises": "{count, plural, one {# ejercicio} other {# ejercicios}}",
     "start": "Empezar",
     "startLabel": "Empezar {name}"

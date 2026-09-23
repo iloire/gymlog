@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-23 12:56
+
+- **Quieter rows on Plan.** Every workout spent four or five lines on itself: its name, the days
+  it is on, when it was last done, how many exercises it has, then a rail of body-part pills.
+  When a workout was last done is Progress's question, and the pills said in colour what *Upper
+  A* and *Lower B* already say in words. What is left is the name and one line — *Mon · 5
+  exercises*. A 4-day programme, its week, and both buttons under it now sit on one screen with
+  nothing to scroll.
+
 ## 2026-09-23 12:47
 
 - **Every day on Today's week strip wears its workout's letter.** The squares said only that a

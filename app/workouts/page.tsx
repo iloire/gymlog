@@ -7,16 +7,13 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import { BodyPartBadges } from '@/components/body-part-badges'
 import { DayPicker } from '@/components/day-picker'
 import { useLocale } from '@/components/locale-provider'
 import { Loading, Placeholder } from '@/components/loading'
 import { Nav } from '@/components/nav'
 import { useUserId } from '@/components/session-boot'
-import { bodyParts } from '@/lib/body-parts'
 import { getDb } from '@/lib/db/dexie'
 import { formatDay } from '@/lib/format'
-import { daysAgo, rotation, sessionHistory } from '@/lib/history'
 import { assignDay, startNewStage } from '@/lib/program'
 import { activeProgram, dayOfWeek } from '@/lib/queries'
 import { startSession } from '@/lib/sessions'
@@ -49,17 +46,11 @@ export default function WorkoutsPage() {
           (day) => day.deletedAt === null,
         )
       : []
-    const lastDone = new Map(
-      rotation(templates, await sessionHistory(userId)).map((entry) => [entry.template.id, entry.lastDone]),
-    )
-
     const workouts = await Promise.all(
       templates.map(async (template) => {
         const items = (await db.templateItems.where('templateId').equals(template.id).toArray())
           .filter((item) => item.deletedAt === null)
           .sort((a, b) => a.position - b.position)
-        const exercises = await db.exercises.bulkGet(items.map((item) => item.exerciseId))
-        const parts = bodyParts(items.map((item, index) => ({ exercise: exercises[index], sets: item.sets })))
         const scheduledOn = days
           .filter((day) => day.templateId === template.id)
           .map((day) => day.dayOfWeek)
@@ -67,11 +58,9 @@ export default function WorkoutsPage() {
         return {
           ...template,
           exerciseCount: items.length,
-          parts,
           scheduledOn,
           // Started on its own day it is the programme's session, as it is from Today.
           programId: scheduledOn.includes(dayOfWeek()) ? (program?.id ?? null) : null,
-          lastDone: lastDone.get(template.id) ?? null,
         }
       }),
     )
@@ -185,17 +174,19 @@ export default function WorkoutsPage() {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[15px]">{workout.name}</span>
+                    {/* One quiet line under the name. Plan is where you see
+                        the shape of the week, and the rows had grown to four
+                        lines each: when a workout was last done is Progress's
+                        question, and a rail of body-part pills said in colour
+                        what Upper A and Lower B already say in words. What is
+                        left is the days it is on and how long it is. */}
                     <span className="block text-sm text-ink-dim">
                       {workout.scheduledOn.length > 0
                         ? workout.scheduledOn.map((day) => weekdayName(day, locale).slice(0, 3)).join(' · ')
                         : t('workout.noSetDay')}
                       {' · '}
-                      {workout.lastDone ? t('workout.lastDone', { when: daysAgo(workout.lastDone, undefined, locale) }) : t('workout.notDoneYet')}
-                    </span>
-                    <span className="block text-sm text-ink-dim">
                       {t('workout.exercises', { count: workout.exerciseCount })}
                     </span>
-                    <BodyPartBadges parts={workout.parts} className="mt-1.5" />
                   </span>
                   <ChevronRight size={18} aria-hidden className="shrink-0 text-ink-dim" />
                 </Link>
