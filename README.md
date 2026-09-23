@@ -8,6 +8,11 @@ did — **with or without signal**. Made for a gym in a basement.
 
 ![gymlog: today's workout, logging a set, the exercise library by body part, and progress](docs/screenshots/gymlog.png)
 
+Dark in a basement, light at a desk by a window — the same app in its light theme: the week on
+Plan, a set going in, the workout just finished, and progress.
+
+![gymlog in its light theme: the week on Plan, logging a set, the workout just finished, and progress](docs/screenshots/gymlog-light.png)
+
 The CI badge is green only when a commit's **unit tests pass, it builds, and that same commit
 deployed to production** — the workflow waits for Vercel's verdict and smoke-tests the live site.
 
@@ -28,6 +33,9 @@ deployed to production** — the workflow waits for Vercel's verdict and smoke-t
 - **Bodyweight** — one field on Today each morning, charted as a 7-day average because single
   readings are noise.
 - **Accounts** — every user sees only their own data; the exercise library is shared.
+- **Dark or light** — and four styles to pick from, set on Profile. The choice is per device, not
+  per account, so the phone can be dark and the laptop light; it is applied before the first paint,
+  so a light theme never flashes dark on the way in.
 - **Kilograms or pounds** — one setting on Profile, saved to the account so every phone follows;
   weights stay kilograms underneath and the steppers, plates and charts convert at the edge.
 - **API for LLMs** — create a token under Profile → API access and let ChatGPT, Claude or a script

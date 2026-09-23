@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-23 13:29
+
+- **The README shows the light theme too.** The one hero image was dark, and nothing on the page
+  said the app has a light theme at all. A second hero sits under the first — the week on Plan, a
+  set going in, the workout just finished, and progress, all in light — with the screens it is cut
+  from in `docs/screenshots/light/`, and a *Dark or light* line among what the app does.
+
 ## 2026-09-23 13:08
 
 - **The week on Plan looks like the editor it is.** Its squares were the same squares Today
