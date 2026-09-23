@@ -24,7 +24,7 @@ import { WeighIn } from '@/components/weigh-in'
 import { bodyParts } from '@/lib/body-parts'
 import { addDays, weekStart } from '@/lib/calendar'
 import { getDb, type LocalExercise } from '@/lib/db/dexie'
-import { formatMinutes } from '@/lib/format'
+import { formatDuration, formatMinutes } from '@/lib/format'
 import { daysAgo, isNewAccount, rotation, sessionHistory, trainedOn, type Rotation } from '@/lib/history'
 import { planSummary } from '@/lib/plan'
 import type { HistoryEntry } from '@/lib/session-summary'
@@ -445,11 +445,17 @@ function TodaySession({ entry, parts }: { entry: HistoryEntry; parts: string[] }
   const unit = useUnit()
   const router = useRouter()
   const [picking, setPicking] = useState(false)
-  const { session, setsDone, setsPlanned, volumeKg, cardioSec, exercises } = entry
+  const { session, setsDone, setsPlanned, volumeKg, cardioSec, durationMs, exercises } = entry
   const totals = [
     t('sets', { done: setsDone, planned: setsPlanned }),
     volumeKg > 0 ? formatWeight(volumeKg, unit, locale) : null,
     cardioSec > 0 ? t('cardio', { minutes: formatMinutes(cardioSec) }) : null,
+    // How long it took, as Progress prints it — but only once the workout is
+    // over: while it is under way the number is the time since the first set,
+    // which grows through every rest and says nothing about the training.
+    session.completedAt !== null && durationMs !== null && durationMs >= 60_000
+      ? formatDuration(durationMs)
+      : null,
   ].filter(Boolean)
 
   async function addExercise(picked: LocalExercise) {

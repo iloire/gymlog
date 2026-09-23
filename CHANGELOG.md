@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-23 12:19
+
+- **How long the workout took, on Today.** Progress has printed a session's length beside its
+  date since it was built; the card on Today gave only the sets and the volume. Once the workout
+  is finished its totals read *7/17 sets · 2,850 kg · 5 min*, measured first logged set to last
+  as Progress measures it. Nothing while the workout is under way — that number is the time since
+  the first set and grows through every rest.
+
 ## 2026-09-23 12:08
 
 - **The rest clock a size down.** The countdown between sets was set at 5.5rem, bigger than it
