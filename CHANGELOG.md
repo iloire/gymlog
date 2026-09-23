@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-23 12:08
+
+- **The rest clock a size down.** The countdown between sets was set at 5.5rem, bigger than it
+  needs to be to read at arm's length on the floor; at 4.5rem it says the same and gives the
+  seconds back to what is under it — what the next set asks, how the last one felt, the rest
+  length and the two buttons.
+
 ## 2026-09-23 12:03
 
 - **One rest clock on the session screen, not two.** Logging the last set of an exercise moved

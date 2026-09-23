@@ -201,7 +201,7 @@ export function RestTakeover({
     <section className="mt-4" aria-label={t('rest')}>
       <p className="text-sm text-ink-dim">{t('rest')}</p>
       <p
-        className="figure mt-1 text-[5.5rem] leading-none text-plate-yellow"
+        className="figure mt-1 text-[4.5rem] leading-none text-plate-yellow"
         role="timer"
         aria-live="off"
         aria-label={t('secondsLeft', { count: remaining })}
