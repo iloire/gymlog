@@ -19,11 +19,13 @@ export function ExerciseNote({
   userId,
   log,
   exerciseName,
+  className = 'mt-5',
 }: {
   userId: string
   log: LocalSetLog
   /** Named when the note is not on the exercise at the top of the screen. */
   exerciseName?: string
+  className?: string
 }) {
   const t = useTranslations('session.note')
   const [editing, setEditing] = useState(false)
@@ -41,7 +43,7 @@ export function ExerciseNote({
           if (notes !== log.notes) await writeRow(userId, 'setLogs', { id: log.id, notes })
           setEditing(false)
         }}
-        className="mt-5 w-full rounded-md border border-line bg-surface p-3 text-[15px] outline-none focus-visible:border-plate-blue-lift"
+        className={`${className} w-full rounded-md border border-line bg-surface p-3 text-[15px] outline-none focus-visible:border-plate-blue-lift`}
       />
     )
   }
@@ -50,7 +52,7 @@ export function ExerciseNote({
     <button
       type="button"
       onClick={() => setEditing(true)}
-      className="mt-5 flex max-w-full items-start gap-1.5 text-left text-sm text-ink-dim"
+      className={`${className} flex max-w-full items-start gap-1.5 text-left text-sm text-ink-dim`}
     >
       <PencilLine size={14} className="mt-0.5 shrink-0" aria-hidden />
       {log.notes ? (

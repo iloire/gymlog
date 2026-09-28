@@ -93,7 +93,6 @@
     "hard": "Hard",
     "failed": "Failed",
     "felt": "Set {n} felt",
-    "feltNamed": "{name} set {n} felt",
     "how": "How set {n} felt"
   },
   "finishSession": {

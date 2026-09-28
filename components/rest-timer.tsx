@@ -89,13 +89,18 @@ export function useRest(): RestState {
  * is the one that names what the rest is for: `after` is the exercise just
  * finished, when the screen has already moved on to the next one. `link` is
  * for every screen but the session: the label takes you back to the workout.
+ *
+ * `children` go under the clock, inside the bar: what is left to say about the
+ * exercise the rest follows — how its last set felt, a note on it — so it sits
+ * with that exercise's rest, not among the steppers of the one now on screen.
  */
 export function RestBar({
   rest,
   remaining,
   link = false,
   after,
-}: RestState & { link?: boolean; after?: string }) {
+  children,
+}: RestState & { link?: boolean; after?: string; children?: React.ReactNode }) {
   const userId = useUserId()
   const t = useTranslations('session.restTimer')
   if (!rest || remaining === 0 || !userId) return null
@@ -152,6 +157,10 @@ export function RestBar({
           </span>
         </div>
       </div>
+      {/* The chips sit on the bar's own surface, so theirs is lifted a step. */}
+      {children && (
+        <div className="mx-auto max-w-page px-5 pb-4 [&_button[aria-pressed=false]]:bg-surface-high">{children}</div>
+      )}
     </div>
   )
 }

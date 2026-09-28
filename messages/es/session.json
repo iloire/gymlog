@@ -93,7 +93,6 @@
     "hard": "Dura",
     "failed": "Fallida",
     "felt": "La serie {n} fue",
-    "feltNamed": "{name} serie {n} fue",
     "how": "Cómo fue la serie {n}"
   },
   "finishSession": {

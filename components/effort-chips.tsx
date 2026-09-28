@@ -19,13 +19,10 @@ export type Effort = (typeof EFFORTS)[number]
 export function EffortChips({
   userId,
   log,
-  exerciseName,
   className = '',
 }: {
   userId: string
   log: LocalSetLog
-  /** Named when the set is not the exercise on screen — the last set of the one before. */
-  exerciseName?: string
   className?: string
 }) {
   const t = useTranslations('session.effort')
@@ -34,7 +31,7 @@ export function EffortChips({
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
       <span className="text-sm text-ink-dim">
-        {exerciseName ? t('feltNamed', { name: exerciseName, n: log.setIndex }) : t('felt', { n: log.setIndex })}
+        {t('felt', { n: log.setIndex })}
       </span>
       <ul className="flex gap-2" aria-label={t('how', { n: log.setIndex })}>
         {EFFORTS.map((value) => {

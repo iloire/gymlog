@@ -353,7 +353,7 @@ function Session() {
   const lastLogged = data.logs.find((log) => log.id === lastLoggedId && log.completedAt !== null) ?? null
   // The last set of an exercise moves the screen on to the next one while its
   // rest still runs, so the clock, the chips and the note under it are about
-  // the exercise just done, not the one now at the top; each says so by name.
+  // the exercise just done, not the one now at the top; the bar names it.
   // Null while the rest is this exercise's own.
   const carried = restingBeforeSet && lastLogged && lastLogged.exerciseId !== exerciseId ? lastLogged : null
   const carriedName = carried ? libraryName(carried.exerciseId, carried.exerciseName, locale) : undefined
@@ -364,9 +364,11 @@ function Session() {
   // the bar, named after the exercise it follows, rather than standing in
   // their place — one clock on screen, never two.
   const takeover = restingBeforeSet && !carried
-  const noteLog = carried
-    ? (data.logs.find((log) => log.position === carried.position) ?? carried)
-    : groupLogs[0]
+  // A carried rest takes its exercise's chips and note down into the bar with
+  // it: everything about the exercise just done in one place at the bottom,
+  // and nothing above the steppers but the exercise now on screen.
+  const carriedNoteLog = carried ? (data.logs.find((log) => log.position === carried.position) ?? carried) : null
+  const noteLog = carried ? null : groupLogs[0]
   // Nothing left to log and nothing picked to fix: Finish takes the Log button's place.
   const finishing = allDone && data.session.completedAt === null && selectedId === null
   const exerciseName = groupLogs[0] ? libraryName(groupLogs[0].exerciseId, groupLogs[0].exerciseName, locale) : t('workoutFallback')
@@ -614,12 +616,6 @@ function Session() {
           </section>
         ) : activeSet ? (
           <section className="mt-4">
-            {/* The rest carried over from the exercise before is counted by the
-                bar at the bottom, which names it; all that belongs up here is
-                how the set it follows felt. */}
-            {carried && carriedName && (
-              <EffortChips userId={userId} log={carried} exerciseName={carriedName} className="mb-5" />
-            )}
             {lastSame && (
               <button
                 type="button"
@@ -751,7 +747,7 @@ function Session() {
             when there is time to write how the set went, and the note was only
             offered once the clock had gone. It stays mounted across the switch, so
             a note begun mid-rest survives the rest ending under it. */}
-        {noteLog && <ExerciseNote key={noteLog.id} userId={userId} log={noteLog} exerciseName={carriedName} />}
+        {noteLog && <ExerciseNote key={noteLog.id} userId={userId} log={noteLog} />}
 
         {/* The way between exercises is the swipe and the sheet behind the
             workout's name in the header; no Previous / Next row, so the height
@@ -781,7 +777,22 @@ function Session() {
             onDismiss={dismissUndoable}
           />
         )}
-        {!takeover && <RestBar rest={rest} remaining={remaining} after={carriedName} />}
+        {!takeover && (
+          <RestBar rest={rest} remaining={remaining} after={carriedName}>
+            {carried && carriedNoteLog && (
+              <>
+                <EffortChips userId={userId} log={carried} />
+                <ExerciseNote
+                  key={carriedNoteLog.id}
+                  userId={userId}
+                  log={carriedNoteLog}
+                  exerciseName={carriedName}
+                  className="mt-3"
+                />
+              </>
+            )}
+          </RestBar>
+        )}
       </div>
     </div>
   )
