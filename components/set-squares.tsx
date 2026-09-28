@@ -18,7 +18,8 @@ import { displayWeight, type Unit } from '@/lib/units'
  *
  * Above it, when there is a last time, a dimmed row of the sets you did then,
  * aligned by set number: "set 3 was 8 reps last time" is read down a column,
- * not out of a sentence. The red edge on a square below then explains
+ * not out of a sentence. The one above the set you are on is drawn solid, so
+ * the number to match is the one that stands out. The red edge on a square below then explains
  * itself — it beat the square above.
  *
  * Tapping a square selects that set, so a mistyped set can be fixed after
@@ -61,6 +62,7 @@ export function SetSquares({
 
   const ghostLabel = previousLabel ?? t('lastTime')
   const ghosts = previous ?? []
+  const activeIndex = logs.find((log) => log.id === activeId)?.setIndex
   const columns = Math.max(logs.length + (onAdd ? 1 : 0), ghosts.length)
   // One grid for both rows, so set 3 sits under set 3 whatever each row holds.
   const grid = { gridTemplateColumns: `repeat(${columns}, minmax(3rem, max-content))` }
@@ -75,7 +77,9 @@ export function SetSquares({
             {ghosts.map((set) => (
               <li
                 key={set.id}
-                className="flex h-11 min-w-12 flex-col items-center justify-center rounded-sm border border-dashed border-line px-2 text-ink-dim"
+                className={`flex h-11 min-w-12 flex-col items-center justify-center rounded-sm border px-2 ${
+                  set.setIndex === activeIndex ? 'border-ink-dim text-ink' : 'border-dashed border-line text-ink-dim'
+                }`}
                 aria-label={t('setGhost', { n: set.setIndex, set: formatSet(set, unit, locale) })}
               >
                 <Figure set={set} unit={unit} />

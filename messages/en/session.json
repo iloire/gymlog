@@ -21,6 +21,7 @@
     "weightLabel": "Weight",
     "repsLabel": "Reps",
     "repsUnit": "reps",
+    "lastSame": "Set {n} last time · <figure>{set}</figure>",
     "quickWeights": "Quick weights",
     "heavier": "Heavier than last time’s top set.",
     "logTime": "Log {time}",

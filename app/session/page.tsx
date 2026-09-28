@@ -26,7 +26,7 @@ import { WorkoutSheet } from '@/components/workout-sheet'
 import { WorkoutSummary } from '@/components/workout-summary'
 import { isCardio } from '@/lib/cardio'
 import { getDb, type LocalSetLog } from '@/lib/db/dexie'
-import { formatAgo, formatMinutes } from '@/lib/format'
+import { formatAgo, formatMinutes, formatSet } from '@/lib/format'
 import type { Locale } from '@/lib/i18n'
 import { openingValues, suggestNext, type Reason, type Values } from '@/lib/progression'
 import { recentPerformances, type LastPerformance } from '@/lib/queries'
@@ -329,6 +329,16 @@ function Session() {
     .sort((a, b) => b - a)
     .slice(0, 4)
 
+  // The same set last time, above the steppers: after a suggestion is
+  // overridden, the numbers you are trying to match are still one glance
+  // away, and one tap puts both of them back in the steppers.
+  const lastSame = activeSet ? previous?.sets.find((set) => set.setIndex === activeSet.setIndex) : undefined
+  const onLastSame =
+    !!lastSame &&
+    values.weightKg === lastSame.weightKg &&
+    values.reps === lastSame.reps &&
+    (values.durationSec ?? null) === (lastSame.durationSec ?? null)
+
   const resting = rest?.sessionId === id && remaining > 0
   const restingBeforeSet = resting && selectedId === null && activeSet !== undefined && activeSet.completedAt === null
   const nextSet = activeSet
@@ -609,6 +619,24 @@ function Session() {
                 how the set it follows felt. */}
             {carried && carriedName && (
               <EffortChips userId={userId} log={carried} exerciseName={carriedName} className="mb-5" />
+            )}
+            {lastSame && (
+              <button
+                type="button"
+                aria-pressed={onLastSame}
+                onClick={() =>
+                  setDraft({ id: values.id, weightKg: lastSame.weightKg, reps: lastSame.reps, durationSec: lastSame.durationSec ?? null })
+                }
+                className={`mb-2 flex h-10 w-full items-center rounded-sm border-l-2 px-3 text-left text-sm transition-colors ${
+                  onLastSame ? 'border-ink-dim text-ink-dim' : 'border-plate-blue-lift bg-surface text-ink'
+                }`}
+              >
+                {t.rich('lastSame', {
+                  n: activeSet.setIndex,
+                  set: formatSet(lastSame, unit, locale),
+                  figure: (chunks) => <span className="figure ml-1">{chunks}</span>,
+                })}
+              </button>
             )}
             {/* Stacked, not side by side: two steppers across a phone leave ~58px for
                 the number, which truncates 77.5 and anything over 100 kg. */}

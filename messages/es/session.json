@@ -21,6 +21,7 @@
     "weightLabel": "Peso",
     "repsLabel": "Reps",
     "repsUnit": "reps",
+    "lastSame": "Serie {n} la última vez · <figure>{set}</figure>",
     "quickWeights": "Pesos rápidos",
     "heavier": "Más peso que la mejor serie de la última vez.",
     "logTime": "Registrar {time}",
