@@ -165,10 +165,13 @@ export function RestTimer({ link = false }: { link?: boolean }) {
 /**
  * The rest as the screen's state. Between sets you look at the phone for the
  * time, then at what the next set asks; so while the rest runs, the block
- * where the steppers were becomes the clock, set huge and draining, with the
- * next set straight under it and Skip where Log set was. How the last set felt
- * and the rest length come after: they are for the second look, not the first.
- * At zero the steppers return.
+ * where the steppers were becomes the clock, set huge and draining, with Skip
+ * where Log set was.
+ *
+ * Everything about the rest and the set it follows — the clock, how that set
+ * felt, the rest length, +30 s and Skip — sits in one amber-edged panel, and
+ * the next set comes after it, outside: what is over and what is coming read
+ * as two things, not one list. At zero the panel goes and the steppers return.
  *
  * `restSec` is what the exercise rests between sets, with − and + beside it:
  * the moment you know 90 s is not enough for this lift is while you are
@@ -188,7 +191,7 @@ export function RestTakeover({
   /** The exercise's rest between sets, and where a change goes. */
   restSec?: number | null
   onRestSec?: (restSec: number) => void
-  /** About the set just done — how it felt — between the clock and what is next. */
+  /** About the set just done — how it felt — inside the panel, under the clock. */
   children?: React.ReactNode
 }) {
   const userId = useUserId()
@@ -198,69 +201,73 @@ export function RestTakeover({
   const progress = Math.min(1, remaining / rest.totalSec)
 
   return (
-    <section className="mt-4" aria-label={t('rest')}>
-      <p className="text-sm text-ink-dim">{t('rest')}</p>
-      <p
-        className="figure mt-1 text-[4.5rem] leading-none text-plate-yellow"
-        role="timer"
-        aria-live="off"
-        aria-label={t('secondsLeft', { count: remaining })}
+    <div className="mt-4">
+      <section
+        className="rounded-sm border border-plate-yellow/40 bg-plate-yellow/[0.06] p-4"
+        aria-label={t('rest')}
       >
-        {formatRest(remaining)}
-      </p>
-      <div className="mt-4 h-1 w-full rounded-full bg-line" aria-hidden>
-        <div
-          className="h-full rounded-full bg-plate-yellow transition-[width] duration-200 ease-linear"
-          style={{ width: `${progress * 100}%` }}
-        />
-      </div>
-
-      {/* What the next set asks, straight under the clock: the two things the
-          eye comes to the phone for between sets, one glance each. */}
-      <p className="mt-4 text-sm text-ink-dim">{t('next')}</p>
-      <p className="mt-0.5 text-lg">{next}</p>
-
-      {children}
-
-      {restSec != null && onRestSec && (
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <span className="text-sm text-ink-dim">
-            {t('betweenSets')}
-            <span className="block text-xs">{t('keptForThis')}</span>
-          </span>
-          <div className="hold-pair h-11">
-            <button
-              type="button"
-              aria-label={t('less')}
-              disabled={restSec < REST_STEP_SEC}
-              onClick={() => onRestSec(restSec - REST_STEP_SEC)}
-              className="hold-button w-11"
-            >
-              <Minus size={18} aria-hidden />
-            </button>
-            <span className="figure flex min-w-16 items-center justify-center text-base" aria-live="polite">
-              {t('seconds', { seconds: restSec })}
-            </span>
-            <button
-              type="button"
-              aria-label={t('more')}
-              onClick={() => onRestSec(restSec + REST_STEP_SEC)}
-              className="hold-button w-11"
-            >
-              <Plus size={18} aria-hidden />
-            </button>
-          </div>
+        <p className="text-sm text-ink-dim">{t('rest')}</p>
+        <p
+          className="figure mt-1 text-[4.5rem] leading-none text-plate-yellow"
+          role="timer"
+          aria-live="off"
+          aria-label={t('secondsLeft', { count: remaining })}
+        >
+          {formatRest(remaining)}
+        </p>
+        <div className="mt-4 h-1 w-full rounded-full bg-line" aria-hidden>
+          <div
+            className="h-full rounded-full bg-plate-yellow transition-[width] duration-200 ease-linear"
+            style={{ width: `${progress * 100}%` }}
+          />
         </div>
-      )}
 
-      <div className="mt-5 grid grid-cols-2 gap-3">
-        <button type="button" onClick={() => void extendRest(userId)} className="btn-quiet figure h-14 text-lg">
-          {t('extend', { seconds: EXTEND_SEC })}
-        </button>
-        <button type="button" onClick={() => void clearRest(userId)} className="btn-primary">
-          {t('skipRest')}
-        </button>
-      </div>
-    </section>
+        {children}
+
+        {restSec != null && onRestSec && (
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <span className="text-sm text-ink-dim">
+              {t('betweenSets')}
+              <span className="block text-xs">{t('keptForThis')}</span>
+            </span>
+            <div className="hold-pair h-11">
+              <button
+                type="button"
+                aria-label={t('less')}
+                disabled={restSec < REST_STEP_SEC}
+                onClick={() => onRestSec(restSec - REST_STEP_SEC)}
+                className="hold-button w-11"
+              >
+                <Minus size={18} aria-hidden />
+              </button>
+              <span className="figure flex min-w-16 items-center justify-center text-base" aria-live="polite">
+                {t('seconds', { seconds: restSec })}
+              </span>
+              <button
+                type="button"
+                aria-label={t('more')}
+                onClick={() => onRestSec(restSec + REST_STEP_SEC)}
+                className="hold-button w-11"
+              >
+                <Plus size={18} aria-hidden />
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <button type="button" onClick={() => void extendRest(userId)} className="btn-quiet figure h-14 text-lg">
+            {t('extend', { seconds: EXTEND_SEC })}
+          </button>
+          <button type="button" onClick={() => void clearRest(userId)} className="btn-primary">
+            {t('skipRest')}
+          </button>
+        </div>
+      </section>
+
+      {/* What comes after the rest, outside its panel: the set the squares above already point at. */}
+      <p className="mt-5 text-sm text-ink-dim">{t('next')}</p>
+      <p className="mt-0.5 text-lg">{next}</p>
+    </div>
   )
 }
