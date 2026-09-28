@@ -230,6 +230,21 @@ describe('openingValues', () => {
       .toMatchObject({ weightKg: 80, reps: 10 })
   })
 
+  it('never opens heavier than last time: a suggested jump is left to you', () => {
+    const lastTime = [set(77.5, 10, { setIndex: 1 }), set(77.5, 10, { setIndex: 2 }), set(77.5, 10, { setIndex: 3 })]
+    expect(openingValues({ log: todo(1), sets: [todo(1)], previous: lastTime, suggestion: plan, unit: 'kg' }))
+      .toMatchObject({ weightKg: 77.5, reps: 10 })
+    // Up from the top of a rep range, the reps stay what you did, not the bottom of the range.
+    const fromReps = { weightKg: 80, reps: 8, reason: { kind: 'hitAddWeightFromReps' as const, sets: 3, reps: 12, weightKg: 77.5, nextKg: 80, nextReps: 8 } }
+    const atTop = [set(77.5, 12, { setIndex: 1 })]
+    expect(openingValues({ log: todo(1), sets: [todo(1)], previous: atTop, suggestion: fromReps, unit: 'kg' }))
+      .toMatchObject({ weightKg: 77.5, reps: 12 })
+    // A deload is not a jump: it still opens lighter.
+    const drop = { weightKg: 70, reps: 10, reason: { kind: 'missedTwiceDrop' as const, weightKg: 77.5, nextKg: 70 } }
+    expect(openingValues({ log: todo(1), sets: [todo(1)], previous: lastTime, suggestion: drop, unit: 'kg' }))
+      .toMatchObject({ weightKg: 70 })
+  })
+
   it('opens the next set on what you just did, reps included, not on the plan', () => {
     // 80 kg was too much for 10: the second set should say 77.5 × 8, not 80 × 10 again.
     const first = set(77.5, 8, { setIndex: 1 })

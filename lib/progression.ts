@@ -3,10 +3,10 @@
  *
  * The core mechanic of beginner training is linear progression: hit every
  * prescribed rep and the bar goes up a little; miss and it stays; miss twice
- * and it comes down. The gym screen used to open on last time's weight and
- * leave the decision to you; now it opens on the next step, with the reason
- * in one line under the steppers. Pure and free of Dexie, so every rule here
- * is a unit test.
+ * and it comes down. The gym screen opens on the next step, with the reason
+ * in one line under the steppers, except that it never opens heavier than
+ * last time: going up is your call, one tap on the suggested weight away.
+ * Pure and free of Dexie, so every rule here is a unit test.
  */
 import type { LocalSetLog } from '@/lib/db/dexie'
 import { tidyWeight, type Unit } from '@/lib/units'
@@ -161,7 +161,10 @@ export type Values = { weightKg: number | null; reps: number | null; durationSec
  *   1. what you already logged for this set (editing it),
  *   2. the set you just did in this session — after two sets at 77.5 kg for 8
  *      the third should say 77.5 and 8, not last week's numbers or the plan's,
- *   3. the progression's next step, worked out from last time,
+ *   3. the progression's next step, worked out from last time — but never
+ *      heavier than last time's top set: a suggested jump opens on the
+ *      weight and reps you already did, and the reason line and the quick
+ *      weights offer the heavier one,
  *   4. the same set number last time, then any set last time,
  *   5. the prescription.
  * `sets` are this exercise's sets in this session, in set order, whatever
@@ -183,15 +186,18 @@ export function openingValues({
   const justDone = sets.filter((set) => set.completedAt !== null && set.setIndex < log.setIndex).at(-1)
   const lastSame = previous?.find((set) => set.setIndex === log.setIndex)
   const lastAny = previous?.at(-1)
+  const lastTop = Math.max(0, ...(previous ?? []).filter(working).map((set) => set.weightKg ?? 0))
+  const jump = suggestion?.weightKg != null && lastTop > 0 && suggestion.weightKg > lastTop
+  const next: Suggestion | null = jump ? { weightKg: lastTop, reps: lastSame?.reps ?? suggestion.reps, reason: null } : suggestion
   return {
     weightKg:
       log.weightKg ??
       justDone?.weightKg ??
-      suggestion?.weightKg ??
+      next?.weightKg ??
       lastSame?.weightKg ??
       lastAny?.weightKg ??
       (log.targetWeightKg === null ? null : tidyWeight(log.targetWeightKg, unit)),
-    reps: log.reps ?? justDone?.reps ?? suggestion?.reps ?? log.targetReps ?? lastSame?.reps ?? null,
+    reps: log.reps ?? justDone?.reps ?? next?.reps ?? log.targetReps ?? lastSame?.reps ?? null,
     durationSec:
       log.durationSec ??
       log.targetDurationSec ??
