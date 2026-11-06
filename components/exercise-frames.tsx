@@ -79,5 +79,5 @@ export function ExerciseThumb({
   exercise: Pick<LocalExercise, 'id' | 'name' | 'images'>
   animate?: boolean | 'md'
 }) {
-  return <ExerciseFrames exercise={exercise} className="aspect-[3/2] w-16 shrink-0 md:w-32" animate={animate} />
+  return <ExerciseFrames exercise={exercise} className="aspect-[3/2] w-24 shrink-0 md:w-32" animate={animate} />
 }
