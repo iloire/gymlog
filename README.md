@@ -18,14 +18,11 @@ deployed to production** — the workflow waits for Vercel's verdict and smoke-t
 
 ## What it does
 
-- **Workouts and a weekly plan** — build workouts, put them on days, or start from a premade programme.
-- **Gym screen** — one exercise at a time, last session alongside, rest timer.
-- **Exercise library** — 873 movements with photos.
-- **Progress** — top sets, e1RM, records, bodyweight trend.
+- **Premade programmes**, fitted to the equipment you have
+- **Progression** — the next set's weight and reps, with the reason
+- **873 exercises** with photos
 - **Theme support**
-- **kg or lb**
-- **Multi-user** — each account sees only its own data.
-- **API for LLMs** — token-based, with an OpenAPI schema at `/api/v1/openapi.json`.
+- **API for LLMs** — OpenAPI schema at `/api/v1/openapi.json`
 
 ## Works offline
 
