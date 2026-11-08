@@ -22,7 +22,7 @@ deployed to production** — the workflow waits for Vercel's verdict and smoke-t
 - **Gym screen** — one exercise at a time, last session alongside, rest timer.
 - **Exercise library** — 873 movements with photos.
 - **Progress** — top sets, e1RM, records, bodyweight trend.
-- **Themes** — dark or light, several styles.
+- **Theme support**
 - **kg or lb**
 - **Multi-user** — each account sees only its own data.
 - **API for LLMs** — token-based, with an OpenAPI schema at `/api/v1/openapi.json`.
