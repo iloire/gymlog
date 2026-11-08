@@ -18,29 +18,14 @@ deployed to production** — the workflow waits for Vercel's verdict and smoke-t
 
 ## What it does
 
-- **Workouts** — an ordered list of exercises with sets, reps and rest.
-- **Premade programmes** — pick a ready-made week (full body, upper/lower, dumbbells only), fitted
-  to the equipment you have: exercises you can't do are swapped for ones you can.
-- **Your week** — the Plan tab opens on the week, a cell per day; tap one to put a workout on it.
-  Moving up a stage starts a new programme; everything you logged before stays exactly as it was.
-- **The gym screen** — one exercise at a time, last time's sets as a ghost row above today's,
-  steppers opened on the next step of the progression with the reason under them, a rest that
-  takes the screen and asks how the set felt, and the screen kept awake.
-- **Exercise library** — 873 movements, filed by body part, each with a start and end photo that
-  fade into one another to show the movement.
-- **Progress** — this week against the plan, each main lift's top set and e1RM over time, and
-  records.
-- **Bodyweight** — one field on Today each morning, charted as a 7-day average because single
-  readings are noise.
-- **Accounts** — every user sees only their own data; the exercise library is shared.
-- **Dark or light** — and six styles to pick from, set on Profile. The choice is per device, not
-  per account, so the phone can be dark and the laptop light; it is applied before the first paint,
-  so a light theme never flashes dark on the way in.
-- **Kilograms or pounds** — one setting on Profile, saved to the account so every phone follows;
-  weights stay kilograms underneath and the steppers, plates and charts convert at the edge.
-- **API for LLMs** — create a token under Profile → API access and let ChatGPT, Claude or a script
-  read your workouts, history and bodyweight; a read and write token can also rework your workouts
-  and week. Described by an OpenAPI schema at `/api/v1/openapi.json`.
+- **Workouts and a weekly plan** — build workouts, put them on days, or start from a premade programme.
+- **Gym screen** — one exercise at a time, last session alongside, rest timer.
+- **Exercise library** — 873 movements with photos.
+- **Progress** — top sets, e1RM, records, bodyweight trend.
+- **Themes** — dark or light, several styles.
+- **kg or lb**
+- **Multi-user** — each account sees only its own data.
+- **API for LLMs** — token-based, with an OpenAPI schema at `/api/v1/openapi.json`.
 
 ## Works offline
 
