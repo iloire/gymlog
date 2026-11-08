@@ -3,7 +3,8 @@
 Validated centrally with Zod. Never read `process.env` directly — import `env` from
 `lib/env.ts` (server) or `publicEnv` from `lib/env.public.ts` (client).
 
-Only `.env.local` (development) and `.env.prod` (production) exist. There is no `.env`.
+Only `.env.local` (development) and `.env.prod` (production) exist. There is no `.env`. Neither is
+in git — see [Where the values live](#where-the-values-live).
 
 | Variable | Required | Where | Notes |
 |---|---|---|---|
@@ -30,18 +31,19 @@ Production reads `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `AUTH_SECRET` (all Se
 - **Only Production has variables.** A Preview deploy (any non-main branch) will fail env
   validation until the same variables are added for Preview.
 - **Never run `vercel link` without checking afterwards** — it pulls development variables into
-  `.env.local` and appends `.env*` to `.gitignore`, which would stop `.env.prod` being committed.
+  `.env.local`, overwriting the local file.
 
-## git-crypt
+## Where the values live
 
-`.env.local` and `.env.prod` are committed **encrypted** with the shared git-crypt key
-(`f43bdfc3`, stored only in 1Password — the same key as the other repos). `.gitattributes` lists
-them with `-text`, which is required: eol normalisation would otherwise strip CR bytes out of the
-ciphertext.
+The repo is meant to be public, so no env file is committed — not even encrypted. `.gitignore`
+ignores every `.env*` except `.env.example`, the placeholder template that documents each
+variable.
 
-On a fresh clone the env files read as binary until the repo is unlocked. Export the key from
-1Password to `~/Downloads/git-crypt-key`, run `git-crypt unlock ~/Downloads/git-crypt-key`, then
-delete the download. Never `git-crypt init` — it would silently generate a new key and fork this
-repo off the shared one.
+The real `.env.local` and `.env.prod` are kept in 1Password, item **gymlog env** (both files as
+attachments or notes). On a fresh clone, restore them from there into the repo root. Production
+also holds its values in Vercel, but they are Sensitive and cannot be pulled back out, so
+1Password is the copy of record.
 
-`.env.example` is committed in plain text and documents every variable.
+Until 2026-11-08 both files were committed git-crypt encrypted. That history was rewritten with
+`git filter-repo` to drop them; a mirror of the old history is in
+`~/code/_archive/gymlog-mirror-2026-11-08.tar.gz`.

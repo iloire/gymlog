@@ -57,11 +57,11 @@ NextAuth v5 · Dexie · Vitest · Vercel
 
 ## Getting started
 
-The env files are committed encrypted with git-crypt. Unlock once per clone with the shared key
-from 1Password — never `git-crypt init`:
+Env files are not in git. Copy the template and fill in an `AUTH_SECRET`; a local SQLite file
+needs nothing else:
 
 ```bash
-git-crypt unlock ~/Downloads/git-crypt-key && rm ~/Downloads/git-crypt-key
+cp .env.example .env.local   # TURSO_DATABASE_URL="file:./local.db", AUTH_SECRET=$(openssl rand -base64 32)
 npm install
 npm run db:migrate     # local SQLite at ./local.db
 npm run db:seed        # the exercise library
@@ -97,7 +97,7 @@ workers and the screen wake lock only run over HTTPS.
 
 - [`docs/architecture.md`](docs/architecture.md) — sync protocol and the offline design
 - [`docs/design-system.md`](docs/design-system.md) — the plate-colour palette and type
-- [`docs/env.md`](docs/env.md) — environment variables and git-crypt
+- [`docs/env.md`](docs/env.md) — environment variables
 - [`docs/plan.md`](docs/plan.md) — the build plan and what is still to do
 - [`CHANGELOG.md`](CHANGELOG.md)
 

@@ -29,12 +29,6 @@ jobs:
 
       - run: npm ci
 
-      # CI has no git-crypt key, so the env files check out as ciphertext.
-      # Remove them rather than let Next try to parse binary as dotenv —
-      # tests and the build need no secrets.
-      - name: Drop encrypted env files
-        run: rm -f .env.local .env.prod
-
       - name: Unit tests
         run: npm test
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-08 14:20
+
+- **Env files are out of git, history included.** Ahead of open-sourcing, `.env.local` and
+  `.env.prod` are untracked and ignored, and `git filter-repo` removed them from every commit; the
+  git-crypt setup (`.gitattributes`, the gitleaks allowlist, CI's step that deleted the
+  ciphertext) goes with them. The values live in 1Password — see `docs/env.md`.
+
 ## 2026-11-08 13:37
 
 - **The README's dark hero is Lane.** The first image was still Plate from September: the old

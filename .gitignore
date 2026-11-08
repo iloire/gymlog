@@ -30,12 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files — .env.local and .env.prod are committed, git-crypt encrypted (see
-# .gitattributes). There is no .env; anything else is local-only.
+# env files never enter git — values live in 1Password (see docs/env.md).
+# Only the placeholder template is committed.
 .env
 .env.*
-!.env.local
-!.env.prod
 !.env.example
 
 # vercel
