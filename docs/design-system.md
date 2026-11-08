@@ -61,7 +61,7 @@ fill with white text, so it must stay a dark enough red), `--plate-yellow` rest 
 | Style | Idea | Action / beat / rest (dark) | Figures | Body | Radius |
 |---|---|---|---|---|---|
 | Plate | Competition plates on graphite | `#0057B8` / `#D22630` / `#F2C300` | Archivo `wdth 112` | Archivo | `0.5rem` |
-| Iron | An old barbell club: cast iron and enamel | `#2B6E4C` / `#C0392B` / `#E8A317` | Big Shoulders 800 | Archivo `wdth 85` | `0` |
+| Iron | An old barbell club: cast iron and enamel | `#2B6E4C` / `#C0392B` / `#E8A317` | Outfit 800 | Outfit | `0` |
 | Studio | Soft and calm | `#5452D0` / `#D9507F` / `#F0B43C` | Nunito 800 | Nunito | `1rem` |
 | Lane | The pool room: water and white tile | `#0B6E88` / `#D63A4A` / `#F2C85A` | Outfit 700 | Outfit | `0.75rem` |
 | Court | A sports hall: maple and painted lines | `#2F6FBB` / `#CF4436` / `#E9A53A` | Archivo `wdth 118` 800 | Archivo | `0.25rem` |
@@ -69,8 +69,7 @@ fill with white text, so it must stay a dark enough red), `--plate-yellow` rest 
 
 Type is set through tokens rather than classes: `--body-font` and `--body-width` for everything,
 and `--figure-font`, `--figure-weight`, `--figure-width`, `--figure-tracking` for `.figure`.
-Iron's body is Archivo rather than Big Shoulders because the condensed face is unreadable at label
-sizes. Only Archivo is preloaded; the other faces download the first time a style uses them and
+Only Archivo is preloaded; the other faces download the first time a style uses them and
 the service worker caches them from then on, so a style first picked with no signal shows a
 system fallback until the next time online.
 

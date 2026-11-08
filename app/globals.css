@@ -179,7 +179,7 @@
 }
 
 /* Iron — an old barbell club: cast iron, bone-white type, enamel green on the
-   machines, safety amber. Tall condensed figures and no rounded corners. */
+   machines, safety amber. Lane's geometric face, set heavy, and no rounded corners. */
 [data-style='iron'] {
   --ground: #1a1917;
   --surface: #23221f;
@@ -192,14 +192,12 @@
   --plate-red: #c0392b;
   --plate-yellow: #e8a317;
   --radius: 0rem;
-  /* Big Shoulders is too narrow to read small at arm's length, so labels use
-     Archivo pulled in to a semi-condensed width that sits beside it. */
-  --body-font: var(--font-archivo);
-  --body-width: 'wdth' 85;
-  --figure-font: var(--font-big-shoulders);
+  --body-font: var(--font-outfit);
+  --body-width: normal;
+  --figure-font: var(--font-outfit);
   --figure-weight: 800;
   --figure-width: normal;
-  --figure-tracking: 0.01em;
+  --figure-tracking: -0.01em;
 }
 
 .light[data-style='iron'],
