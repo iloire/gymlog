@@ -18,7 +18,21 @@
 export const THEMES = ['dark', 'light', 'system'] as const
 export type Theme = (typeof THEMES)[number]
 
-export const STYLES = ['plate', 'iron', 'studio', 'lane', 'court', 'signal'] as const
+export const STYLES = [
+  'plate',
+  'iron',
+  'studio',
+  'lane',
+  'court',
+  'signal',
+  'turf',
+  'plum',
+  'deep',
+  'clay',
+  'butter',
+  'rose',
+  'fog',
+] as const
 export type Style = (typeof STYLES)[number]
 
 export const DEFAULT_THEME: Theme = 'dark'
@@ -36,6 +50,13 @@ export const THEME_COLORS = {
   lane: { dark: '#0c1b22', light: '#e8f1f3' },
   court: { dark: '#1a1510', light: '#f0e5d0' },
   signal: { dark: '#000000', light: '#ffffff' },
+  turf: { dark: '#0f2a1e', light: '#d9eedf' },
+  plum: { dark: '#24142e', light: '#ece0f3' },
+  deep: { dark: '#0d1f3f', light: '#dbe8fa' },
+  clay: { dark: '#2b1611', light: '#f6dccd' },
+  butter: { dark: '#25220f', light: '#f8edc0' },
+  rose: { dark: '#2e0f1e', light: '#fbe0e8' },
+  fog: { dark: '#2b3440', light: '#cdd4dc' },
 } as const satisfies Record<Style, Record<'dark' | 'light', string>>
 
 export function parseTheme(value: unknown): Theme {

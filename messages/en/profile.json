@@ -62,6 +62,34 @@
       "signal": {
         "label": "Signal",
         "description": "Black and white, full contrast"
+      },
+      "turf": {
+        "label": "Turf",
+        "description": "Grass green and mint"
+      },
+      "plum": {
+        "label": "Plum",
+        "description": "Aubergine and lilac"
+      },
+      "deep": {
+        "label": "Deep",
+        "description": "Navy and sky blue"
+      },
+      "clay": {
+        "label": "Clay",
+        "description": "Track red and peach"
+      },
+      "butter": {
+        "label": "Butter",
+        "description": "Olive and butter yellow"
+      },
+      "rose": {
+        "label": "Rose",
+        "description": "Berry and blush pink"
+      },
+      "fog": {
+        "label": "Fog",
+        "description": "Mid grey, never black or white"
       }
     },
     "modes": {

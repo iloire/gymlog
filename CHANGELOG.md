@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-08 13:13
+
+- **Seven styles with colour in the ground.** Every style so far sat on near-black or near-white,
+  so a light theme was always white and a dark one always black. **Turf** (grass green / mint),
+  **Plum** (aubergine / lilac), **Deep** (navy / sky), **Clay** (track red / peach), **Butter**
+  (olive / butter yellow) and **Rose** (berry / blush) tint the ground itself; **Fog** is mid grey
+  both ways, a dark that is not black and a light that is not white. Where the ground is blue or
+  red the action button turns teal so it still stands out. All keep white text on the action and
+  "beat" colours at 4.5:1 or better. The picker now tiles every entry in `STYLES` instead of its own
+  copy of the list.
+
 ## 2026-09-23 14:16
 
 - **Three more styles: Lane, Court and Signal.** Two of the three that were left were dark and

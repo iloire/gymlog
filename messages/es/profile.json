@@ -62,6 +62,34 @@
       "signal": {
         "label": "Señal",
         "description": "Blanco y negro, contraste máximo"
+      },
+      "turf": {
+        "label": "Césped",
+        "description": "Verde hierba y menta"
+      },
+      "plum": {
+        "label": "Ciruela",
+        "description": "Berenjena y lila"
+      },
+      "deep": {
+        "label": "Fondo",
+        "description": "Azul marino y celeste"
+      },
+      "clay": {
+        "label": "Arcilla",
+        "description": "Rojo de pista y melocotón"
+      },
+      "butter": {
+        "label": "Mantequilla",
+        "description": "Oliva y amarillo mantequilla"
+      },
+      "rose": {
+        "label": "Rosa",
+        "description": "Frambuesa y rosa pálido"
+      },
+      "fog": {
+        "label": "Niebla",
+        "description": "Gris medio, ni negro ni blanco"
       }
     },
     "modes": {

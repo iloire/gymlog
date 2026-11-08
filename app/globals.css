@@ -129,7 +129,7 @@
   }
 }
 /* ---------------------------------------------------------------- gymlog
-   Six styles, each with a dark and a light version. Every style keeps the
+   Thirteen styles, each with a dark and a light version. Every style keeps the
    three meanings from the sport: --plate-blue is the action, --plate-red is
    "you beat last time", --plate-yellow is rest running. The names come from
    Plate, the original style; in the others they are roles, not hues.
@@ -357,6 +357,259 @@
   --plate-blue-lift: #1d4ed8;
   --plate-red: #c01616;
   --plate-yellow: #7a5c00;
+}
+
+/* ---- Coloured grounds. The six above keep their grounds near black or near
+   white; these put the hue in the ground itself, and Fog sits mid-grey in
+   both modes for a screen that is neither. The action moves off blue wherever
+   the ground is blue, so the one button still stands out. */
+
+/* Turf — the sled track: artificial grass, white lines, a blue-painted sled. */
+[data-style='turf'] {
+  --ground: #0f2a1e;
+  --surface: #15362a;
+  --surface-high: #1c4434;
+  --line: #275341;
+  --ink: #e9f5ee;
+  --ink-dim: #93b5a3;
+  --plate-blue: #1d5fae;
+  --plate-blue-lift: #2f74c8;
+  --plate-red: #d63a3a;
+  --plate-yellow: #f2d43a;
+  --radius: 0.375rem;
+  --body-font: var(--font-archivo);
+  --body-width: 'wdth' 100;
+  --figure-font: var(--font-archivo);
+  --figure-weight: 800;
+  --figure-width: 'wdth' 112;
+  --figure-tracking: -0.02em;
+}
+
+.light[data-style='turf'],
+.light [data-style='turf'] {
+  --ground: #d9eedf;
+  --surface: #f3fbf5;
+  --surface-high: #c6e3cf;
+  --line: #aacfb6;
+  --ink: #0d2418;
+  --ink-dim: #3f5f4d;
+  --plate-blue: #1a56a0;
+  --plate-blue-lift: #2266b8;
+  --plate-red: #b52b2b;
+  --plate-yellow: #7a5d00;
+}
+
+/* Plum — a boxing gym after hours: aubergine and lilac, violet on the bell. */
+[data-style='plum'] {
+  --ground: #24142e;
+  --surface: #2e1b3a;
+  --surface-high: #3a2448;
+  --line: #4a3059;
+  --ink: #f3eaf8;
+  --ink-dim: #b39fc2;
+  --plate-blue: #7339c4;
+  --plate-blue-lift: #8d58e0;
+  --plate-red: #c9325a;
+  --plate-yellow: #f5b93a;
+  --radius: 1rem;
+  --body-font: var(--font-nunito);
+  --body-width: normal;
+  --figure-font: var(--font-nunito);
+  --figure-weight: 800;
+  --figure-width: normal;
+  --figure-tracking: -0.01em;
+}
+
+.light[data-style='plum'],
+.light [data-style='plum'] {
+  --ground: #ece0f3;
+  --surface: #faf5fd;
+  --surface-high: #dccbe8;
+  --line: #c9b3d9;
+  --ink: #22122c;
+  --ink-dim: #5f4a6e;
+  --plate-blue: #6a31bd;
+  --plate-blue-lift: #7a3fd0;
+  --plate-red: #b8264f;
+  --plate-yellow: #8a5a00;
+}
+
+/* Deep — a rowing club: navy blazers and sky, the action in teal because a
+   blue button would sink into a blue ground. */
+[data-style='deep'] {
+  --ground: #0d1f3f;
+  --surface: #13294f;
+  --surface-high: #1a3460;
+  --line: #264272;
+  --ink: #e8f0fb;
+  --ink-dim: #93a8c8;
+  --plate-blue: #0f766e;
+  --plate-blue-lift: #14958b;
+  --plate-red: #d03a44;
+  --plate-yellow: #fbc531;
+  --radius: 0.75rem;
+  --body-font: var(--font-outfit);
+  --body-width: normal;
+  --figure-font: var(--font-outfit);
+  --figure-weight: 700;
+  --figure-width: normal;
+  --figure-tracking: -0.01em;
+}
+
+.light[data-style='deep'],
+.light [data-style='deep'] {
+  --ground: #dbe8fa;
+  --surface: #f4f8fe;
+  --surface-high: #c7d9f2;
+  --line: #aec6e8;
+  --ink: #0b1a33;
+  --ink-dim: #44587a;
+  --plate-blue: #0d6b63;
+  --plate-blue-lift: #0f7f76;
+  --plate-red: #c22f39;
+  --plate-yellow: #805d00;
+}
+
+/* Clay — a running track: red-brown rubber in the dark, peach in the light. */
+[data-style='clay'] {
+  --ground: #2b1611;
+  --surface: #361d17;
+  --surface-high: #43261e;
+  --line: #553228;
+  --ink: #f8ebe4;
+  --ink-dim: #c09d8e;
+  --plate-blue: #1f6f8b;
+  --plate-blue-lift: #2a8aa8;
+  --plate-red: #d03a30;
+  --plate-yellow: #f3b23e;
+  --radius: 0.5rem;
+  --body-font: var(--font-outfit);
+  --body-width: normal;
+  --figure-font: var(--font-outfit);
+  --figure-weight: 800;
+  --figure-width: normal;
+  --figure-tracking: -0.01em;
+}
+
+.light[data-style='clay'],
+.light [data-style='clay'] {
+  --ground: #f6dccd;
+  --surface: #fdf1ea;
+  --surface-high: #ecc8b4;
+  --line: #ddb09a;
+  --ink: #2a140d;
+  --ink-dim: #6b4637;
+  --plate-blue: #1a5f78;
+  --plate-blue-lift: #1f6f8b;
+  --plate-red: #b3261e;
+  --plate-yellow: #84530a;
+}
+
+/* Butter — a sunny warm-up room: butter yellow and olive, cobalt to press. */
+[data-style='butter'] {
+  --ground: #25220f;
+  --surface: #2f2b15;
+  --surface-high: #3a351c;
+  --line: #4a4425;
+  --ink: #f7f1d9;
+  --ink-dim: #b5ab86;
+  --plate-blue: #3657c4;
+  --plate-blue-lift: #4a6dde;
+  --plate-red: #d03a2e;
+  --plate-yellow: #f5cf3a;
+  --radius: 0.75rem;
+  --body-font: var(--font-nunito);
+  --body-width: normal;
+  --figure-font: var(--font-nunito);
+  --figure-weight: 800;
+  --figure-width: normal;
+  --figure-tracking: -0.01em;
+}
+
+.light[data-style='butter'],
+.light [data-style='butter'] {
+  --ground: #f8edc0;
+  --surface: #fffae6;
+  --surface-high: #efe0a6;
+  --line: #dccb8a;
+  --ink: #241f08;
+  --ink-dim: #5e5532;
+  --plate-blue: #2d4fb8;
+  --plate-blue-lift: #3657c4;
+  --plate-red: #b42d22;
+  --plate-yellow: #7d5600;
+}
+
+/* Rose — berry in the dark, blush in the light, teal for the action so it
+   never reads as "beat". */
+[data-style='rose'] {
+  --ground: #2e0f1e;
+  --surface: #3a1627;
+  --surface-high: #471d31;
+  --line: #5a2840;
+  --ink: #fbe9f0;
+  --ink-dim: #c99aae;
+  --plate-blue: #0e7490;
+  --plate-blue-lift: #1490b0;
+  --plate-red: #d42f45;
+  --plate-yellow: #f6c344;
+  --radius: 1rem;
+  --body-font: var(--font-outfit);
+  --body-width: normal;
+  --figure-font: var(--font-outfit);
+  --figure-weight: 700;
+  --figure-width: normal;
+  --figure-tracking: -0.01em;
+}
+
+.light[data-style='rose'],
+.light [data-style='rose'] {
+  --ground: #fbe0e8;
+  --surface: #fff5f8;
+  --surface-high: #f3c9d6;
+  --line: #e5aec0;
+  --ink: #2b0b19;
+  --ink-dim: #6e3d52;
+  --plate-blue: #0b6680;
+  --plate-blue-lift: #0e7490;
+  --plate-red: #b0102c;
+  --plate-yellow: #835b00;
+}
+
+/* Fog — mid-grey both ways: a dark that is not black, a light that is not
+   white, for eyes that find either extreme glaring. */
+[data-style='fog'] {
+  --ground: #2b3440;
+  --surface: #343e4b;
+  --surface-high: #3e4957;
+  --line: #4d5968;
+  --ink: #f1f4f7;
+  --ink-dim: #b0bac6;
+  --plate-blue: #2459bd;
+  --plate-blue-lift: #3b78de;
+  --plate-red: #d63c3c;
+  --plate-yellow: #f6c945;
+  --radius: 0.5rem;
+  --body-font: var(--font-archivo);
+  --body-width: 'wdth' 100;
+  --figure-font: var(--font-archivo);
+  --figure-weight: 700;
+  --figure-width: 'wdth' 106;
+  --figure-tracking: -0.02em;
+}
+
+.light[data-style='fog'],
+.light [data-style='fog'] {
+  --ground: #cdd4dc;
+  --surface: #e3e8ed;
+  --surface-high: #bcc5cf;
+  --line: #a6b1bd;
+  --ink: #111821;
+  --ink-dim: #3d4855;
+  --plate-blue: #1d4fae;
+  --plate-blue-lift: #2559c2;
+  --plate-red: #b3262a;
+  --plate-yellow: #6b5000;
 }
 
 /* Map the shadcn surface tokens onto the palette so its components inherit

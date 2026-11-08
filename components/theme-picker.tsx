@@ -8,6 +8,7 @@ import {
   readStyle,
   readTheme,
   setStyle,
+  STYLES,
   setTheme,
   subscribeTheme,
   type Style,
@@ -20,8 +21,6 @@ const modes: { value: Theme; icon: typeof Sun }[] = [
   { value: 'light', icon: Sun },
   { value: 'system', icon: SunMoon },
 ]
-
-const styles: Style[] = ['plate', 'iron', 'studio', 'lane', 'court', 'signal']
 
 const option =
   'cursor-pointer rounded-md border border-line bg-surface text-sm text-ink-dim has-checked:border-plate-blue-lift has-checked:text-ink has-focus-visible:ring-2 has-focus-visible:ring-ring'
@@ -38,7 +37,7 @@ export function ThemePicker() {
       <fieldset>
         <legend className="mb-2 text-sm text-ink-dim">{t('style')}</legend>
         <div className="grid grid-cols-2 gap-2">
-          {styles.map((value) => (
+          {STYLES.map((value) => (
             <label key={value} className={`${option} flex flex-col overflow-hidden`}>
               <input
                 type="radio"

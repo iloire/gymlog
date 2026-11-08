@@ -48,7 +48,7 @@ a colour. Nothing is coloured for decoration.
 
 ## Styles
 
-Plate is one of six styles, picked on the profile page next to the mode and stored per device
+Plate is one of thirteen styles, picked on the profile page next to the mode and stored per device
 (`gymlog:style`). The theme script sets `data-style` on `<html>`; each style is a block in
 `app/globals.css` for dark and one for `.light`, setting every token so no style inherits half of
 another. The picker previews each style by putting `data-style` on its own tile.
@@ -66,6 +66,18 @@ fill with white text, so it must stay a dark enough red), `--plate-yellow` rest 
 | Lane | The pool room: water and white tile | `#0B6E88` / `#D63A4A` / `#F2C85A` | Outfit 700 | Outfit | `0.75rem` |
 | Court | A sports hall: maple and painted lines | `#2F6FBB` / `#CF4436` / `#E9A53A` | Archivo `wdth 118` 800 | Archivo | `0.25rem` |
 | Signal | Black and white at full contrast | `#1D4ED8` / `#DC2626` / `#FFD400` | Archivo 900 | Archivo | `0.125rem` |
+| Turf | Sled track: grass green / mint | `#1D5FAE` / `#D63A3A` / `#F2D43A` | Archivo `wdth 112` 800 | Archivo | `0.375rem` |
+| Plum | Boxing gym: aubergine / lilac | `#7339C4` / `#C9325A` / `#F5B93A` | Nunito 800 | Nunito | `1rem` |
+| Deep | Rowing club: navy / sky | `#0F766E` / `#D03A44` / `#FBC531` | Outfit 700 | Outfit | `0.75rem` |
+| Clay | Running track: red-brown / peach | `#1F6F8B` / `#D03A30` / `#F3B23E` | Outfit 800 | Outfit | `0.5rem` |
+| Butter | Warm-up room: olive / butter yellow | `#3657C4` / `#D03A2E` / `#F5CF3A` | Nunito 800 | Nunito | `0.75rem` |
+| Rose | Berry / blush pink | `#0E7490` / `#D42F45` / `#F6C344` | Outfit 700 | Outfit | `1rem` |
+| Fog | Mid grey both ways | `#2459BD` / `#D63C3C` / `#F6C945` | Archivo `wdth 106` 700 | Archivo | `0.5rem` |
+
+The first six keep their grounds near black or near white. The last seven put the hue in the ground
+itself (Fog puts value there instead: a dark that is not black, a light that is not white). Where
+the ground is blue or red, the action moves to teal so it never sinks into the ground or reads as
+"beat".
 
 Type is set through tokens rather than classes: `--body-font` and `--body-width` for everything,
 and `--figure-font`, `--figure-weight`, `--figure-width`, `--figure-tracking` for `.figure`.
@@ -80,7 +92,7 @@ enough — which is why it is bright on dark and ochre on light.
 
 To add a style: a dark and a `.light` block in `globals.css`, its name in `STYLES` and its two
 grounds in `THEME_COLORS` (`lib/theme.ts`), its label and description in
-`messages/<locale>/profile.json`, a tile in `components/theme-picker.tsx`, and any new face loaded
+`messages/<locale>/profile.json` (the picker tiles every entry in `STYLES`), and any new face loaded
 with `preload: false` in `app/layout.tsx`. `tests/theme.test.ts` reads `globals.css` and fails if a
 style is missing a block, a token, or the ground its browser chrome claims.
 
