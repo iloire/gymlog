@@ -1,7 +1,18 @@
 'use client'
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronRight } from 'lucide-react'
+import {
+  ChevronRight,
+  Database,
+  Dumbbell,
+  KeyRound,
+  Languages,
+  Palette,
+  Ruler,
+  ShieldCheck,
+  Weight,
+  type LucideIcon,
+} from 'lucide-react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -70,17 +81,17 @@ export default function ProfilePage() {
         </header>
 
         <ul className="mt-6 divide-y divide-line border-y border-line">
-          <Row href="/profile/appearance" title={t('rows.appearance')} value={appearance} />
-          <Row href="/profile/equipment" title={t('rows.equipment')} value={gym} />
-          <Row href="/profile/units" title={t('rows.units')} value={`${t(`units.${unit}`)} (${unit})`} />
-          <Row href="/profile/language" title={t('rows.language')} value={LOCALE_NAMES[locale]} />
-          <Row href="/weight" title={t('rows.bodyweight')} value={bodyweight} />
-          <Row href="/profile/data" title={t('rows.data')} value={t('rows.dataValue')} />
+          <Row href="/profile/appearance" icon={Palette} title={t('rows.appearance')} value={appearance} />
+          <Row href="/profile/equipment" icon={Dumbbell} title={t('rows.equipment')} value={gym} />
+          <Row href="/profile/units" icon={Ruler} title={t('rows.units')} value={`${t(`units.${unit}`)} (${unit})`} />
+          <Row href="/profile/language" icon={Languages} title={t('rows.language')} value={LOCALE_NAMES[locale]} />
+          <Row href="/weight" icon={Weight} title={t('rows.bodyweight')} value={bodyweight} />
+          <Row href="/profile/data" icon={Database} title={t('rows.data')} value={t('rows.dataValue')} />
           {/* A plain <a>: the token page is server-rendered and online-only, so
               visiting Profile must not prefetch it. */}
-          <Row href="/profile/api" title={t('rows.api')} value={t('rows.apiValue')} plain />
+          <Row href="/profile/api" icon={KeyRound} title={t('rows.api')} value={t('rows.apiValue')} plain />
           {/* Likewise the server-rendered admin panel. */}
-          {isAdmin && <Row href="/admin" title={t('rows.admin')} value={t('rows.adminValue')} plain />}
+          {isAdmin && <Row href="/admin" icon={ShieldCheck} title={t('rows.admin')} value={t('rows.adminValue')} plain />}
         </ul>
 
         <footer className="mt-8">
@@ -104,11 +115,29 @@ export default function ProfilePage() {
   )
 }
 
-/** A setting: its name, what it is set to, and the chevron that says it opens. */
-function Row({ href, title, value, plain = false }: { href: string; title: string; value: ReactNode; plain?: boolean }) {
-  const className = 'flex items-center gap-3 py-3.5 -mx-2 px-2 rounded-sm active:bg-surface-high'
+/**
+ * A setting: an icon to find it by, its name, what it is set to, and the
+ * chevron that says it opens.
+ */
+function Row({
+  href,
+  icon: Icon,
+  title,
+  value,
+  plain = false,
+}: {
+  href: string
+  icon: LucideIcon
+  title: string
+  value: ReactNode
+  plain?: boolean
+}) {
+  const className = 'flex items-center gap-3.5 py-3.5 -mx-2 px-2 rounded-sm active:bg-surface-high'
   const inner = (
     <>
+      <span className="grid size-9 shrink-0 place-items-center rounded-sm bg-surface-high text-ink-dim">
+        <Icon size={18} strokeWidth={1.8} aria-hidden />
+      </span>
       <span className="min-w-0 flex-1">
         <span className="block text-[15px]">{title}</span>
         <span className="block min-h-5 truncate text-sm text-ink-dim">{value}</span>
