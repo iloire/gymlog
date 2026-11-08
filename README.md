@@ -6,7 +6,7 @@
 Build your workouts, put them on the days you train, then log the weight and reps you actually
 did — **with or without signal**. Made for a gym in a basement.
 
-![gymlog: today's workout, logging a set, the exercise library by body part, and progress](docs/screenshots/gymlog.png)
+![gymlog in its Lane style, dark: today's workout, logging a set, the exercise library, and progress](docs/screenshots/gymlog.png)
 
 Dark in a basement, light at a desk by a window — the same app in its light theme: the week on
 Plan, a set going in, the workout just finished, and progress.

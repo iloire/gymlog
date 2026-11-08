@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-08 13:37
+
+- **The README's dark hero is Lane.** The first image was still Plate from September: the old
+  week strip, a workout count on Progress and no "Add your own" on Exercises. It is retaken in
+  Lane, dark, from a production build with five weeks of an upper/lower programme logged — Today
+  mid-workout, the session screen, Exercises and Progress — and the dark screens it is cut from in
+  `docs/screenshots/` are retaken with it (`sheet.png` is not).
+
 ## 2026-11-08 13:13
 
 - **Seven styles with colour in the ground.** Every style so far sat on near-black or near-white,
