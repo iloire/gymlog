@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-08 14:35
+
+- **MIT license.** `LICENSE`, a `license` field in `package.json` and a License section in the
+  README, ahead of making the repo public.
+
 ## 2026-11-08 14:20
 
 - **Env files are out of git, history included.** Ahead of open-sourcing, `.env.local` and

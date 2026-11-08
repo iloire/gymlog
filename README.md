@@ -105,3 +105,7 @@ workers and the screen wake lock only run over HTTPS.
 
 Exercise data and photos: [yuhonas/free-exercise-db](https://github.com/yuhonas/free-exercise-db),
 released into the public domain under the Unlicense.
+
+## License
+
+[MIT](LICENSE). The exercise data keeps its own Unlicense (public domain).
