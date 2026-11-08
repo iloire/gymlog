@@ -2,7 +2,7 @@
   "title": "Progreso",
   "intro": {
     "empty": "Cada entrenamiento que registres aparece aquí.",
-    "logged": "{count, plural, one {# entrenamiento registrado} other {# entrenamientos registrados}}"
+    "streak": "{count, plural, one {# semana seguida} other {# semanas seguidas}}"
   },
   "week": {
     "label": "Esta semana",
@@ -23,8 +23,6 @@
   },
   "streak": {
     "label": "Racha",
-    "weeksInARow": "{count, plural, one {semana seguida} other {semanas seguidas}}",
-    "daysThisWeek": "· {count, plural, one {# día} other {# días}} esta semana",
     "hint": {
       "newStreak": "Un entrenamiento esta semana empieza una racha nueva.",
       "nextMakes": "Un entrenamiento esta semana la deja en {count}.",

@@ -33,9 +33,9 @@ import { planWeek } from '@/lib/week'
 const LIFTS = 4
 
 /**
- * Progress, not just a log. The streak and the calendar were the top of
- * History; the story is the lifts, so they come first: this week against the
- * plan, the main lifts' top set over time, the records, then the consistency,
+ * Progress, consistency first: the week streak heads the page, then this
+ * week against the plan and the calendar of days trained, then the main
+ * lifts' top set over time and the records, then the sessions themselves.
  * then the sessions themselves.
  */
 export default function ProgressPage() {
@@ -100,7 +100,8 @@ export default function ProgressPage() {
   return (
     <>
       <main className="mx-auto w-full max-w-page flex-1 px-5 pt-8 pb-6">
-        {/* The log's size is the headline; the tab bar already says Progress. */}
+        {/* Consistency is the headline: weeks in a row, and what keeps the run
+            going. The tab bar already says Progress. */}
         {count === 0 ? (
           <header>
             <h1 className="figure text-4xl">{t('title')}</h1>
@@ -109,7 +110,8 @@ export default function ProgressPage() {
         ) : (
           <header>
             <p className="text-sm text-ink-dim">{t('title')}</p>
-            <h1 className="figure mt-1 text-4xl leading-[1.05]">{t('intro.logged', { count })}</h1>
+            <h1 className="figure mt-1 text-4xl leading-[1.05]">{t('intro.streak', { count: streak.current })}</h1>
+            <p className="mt-2 text-sm text-ink-dim">{t(`streak.hint.${hint.key}`, { count: hint.count })}</p>
           </header>
         )}
 
@@ -134,6 +136,18 @@ export default function ProgressPage() {
                 <p className="mt-1.5 text-xs text-ink-dim">{t('week.unitThisWeek', { unit })}</p>
               </div>
             </section>
+
+            <div className="mt-7">
+              <TrainingCalendar trained={trained} today={date} selected={selected} onSelect={setSelected} />
+            </div>
+
+            {selected && (
+              <ul className="mt-4 divide-y divide-line border-y border-line" aria-label={formatDay(selected, locale)}>
+                {trainedOn(history, selected).map((entry) => (
+                  <SessionRow key={entry.session.id} entry={entry} open />
+                ))}
+              </ul>
+            )}
 
             {lifts.length > 0 && shownLift && (
               <section className="mt-8" aria-label={t('lifts.label')}>
@@ -176,29 +190,6 @@ export default function ProgressPage() {
                   ))}
                 </ul>
               </section>
-            )}
-
-            <section className="mt-8 flex items-center gap-4" aria-label={t('streak.label')}>
-              <span className="figure text-6xl leading-none">{streak.current}</span>
-              <span className="min-w-0">
-                <span className="block text-[15px]">
-                  {t('streak.weeksInARow', { count: streak.current })}
-                  <span className="text-ink-dim"> {t('streak.daysThisWeek', { count: streak.thisWeek })}</span>
-                </span>
-                <span className="block text-sm text-ink-dim">{t(`streak.hint.${hint.key}`, { count: hint.count })}</span>
-              </span>
-            </section>
-
-            <div className="mt-7">
-              <TrainingCalendar trained={trained} today={date} selected={selected} onSelect={setSelected} />
-            </div>
-
-            {selected && (
-              <ul className="mt-4 divide-y divide-line border-y border-line" aria-label={formatDay(selected, locale)}>
-                {trainedOn(history, selected).map((entry) => (
-                  <SessionRow key={entry.session.id} entry={entry} open />
-                ))}
-              </ul>
             )}
           </>
         )}

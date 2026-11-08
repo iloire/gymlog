@@ -2,7 +2,7 @@
   "title": "Progress",
   "intro": {
     "empty": "Every workout you log shows up here.",
-    "logged": "{count, plural, one {# workout} other {# workouts}} logged"
+    "streak": "{count, plural, one {# week} other {# weeks}} in a row"
   },
   "week": {
     "label": "This week",
@@ -23,8 +23,6 @@
   },
   "streak": {
     "label": "Streak",
-    "weeksInARow": "{count, plural, one {week} other {weeks}} in a row",
-    "daysThisWeek": "· {count, plural, one {# day} other {# days}} this week",
     "hint": {
       "newStreak": "One workout this week starts a new streak.",
       "nextMakes": "One workout this week makes it {count}.",
