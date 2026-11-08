@@ -38,7 +38,7 @@ under `.light`:
 | `--line` | `#D2D9E0` |
 | `--ink` | `#12171C` |
 | `--ink-dim` | `#5A6773` |
-| `--plate-yellow` | `#B38600` — ochre, because `#F2C300` is unreadable as text on a light ground |
+| `--plate-yellow` | `#A67C00` — ochre, because `#F2C300` is unreadable as text on a light ground |
 
 Blue and red keep their values. Use the tokens (`text-ink`, `bg-ground`) rather than `text-white`,
 except for text sitting on a plate-coloured fill.
@@ -62,7 +62,7 @@ fill with white text, so it must stay a dark enough red), `--plate-yellow` rest 
 |---|---|---|---|---|---|
 | Plate | Competition plates on graphite | `#0057B8` / `#D22630` / `#F2C300` | Archivo `wdth 112` | Archivo | `0.5rem` |
 | Iron | An old barbell club: cast iron and enamel | `#2B6E4C` / `#C0392B` / `#E8A317` | Outfit 800 | Outfit | `0` |
-| Studio | Soft and calm | `#5452D0` / `#D9507F` / `#F0B43C` | Nunito 800 | Nunito | `1rem` |
+| Studio | Soft and calm | `#5452D0` / `#C94473` / `#F0B43C` | Nunito 800 | Nunito | `1rem` |
 | Lane | The pool room: water and white tile | `#0B6E88` / `#D63A4A` / `#F2C85A` | Outfit 700 | Outfit | `0.75rem` |
 | Court | A sports hall: maple and painted lines | `#2F6FBB` / `#CF4436` / `#E9A53A` | Archivo `wdth 118` 800 | Archivo | `0.25rem` |
 | Signal | Black and white at full contrast | `#1D4ED8` / `#DC2626` / `#FFD400` | Archivo 900 | Archivo | `0.125rem` |
