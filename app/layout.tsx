@@ -28,6 +28,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: publicEnv.appName,
     description: t('description'),
     manifest: '/manifest.json',
+    // iOS takes the home-screen icon from apple-touch-icon, not the manifest. It lives under
+    // /icons/ (not app/apple-icon.png) so the proxy lets it through without a session.
+    icons: { apple: '/icons/barbell-180.png' },
     appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: publicEnv.appName },
   }
 }

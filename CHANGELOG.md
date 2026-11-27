@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-27 06:57
+
+- **A barbell icon that reads at phone size.** Two thick plates and a thick bar, from
+  `public/icons/barbell.svg`. The favicon is the barbell now instead of the Vercel triangle, and
+  iOS gets an `apple-touch-icon`. The files have new names so the service worker, which caches
+  `/icons/` forever, picks them up. The unused scaffold SVGs are gone.
+
 ## 2026-11-08 14:35
 
 - **MIT license.** `LICENSE`, a `license` field in `package.json` and a License section in the
